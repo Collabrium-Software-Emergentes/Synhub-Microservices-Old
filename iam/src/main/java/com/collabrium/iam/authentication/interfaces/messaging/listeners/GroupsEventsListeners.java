@@ -6,7 +6,7 @@ import com.collabrium.iam.authentication.interfaces.messaging.transform.UpdateUs
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import static com.collabrium.iam.shared.infrastructure.config.RabbitMQConfig.LEADER_CREATED_QUEUE;
+import static com.collabrium.iam.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.LEADER_CREATED_QUEUE;
 
 @Component
 public class GroupsEventsListeners {

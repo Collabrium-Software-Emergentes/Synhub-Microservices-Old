@@ -6,9 +6,9 @@ import com.collabrium.iam.authentication.domain.model.events.UserMemberCreatedEv
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 
-import static com.collabrium.iam.shared.infrastructure.config.RabbitMQConfig.IAM_EXCHANGE;
-import static com.collabrium.iam.shared.infrastructure.config.RabbitMQConfig.USER_LEADER_CREATED_KEY;
-import static com.collabrium.iam.shared.infrastructure.config.RabbitMQConfig.USER_MEMBER_CREATED_KEY;
+import static com.collabrium.iam.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.IAM_EXCHANGE;
+import static com.collabrium.iam.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.USER_LEADER_CREATED_KEY;
+import static com.collabrium.iam.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.USER_MEMBER_CREATED_KEY;
 
 @Service
 public class IamEventPublisherImpl implements IamEventPublisher {
