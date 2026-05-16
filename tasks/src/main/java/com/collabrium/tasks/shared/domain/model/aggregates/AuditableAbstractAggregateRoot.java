@@ -1,4 +1,4 @@
-package com.collabrium.groups.shared.domain.model.aggregates;
+package com.collabrium.tasks.shared.domain.model.aggregates;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 @Getter
 @MappedSuperclass
 public class AuditableAbstractAggregateRoot<T extends AbstractAggregateRoot<T>>
-    extends AbstractAggregateRoot<T> {
+  extends AbstractAggregateRoot<T> {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

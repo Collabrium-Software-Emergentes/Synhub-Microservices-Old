@@ -1,26 +1,17 @@
-package com.collabrium.groups.shared.domain.model.aggregates;
+package com.collabrium.tasks.shared.domain.model.entities;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
-import org.springframework.data.domain.AbstractAggregateRoot;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Getter
 @MappedSuperclass
-public class AuditableAbstractAggregateRoot<T extends AbstractAggregateRoot<T>>
-    extends AbstractAggregateRoot<T> {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class AuditableModel {
 
   @Column(nullable = false, updatable = false)
   private OffsetDateTime createdAt;
