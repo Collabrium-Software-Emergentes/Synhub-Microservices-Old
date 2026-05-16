@@ -1,0 +1,21 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+eureka:
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000
+    response-cache-auto-expiration-in-seconds: 30
+
+logging:
+  level:
+    root: INFO
+    com.netflix.eureka: DEBUG
+    org.springframework.cloud: DEBUG
+
+management:
+  endpoint:
+    health:
+      show-details: always

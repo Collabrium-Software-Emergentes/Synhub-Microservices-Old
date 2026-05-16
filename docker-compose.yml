@@ -1,0 +1,222 @@
+version: '3.9'
+
+services:
+
+  # =========================================
+  # POSTGRESQL
+  # =========================================
+  postgres:
+    image: postgres:17
+    container_name: collabrium-postgres
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - collabrium-network
+
+  # =========================================
+  # RABBITMQ
+  # =========================================
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: collabrium-rabbitmq
+
+    environment:
+      RABBITMQ_DEFAULT_USER: collabrium
+      RABBITMQ_DEFAULT_PASS: collabrium
+      RABBITMQ_DEFAULT_VHOST: /
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - collabrium-network
+
+  # =========================================
+  # API GATEWAY
+  # =========================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+
+    container_name: collabrium-api-gateway
+
+    env_file:
+      - ./api-gateway/.env.prod
+
+    ports:
+      - "8080:8080"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+
+      iam-service:
+        condition: service_healthy
+
+    networks:
+      - collabrium-network
+
+  # =========================================
+  # EUREKA DISCOVERY SERVER
+  # =========================================
+  discovery-server:
+    build:
+      context: ./discovery-server
+      dockerfile: Dockerfile
+
+    container_name: collabrium-discovery-server
+
+    env_file:
+      - ./discovery-server/.env.prod
+
+    ports:
+      - "8761:8761"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+    networks:
+      - collabrium-network
+
+  # =========================================
+  # IAM SERVICE
+  # =========================================
+  iam-service:
+    build:
+      context: ./iam
+      dockerfile: Dockerfile
+
+    container_name: collabrium-iam-service
+
+    env_file:
+      - ./iam/.env.prod
+
+    ports:
+      - "8081:8081"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+      discovery-server:
+        condition: service_healthy
+
+    networks:
+      - collabrium-network
+
+  # =========================================
+  # GROUPS SERVICE
+  # =========================================
+  groups-service:
+    build:
+      context: ./groups
+      dockerfile: Dockerfile
+
+    container_name: collabrium-groups-service
+
+    env_file:
+      - ./groups/.env.prod
+
+    ports:
+      - "8082:8082"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+      discovery-server:
+        condition: service_healthy
+
+    networks:
+      - collabrium-network
+
+# =========================================
+# NETWORKS
+# =========================================
+networks:
+  collabrium-network:
+    driver: bridge
+
+# =========================================
+# VOLUMES
+# =========================================
+volumes:
+  postgres_data:
+  rabbitmq_data:

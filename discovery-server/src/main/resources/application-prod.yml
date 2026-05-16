@@ -1,0 +1,25 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+eureka:
+  server:
+    enable-self-preservation: true
+    eviction-interval-timer-in-ms: 60000
+    response-cache-auto-expiration-in-seconds: 180
+
+logging:
+  level:
+    com.netflix.discovery: WARN
+
+management:
+  endpoint:
+    health:
+      show-details: never
+
+server:
+  shutdown: graceful

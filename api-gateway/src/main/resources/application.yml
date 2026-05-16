@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+
+          routes:
+            - id: iam-service
+              uri: lb://iam-service
+              predicates:
+                - Path=/iam/**
+              filters:
+                - StripPrefix=1
+
+            - id: groups-service
+              uri: lb://groups-service
+              predicates:
+                - Path=/groups/**
+              filters:
+                - StripPrefix=1
+
+            - id: tasks-service
+              uri: lb://tasks-service
+              predicates:
+                - Path=/tasks/**
+              filters:
+                - StripPrefix=1
+
+            - id: requests-service
+              uri: lb://requests-service
+              predicates:
+                - Path=/requests/**
+              filters:
+                - StripPrefix=1
+
+            - id: metrics-service
+              uri: lb://metrics-service
+              predicates:
+                - Path=/metrics/**
+              filters:
+                - StripPrefix=1
+
+server:
+  port: ${PORT:8080}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+    fetch-registry: true
+    register-with-eureka: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+authorization:
+  jwt:
+    secret: ${JWT_SECRET:WriteHereYourSecretStringForTokenSigningCredentials}
+    issuer: ${JWT_ISSUER:collabrium}
+    audience: ${JWT_AUDIENCE:collabrium-platform}
+
+  public-paths:
+    - /api/v1/authentication/sign-in
+    - /api/v1/authentication/sign-up
+    - /ping
+    - /actuator/health
+    - /actuator/info
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.server: DEBUG
+    org.springframework.web.server: DEBUG

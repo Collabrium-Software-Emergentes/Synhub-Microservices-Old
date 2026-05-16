@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT:8761}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:discovery-server}
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+
+  instance:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    prefer-ip-address: ${EUREKA_PREFER_IP_ADDRESS:false}
+
+    metadata-map:
+      zone: ${EUREKA_ZONE:default}
+      version: ${APPLICATION_VERSION:1.0.0}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: ${MANAGEMENT_BASE_PATH:/actuator}
+
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: ${APPLICATION_VERSION:1.0.0}
+    description: ${APPLICATION_DESCRIPTION:Collabrium Discovery Server}
