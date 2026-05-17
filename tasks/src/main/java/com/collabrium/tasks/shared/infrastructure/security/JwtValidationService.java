@@ -1,4 +1,4 @@
-package com.collabrium.groups.shared.infrastructure.security;
+package com.collabrium.tasks.shared.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
