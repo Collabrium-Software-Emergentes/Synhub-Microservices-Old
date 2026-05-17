@@ -57,6 +57,10 @@ public class SecurityConfig {
             .anyRequest().authenticated()
         )
 
+        .httpBasic(AbstractHttpConfigurer::disable)
+
+        .formLogin(AbstractHttpConfigurer::disable)
+
         .addFilterBefore(
             jwtAuthenticationFilter,
             UsernamePasswordAuthenticationFilter.class
