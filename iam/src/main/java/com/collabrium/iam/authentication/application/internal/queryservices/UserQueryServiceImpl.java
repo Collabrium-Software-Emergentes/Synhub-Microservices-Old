@@ -20,9 +20,8 @@ import java.util.Optional;
  */
 @Service
 public class UserQueryServiceImpl implements UserQueryService {
+
   private final UserRepository userRepository;
-//  private final GroupsServiceClient groupsServiceClient;
-//  private final TasksServiceClient tasksServiceClient;
 
   /**
    * Constructor.
@@ -30,12 +29,9 @@ public class UserQueryServiceImpl implements UserQueryService {
    * @param userRepository {@link UserRepository} instance.
    */
   public UserQueryServiceImpl(UserRepository userRepository
-//                              GroupsServiceClient groupsServiceClient,
-//                              TasksServiceClient tasksServiceClient
   ) {
+
     this.userRepository = userRepository;
-//    this.groupsServiceClient = groupsServiceClient;
-//    this.tasksServiceClient = tasksServiceClient;
   }
 
   /**

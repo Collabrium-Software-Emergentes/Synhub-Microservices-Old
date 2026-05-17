@@ -1,6 +1,5 @@
 package com.collabrium.api_gateway.infrastructure.config;
 
-import io.jsonwebtoken.Jwt;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 

@@ -3,18 +3,19 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
+RUN --mount=type=cache,target=/root/.m2 \
+    echo "Preparing Maven cache"
+
 # Copy Maven files
 COPY pom.xml .
 COPY .mvn .mvn
-
-# Download dependencies
-RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
 
 # Build application
-RUN mvn clean package -DskipTests -B
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests -B
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
