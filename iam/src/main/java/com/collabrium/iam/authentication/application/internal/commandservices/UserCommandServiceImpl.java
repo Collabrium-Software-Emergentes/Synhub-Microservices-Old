@@ -13,6 +13,7 @@ import com.collabrium.iam.authentication.domain.model.commands.SignUpCommand;
 import com.collabrium.iam.authentication.domain.model.events.UserLeaderCreatedEvent;
 import com.collabrium.iam.authentication.domain.model.events.UserMemberCreatedEvent;
 import com.collabrium.iam.authentication.domain.model.valueobjects.LeaderId;
+import com.collabrium.iam.authentication.domain.model.valueobjects.MemberId;
 import com.collabrium.iam.authentication.domain.model.valueobjects.Roles;
 import com.collabrium.iam.authentication.domain.services.UserCommandService;
 import com.collabrium.iam.authentication.infrastructure.authorization.sfs.model.UserDetailsImpl;
@@ -23,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * User command service implementation
@@ -141,23 +143,23 @@ public class UserCommandServiceImpl implements UserCommandService {
   @Override
   public void handle(UpdateUserLeaderIdCommand command) {
 
-    var userOptional = userRepository.findById(command.userId());
-
-    if (userOptional.isEmpty()) {
-      throw new RuntimeException("User not found");
-    }
-
-    var user = userOptional.get();
-
-    LeaderId newLeaderId = new LeaderId(command.leaderId());
-
-    user.setLeaderId(newLeaderId);
-    userRepository.save(user);
+    updateUser(
+        command.userId(),
+        user -> user.setLeaderId(
+            new LeaderId(command.leaderId())
+        )
+    );
   }
 
   @Override
-  public Optional<User> handle(UpdateUserMemberIdCommand command) {
-    return Optional.empty();
+  public void handle(UpdateUserMemberIdCommand command) {
+
+    updateUser(
+        command.userId(),
+        user -> user.setMemberId(
+            new MemberId(command.memberId())
+        )
+    );
   }
 
   private void publishDomainEvents(User user) {
@@ -179,5 +181,19 @@ public class UserCommandServiceImpl implements UserCommandService {
           new UserMemberCreatedEvent(user.getId())
       );
     }
+  }
+
+  private void updateUser(
+      Long userId,
+      Consumer<User> updater
+  ) {
+
+    var user = userRepository.findById(userId)
+        .orElseThrow(() ->
+            new RuntimeException("User not found"));
+
+    updater.accept(user);
+
+    userRepository.save(user);
   }
 }
