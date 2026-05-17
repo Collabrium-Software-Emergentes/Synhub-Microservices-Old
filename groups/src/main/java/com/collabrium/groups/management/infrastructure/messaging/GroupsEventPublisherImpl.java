@@ -5,8 +5,8 @@ import com.collabrium.groups.management.domain.model.events.LeaderCreatedEvent;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 
-import static com.collabrium.groups.shared.infrastructure.config.RabbitMQConfig.GROUPS_EXCHANGE;
-import static com.collabrium.groups.shared.infrastructure.config.RabbitMQConfig.LEADER_CREATED_KEY;
+import static com.collabrium.groups.shared.infrastructure.configuration.RabbitMQConfiguration.GROUPS_EXCHANGE;
+import static com.collabrium.groups.shared.infrastructure.configuration.RabbitMQConfiguration.LEADER_CREATED_KEY;
 
 @Service
 public class GroupsEventPublisherImpl implements GroupsEventPublisher {

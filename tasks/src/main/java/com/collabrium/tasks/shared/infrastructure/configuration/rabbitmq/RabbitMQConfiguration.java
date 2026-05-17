@@ -1,4 +1,4 @@
-package com.collabrium.groups.shared.infrastructure.config;
+package com.collabrium.tasks.shared.infrastructure.configuration.rabbitmq;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -9,57 +9,57 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQConfig {
+public class RabbitMQConfiguration {
 
   // =========================
   // EXCHANGE
   // =========================
   public static final String IAM_EXCHANGE = "iam.exchange";
-  public static final String GROUPS_EXCHANGE = "groups.exchange";
+  public static final String TASKS_EXCHANGE = "tasks.exchange";
 
   // =========================
   // ROUTING KEYS
   // =========================
-  public static final String USER_LEADER_CREATED_KEY = "user.leader.created";
-  public static final String LEADER_CREATED_KEY = "leader.created";
+  public static final String USER_MEMBER_CREATED_KEY = "user.member.created";
+  public static final String MEMBER_CREATED_KEY = "member.created";
 
   // =========================
   // QUEUES
   // =========================
-  public static final String USER_LEADER_CREATED_QUEUE = "groups.user.leader.created.queue";
+  public static final String USER_MEMBER_CREATED_QUEUE = "tasks.user.member.created.queue";
 
   // =========================
-  // EXCHANGE BEANS
+  // EXCHANGE BEAN
   // =========================
   @Bean
   public TopicExchange iamExchange() {
     return new TopicExchange(IAM_EXCHANGE);
   }
 
-  @Bean TopicExchange groupsExchange() {
-    return new TopicExchange(GROUPS_EXCHANGE);
+  @Bean TopicExchange tasksExchange() {
+    return new TopicExchange(TASKS_EXCHANGE);
   }
 
   // =========================
   // QUEUE
   // =========================
   @Bean
-  public Queue userLeaderCreatedQueue() {
-    return new Queue(USER_LEADER_CREATED_QUEUE);
+  public Queue userMemberCreatedQueue() {
+    return new Queue(USER_MEMBER_CREATED_QUEUE);
   }
 
   // =========================
   // BINDING
   // =========================
   @Bean
-  public Binding userLeaderCreatedBinding(
-      Queue userLeaderCreatedQueue,
-      TopicExchange iamExchange
+  public Binding userMemberCreatedBinding(
+      Queue userMemberCreatedQueue,
+      TopicExchange tasksExchange
   ) {
     return BindingBuilder
-        .bind(userLeaderCreatedQueue)
-        .to(iamExchange)
-        .with(USER_LEADER_CREATED_KEY);
+        .bind(userMemberCreatedQueue)
+        .to(tasksExchange)
+        .with(USER_MEMBER_CREATED_KEY);
   }
 
   @Bean
