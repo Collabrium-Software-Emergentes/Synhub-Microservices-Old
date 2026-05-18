@@ -4,15 +4,20 @@ import feign.Logger;
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@RequiredArgsConstructor
 public class GlobalFeignConfiguration {
 
   private final HttpServletRequest request;
+
+  public GlobalFeignConfiguration(
+      HttpServletRequest request
+  ) {
+
+    this.request = request;
+  }
 
   @Bean
   public RequestInterceptor jwtPropagationInterceptor() {
