@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface MemberCommandService {
 
-  Optional<Member> handle(CreateMemberCommand command);
+  void handle(CreateMemberCommand command);
 
   Optional<Member> handle(AddGroupToMemberCommand command);
 

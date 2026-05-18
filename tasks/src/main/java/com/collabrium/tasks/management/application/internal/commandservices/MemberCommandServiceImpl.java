@@ -36,7 +36,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   }
 
   @Override
-  public Optional<Member> handle(CreateMemberCommand command) {
+  public void handle(CreateMemberCommand command) {
 
     validateCreateCommand(command);
 
@@ -54,7 +54,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         memberCreatedEvent
     );
 
-    return Optional.of(savedMember);
   }
 
   @Override
