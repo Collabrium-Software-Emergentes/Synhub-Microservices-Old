@@ -31,7 +31,7 @@ public class UserDetailsQueryService {
 
   public List<UserDetailsDTO> handle(GetAllUsersQuery query) {
 
-    var users = userRepository.findAll();
+    var users = userRepository.findAllWithRoles();
 
     return users.stream()
         .map(this::buildUserDetails)
@@ -52,7 +52,16 @@ public class UserDetailsQueryService {
     }
 
     return new UserDetailsDTO(
-        user,
+        user.getId(),
+        user.getUsername(),
+        user.getName(),
+        user.getSurname(),
+        user.getImgUrl(),
+        user.getEmail(),
+        user.getRoles()
+            .stream()
+            .map(role -> role.getName().name())
+            .toList(),
         leaderResource,
         memberResource
     );
