@@ -54,11 +54,11 @@ public class RabbitMQConfiguration {
   @Bean
   public Binding userMemberCreatedBinding(
       Queue userMemberCreatedQueue,
-      TopicExchange tasksExchange
+      TopicExchange iamExchange
   ) {
     return BindingBuilder
         .bind(userMemberCreatedQueue)
-        .to(tasksExchange)
+        .to(iamExchange)
         .with(USER_MEMBER_CREATED_KEY);
   }
 

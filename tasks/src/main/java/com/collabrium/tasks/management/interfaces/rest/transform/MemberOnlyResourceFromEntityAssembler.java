@@ -12,9 +12,13 @@ public class MemberOnlyResourceFromEntityAssembler {
       Member entity
   ) {
 
+    Long groupId = entity.getGroupId() != null
+        ? entity.getGroupId().value()
+        : null;
+
     return new MemberOnlyResource(
         entity.getId(),
-        entity.getGroupId().value()
+        groupId
     );
   }
 }
