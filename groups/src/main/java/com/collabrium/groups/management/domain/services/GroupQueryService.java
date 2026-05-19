@@ -2,7 +2,7 @@ package com.collabrium.groups.management.domain.services;
 
 import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByIdQuery;
+import com.collabrium.groups.management.domain.model.queries.GetGroupByUserIdQuery;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByLeaderIdQuery;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByMemberIdQuery;
 
@@ -16,5 +16,5 @@ public interface GroupQueryService {
 
   Optional<Group> handle(GetGroupByMemberIdQuery query);
 
-  Optional<Group> handle(GetGroupByIdQuery query);
+  Optional<Group> handle(GetGroupByUserIdQuery query);
 }

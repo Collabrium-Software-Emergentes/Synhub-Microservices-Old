@@ -1,6 +1,8 @@
 package com.collabrium.groups.management.interfaces.rest.controllers;
 
+import com.collabrium.groups.management.domain.model.queries.GetGroupByUserIdQuery;
 import com.collabrium.groups.management.domain.services.GroupCommandService;
+import com.collabrium.groups.management.domain.services.GroupQueryService;
 import com.collabrium.groups.management.interfaces.rest.resources.CreateGroupResource;
 import com.collabrium.groups.management.interfaces.rest.resources.GroupResource;
 import com.collabrium.groups.management.interfaces.rest.resources.UpdateGroupResource;
@@ -20,12 +22,15 @@ import org.springframework.web.bind.annotation.*;
 public class LeaderGroupController {
 
   private final GroupCommandService groupCommandService;
+  private final GroupQueryService groupQueryService;
 
   public LeaderGroupController(
-      GroupCommandService groupCommandService
+      GroupCommandService groupCommandService,
+      GroupQueryService groupQueryService
   ) {
 
     this.groupCommandService = groupCommandService;
+    this.groupQueryService = groupQueryService;
   }
 
   @PostMapping
@@ -67,6 +72,25 @@ public class LeaderGroupController {
 
     if (groupOptional.isEmpty()) {
       return ResponseEntity.badRequest().build();
+    }
+
+    var resource = GroupResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping
+  @Operation(summary = "Get a group by ID", description = "Gets a group by ID")
+  public ResponseEntity<GroupResource> getGroupByUserId(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getGroupByUserIdQuery = new GetGroupByUserIdQuery(user.userId());
+
+    var groupOptional = groupQueryService.handle(getGroupByUserIdQuery);
+
+    if (groupOptional.isEmpty()) {
+      return ResponseEntity.notFound().build();
     }
 
     var resource = GroupResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
