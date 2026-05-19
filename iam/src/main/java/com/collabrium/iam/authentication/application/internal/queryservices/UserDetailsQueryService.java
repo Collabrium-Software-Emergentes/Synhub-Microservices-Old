@@ -5,12 +5,14 @@ import com.collabrium.iam.authentication.application.internal.outboundservices.p
 import com.collabrium.iam.authentication.application.internal.queryservices.dto.UserDetailsDTO;
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
 import com.collabrium.iam.authentication.domain.model.queries.GetAllUsersQuery;
+import com.collabrium.iam.authentication.domain.model.queries.GetUserByIdQuery;
 import com.collabrium.iam.authentication.infrastructure.persistence.jpa.repositories.UserRepository;
 import com.collabrium.iam.shared.infrastructure.clients.groups.resources.LeaderResource;
 import com.collabrium.iam.shared.infrastructure.clients.groups.resources.MemberResource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserDetailsQueryService {
@@ -36,6 +38,12 @@ public class UserDetailsQueryService {
     return users.stream()
         .map(this::buildUserDetails)
         .toList();
+  }
+
+  public Optional<UserDetailsDTO> handle(GetUserByIdQuery query) {
+
+    return userRepository.findByIdWithRoles(query.userId())
+        .map(this::buildUserDetails);
   }
 
   private UserDetailsDTO buildUserDetails(User user) {

@@ -1,4 +1,4 @@
-package com.collabrium.iam.shared.interfaces.rest.exceptions;
+package com.collabrium.iam.shared.interfaces.rest.resources;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.collabrium.tasks.management.interfaces.rest.exceptions;
+package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.domain.model.queries.GetMemberByIdQuery;
 import com.collabrium.tasks.management.domain.services.MemberQueryService;

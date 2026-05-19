@@ -1,7 +1,6 @@
 package com.collabrium.iam.authentication.interfaces.rest.transform;
 
 import com.collabrium.iam.authentication.application.internal.queryservices.dto.UserDetailsDTO;
-import com.collabrium.iam.authentication.domain.model.entities.Role;
 import com.collabrium.iam.authentication.interfaces.rest.resources.UserLeaderResource;
 import com.collabrium.iam.authentication.interfaces.rest.resources.UserMemberResource;
 import com.collabrium.iam.authentication.interfaces.rest.resources.UserResource;

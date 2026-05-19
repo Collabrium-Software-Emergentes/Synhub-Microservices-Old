@@ -1,6 +1,6 @@
 package com.collabrium.iam.authentication.infrastructure.authorization.sfs.pipeline;
 
-import com.collabrium.iam.shared.interfaces.rest.exceptions.AuthenticationErrorResource;
+import com.collabrium.iam.shared.interfaces.rest.resources.AuthenticationErrorResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
