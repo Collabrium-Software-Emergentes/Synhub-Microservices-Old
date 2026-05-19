@@ -6,6 +6,7 @@ import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery
 import com.collabrium.groups.management.domain.model.queries.GetGroupByLeaderIdQuery;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByMemberIdQuery;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByUserIdQuery;
+import com.collabrium.groups.management.domain.model.valueobjects.GroupCode;
 import com.collabrium.groups.management.domain.services.GroupQueryService;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.GroupRepository;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,10 @@ public class GroupQueryServiceImpl implements GroupQueryService {
 
   @Override
   public Optional<Group> handle(GetGroupByCodeQuery query) {
-    return Optional.empty();
+
+    var groupCode = GroupCode.fromString(query.code());
+
+    return groupRepository.findByCode(groupCode);
   }
 
   @Override
