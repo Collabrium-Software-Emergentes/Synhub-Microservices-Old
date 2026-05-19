@@ -10,8 +10,6 @@ import java.util.Optional;
 
 public interface InvitationCommandService {
 
-  Optional<Invitation> handle(CreateInvitationCommand command);
-
   void handle(RejectInvitationCommand command);
 
   void handle(CancelInvitationCommand command);

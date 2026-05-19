@@ -1,4 +1,4 @@
-package com.collabrium.groups.management.application.internal.queryservices.dto;
+package com.collabrium.groups.management.application.internal.dto;
 
 public record LeaderDetailsDTO(
     Long leaderId,

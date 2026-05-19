@@ -6,6 +6,7 @@ public record UserOnlyResource(
     String surname,
     String imgUrl,
     String email,
-    Long leaderId
+    Long leaderId,
+    Long memberId
 ) {
 }

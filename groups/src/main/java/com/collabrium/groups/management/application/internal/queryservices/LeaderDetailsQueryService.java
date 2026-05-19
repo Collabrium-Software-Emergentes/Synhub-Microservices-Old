@@ -1,7 +1,7 @@
 package com.collabrium.groups.management.application.internal.queryservices;
 
 import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
-import com.collabrium.groups.management.application.internal.queryservices.dto.LeaderDetailsDTO;
+import com.collabrium.groups.management.application.internal.dto.LeaderDetailsDTO;
 import com.collabrium.groups.management.domain.model.queries.GetLeaderDetailsByUserIdQuery;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.LeaderRepository;
 import org.springframework.stereotype.Service;
