@@ -6,10 +6,6 @@ public class InvalidInvitationException extends RuntimeException {
     super(message);
   }
 
-  public InvalidInvitationException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   public static InvalidInvitationException forNullMemberId() {
     return new InvalidInvitationException("Cannot create invitation: Member ID is required");
   }

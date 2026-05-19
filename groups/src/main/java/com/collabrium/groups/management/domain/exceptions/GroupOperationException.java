@@ -6,10 +6,6 @@ public class GroupOperationException extends RuntimeException {
     super(message);
   }
 
-  public GroupOperationException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   public static GroupOperationException forDuplicateCode(String code) {
     return new GroupOperationException(
         String.format("Group with code '%s' already exists", code)
