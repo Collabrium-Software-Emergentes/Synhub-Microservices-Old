@@ -2,6 +2,7 @@ package com.collabrium.groups.management.application.internal.commandservices;
 
 import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.GroupAlreadyExistsException;
+import com.collabrium.groups.management.domain.exceptions.GroupNotFoundException;
 import com.collabrium.groups.management.domain.exceptions.LeaderNotFoundException;
 import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.commands.*;
@@ -79,7 +80,27 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
   @Override
   public Optional<Group> handle(UpdateGroupCommand command) {
-    return Optional.empty();
+
+    var user = iamQueryPort.getUserOnlyById(command.userId());
+
+    if (user == null || user.leaderId() == null) {
+      throw new LeaderNotFoundException(command.userId());
+    }
+
+    Long leaderId = user.leaderId();
+
+    var group = groupRepository
+        .findByLeaderId(leaderId)
+        .orElseThrow(() ->
+            GroupNotFoundException.forLeader(leaderId)
+        );
+
+    group.updateInformation(command);
+
+    var updatedGroup =
+        groupRepository.save(group);
+
+    return Optional.of(updatedGroup);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.collabrium.groups.management.domain.model.aggregates;
 
 import com.collabrium.groups.management.domain.exceptions.InvalidGroupException;
+import com.collabrium.groups.management.domain.model.commands.UpdateGroupCommand;
 import com.collabrium.groups.management.domain.model.valueobjects.GroupCode;
 import com.collabrium.groups.management.domain.model.valueobjects.ImgUrl;
 import com.collabrium.groups.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
@@ -68,19 +69,12 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     }
   }
 
-//  public void updateInformation(UpdateGroupCommand command) {
-//    if (command.name() != null && !command.name().isBlank()) {
-//      this.name = command.name();
-//    }
-//
-//    if (command.description() != null && !command.description().isBlank()) {
-//      this.description = command.description();
-//    }
-//
-//    if (command.imgUrl() != null && !command.imgUrl().isBlank()) {
-//      this.imgUrl = new ImgUrl(command.imgUrl());
-//    }
-//  }
+  public void updateInformation(UpdateGroupCommand command) {
+
+    updateName(command.name());
+    updateDescription(command.description());
+    updateImgUrl(command.imgUrl());
+  }
 
   public void increaseMemberCount() {
     validateMemberCountOperation();
@@ -101,6 +95,53 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
     }
     if (this.memberCount < 0) {
       throw InvalidGroupException.forInvalidMemberCount();
+    }
+  }
+
+  private void updateName(String name) {
+
+    if (name == null) {
+      return;
+    }
+
+    validateText(name, InvalidGroupException.forEmptyName());
+
+    this.name = name;
+  }
+
+  private void updateDescription(String description) {
+
+    if (description == null) {
+      return;
+    }
+
+    validateText(
+        description,
+        InvalidGroupException.forEmptyDescription()
+    );
+
+    this.description = description;
+  }
+
+  private void updateImgUrl(String imgUrl) {
+
+    if (imgUrl == null) {
+      return;
+    }
+
+    this.imgUrl =
+        imgUrl.isBlank()
+            ? null
+            : new ImgUrl(imgUrl);
+  }
+
+  private void validateText(
+      String value,
+      RuntimeException exception
+  ) {
+
+    if (value.isBlank()) {
+      throw exception;
     }
   }
 
