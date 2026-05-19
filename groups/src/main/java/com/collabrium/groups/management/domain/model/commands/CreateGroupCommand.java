@@ -4,6 +4,6 @@ public record CreateGroupCommand(
     String name,
     String imgUrl,
     String description,
-    Long leaderId
+    Long userId
 ) {
 }

@@ -1,5 +1,6 @@
 package com.collabrium.groups.management.application.internal.commandservices;
 
+import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.GroupAlreadyExistsException;
 import com.collabrium.groups.management.domain.exceptions.LeaderNotFoundException;
 import com.collabrium.groups.management.domain.model.aggregates.Group;
@@ -16,27 +17,38 @@ import java.util.Optional;
 public class GroupCommandServiceImpl implements GroupCommandService {
 
   private final GroupRepository groupRepository;
+  private final IamQueryPort iamQueryPort;
   private final LeaderRepository leaderRepository;
 
   public GroupCommandServiceImpl(
       GroupRepository groupRepository,
+      IamQueryPort iamQueryPort,
       LeaderRepository leaderRepository
   ) {
 
     this.groupRepository = groupRepository;
+    this.iamQueryPort = iamQueryPort;
     this.leaderRepository = leaderRepository;
   }
 
   @Override
   public Optional<Group> handle(CreateGroupCommand command) {
 
+    var user = iamQueryPort.getUserOnlyById(command.userId());
+
+    if (user == null || user.leaderId() == null) {
+      return Optional.empty();
+    }
+
+    Long leaderId = user.leaderId();
+
     var leader = leaderRepository
-        .findById(command.leaderId())
+        .findById(leaderId)
         .orElseThrow(() ->
-            new LeaderNotFoundException(command.leaderId())
+            new LeaderNotFoundException(leaderId)
         );
 
-    if (groupRepository.findByLeaderId(command.leaderId()).isPresent()) {
+    if (groupRepository.findByLeaderId(leaderId).isPresent()) {
 
       throw new GroupAlreadyExistsException(
           "Leader already owns a group"
