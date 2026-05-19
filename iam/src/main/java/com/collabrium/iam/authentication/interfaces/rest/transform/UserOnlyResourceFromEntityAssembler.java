@@ -12,13 +12,23 @@ public class UserOnlyResourceFromEntityAssembler {
       User entity
   ) {
 
+    Long leaderIdValue = entity.getLeaderId() != null
+        ? entity.getLeaderId().value()
+        : null;
+
+    Long memberIdValue = entity.getMemberId() != null
+        ? entity.getMemberId().value()
+        : null;
+
     return new UserOnlyResource(
         entity.getId(),
         entity.getUsername(),
         entity.getName(),
         entity.getSurname(),
         entity.getImgUrl(),
-        entity.getEmail()
+        entity.getEmail(),
+        leaderIdValue,
+        memberIdValue
     );
   }
 }
