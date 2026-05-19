@@ -1,6 +1,6 @@
-package com.collabrium.iam.shared.infrastructure.clients.groups;
+package com.collabrium.iam.shared.infrastructure.clients.tasks;
 
-import com.collabrium.iam.shared.infrastructure.clients.groups.resources.MemberResource;
+import com.collabrium.iam.shared.infrastructure.clients.tasks.resources.MemberResource;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,8 +1,8 @@
 package com.collabrium.iam.authentication.infrastructure.adapters;
 
 import com.collabrium.iam.authentication.application.internal.outboundservices.ports.TasksQueryPort;
-import com.collabrium.iam.shared.infrastructure.clients.groups.TasksFeignClient;
-import com.collabrium.iam.shared.infrastructure.clients.groups.resources.MemberResource;
+import com.collabrium.iam.shared.infrastructure.clients.tasks.TasksFeignClient;
+import com.collabrium.iam.shared.infrastructure.clients.tasks.resources.MemberResource;
 import org.springframework.stereotype.Component;
 
 @Component

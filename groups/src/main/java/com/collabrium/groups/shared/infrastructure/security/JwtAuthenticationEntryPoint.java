@@ -1,6 +1,6 @@
 package com.collabrium.groups.shared.infrastructure.security;
 
-import com.collabrium.groups.shared.interfaces.rest.exceptions.AuthenticationErrorResource;
+import com.collabrium.groups.shared.interfaces.rest.resources.AuthenticationErrorResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;

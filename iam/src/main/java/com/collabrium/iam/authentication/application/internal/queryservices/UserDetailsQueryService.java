@@ -8,7 +8,7 @@ import com.collabrium.iam.authentication.domain.model.queries.GetAllUsersQuery;
 import com.collabrium.iam.authentication.domain.model.queries.GetUserByIdQuery;
 import com.collabrium.iam.authentication.infrastructure.persistence.jpa.repositories.UserRepository;
 import com.collabrium.iam.shared.infrastructure.clients.groups.resources.LeaderResource;
-import com.collabrium.iam.shared.infrastructure.clients.groups.resources.MemberResource;
+import com.collabrium.iam.shared.infrastructure.clients.tasks.resources.MemberResource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

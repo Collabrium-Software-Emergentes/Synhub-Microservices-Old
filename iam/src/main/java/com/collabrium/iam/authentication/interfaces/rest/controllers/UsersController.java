@@ -2,14 +2,12 @@ package com.collabrium.iam.authentication.interfaces.rest.controllers;
 
 import com.collabrium.iam.authentication.domain.model.queries.*;
 import com.collabrium.iam.authentication.domain.services.UserQueryService;
-import com.collabrium.iam.authentication.interfaces.rest.resources.UserResource;
-import com.collabrium.iam.authentication.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import com.collabrium.iam.authentication.interfaces.rest.resources.UserOnlyResource;
+import com.collabrium.iam.authentication.interfaces.rest.transform.UserOnlyResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * This class is a REST controller that exposes the user's resource.
@@ -28,5 +26,22 @@ public class UsersController {
     this.userQueryService = userQueryService;
   }
 
+  @GetMapping("/{userId}/domain-profile")
+  public ResponseEntity<UserOnlyResource> getUserOnlyById(
+      @PathVariable Long userId
+  ) {
 
+    var getUserOnlyByIdQuery = new GetUserOnlyByIdQuery(userId);
+
+    var userOptional = userQueryService.handle(getUserOnlyByIdQuery);
+
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var userOnlyResource = UserOnlyResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+
+    return ResponseEntity.ok(userOnlyResource);
+
+  }
 }

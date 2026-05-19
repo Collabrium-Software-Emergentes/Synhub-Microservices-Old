@@ -1,4 +1,4 @@
-package com.collabrium.groups.shared.infrastructure.configuration;
+package com.collabrium.groups.shared.infrastructure.configuration.rabbitmq;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

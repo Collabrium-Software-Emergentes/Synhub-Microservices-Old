@@ -1,4 +1,4 @@
-package com.collabrium.groups.shared.interfaces.rest.exceptions;
+package com.collabrium.groups.shared.interfaces.rest.resources;
 
 import java.util.List;
 
