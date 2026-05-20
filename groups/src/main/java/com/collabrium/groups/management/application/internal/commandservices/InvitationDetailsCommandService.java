@@ -39,7 +39,7 @@ public class InvitationDetailsCommandService {
     var group = groupRepository
         .findById(command.groupId())
         .orElseThrow(() ->
-            new GroupNotFoundException(command.groupId())
+            GroupNotFoundException.forId(command.groupId())
         );
 
     var user = iamQueryPort.getUserOnlyById(command.userId());

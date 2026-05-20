@@ -1,6 +1,6 @@
 package com.collabrium.groups.management.domain.model.queries;
 
-public record GetInvitationByMemberIdQuery(
-    Long memberId
+public record GetInvitationsOfMyGroupQuery(
+    Long userId
 ) {
 }

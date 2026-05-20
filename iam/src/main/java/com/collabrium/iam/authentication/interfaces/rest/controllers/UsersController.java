@@ -4,6 +4,7 @@ import com.collabrium.iam.authentication.domain.model.queries.*;
 import com.collabrium.iam.authentication.domain.services.UserQueryService;
 import com.collabrium.iam.authentication.interfaces.rest.resources.UserOnlyResource;
 import com.collabrium.iam.authentication.interfaces.rest.transform.UserOnlyResourceFromEntityAssembler;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,27 @@ public class UsersController {
     var userOnlyResource = UserOnlyResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
 
     return ResponseEntity.ok(userOnlyResource);
+  }
 
+  @GetMapping(params = "memberId")
+  @Operation(
+      summary = "Get user information by member ID",
+      description = "Returns basic user information associated with the specified member ID"
+  )
+  public ResponseEntity<UserOnlyResource> getUserOnlyByMemberId(
+      @RequestParam Long memberId
+  ) {
+
+    var getUserByMemberIdQuery = new GetUserByMemberIdQuery(memberId);
+
+    var userOptional = userQueryService.handle(getUserByMemberIdQuery);
+
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var userOnlyResource = UserOnlyResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+
+    return ResponseEntity.ok(userOnlyResource);
   }
 }
