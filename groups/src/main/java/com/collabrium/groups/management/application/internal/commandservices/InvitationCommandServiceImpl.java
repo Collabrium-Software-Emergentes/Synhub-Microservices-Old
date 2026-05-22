@@ -3,10 +3,8 @@ package com.collabrium.groups.management.application.internal.commandservices;
 import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.*;
 import com.collabrium.groups.management.domain.model.aggregates.Invitation;
-import com.collabrium.groups.management.domain.model.commands.AcceptInvitationCommand;
 import com.collabrium.groups.management.domain.model.commands.CancelInvitationCommand;
 import com.collabrium.groups.management.domain.model.commands.ProcessInvitationCommand;
-import com.collabrium.groups.management.domain.model.commands.RejectInvitationCommand;
 import com.collabrium.groups.management.domain.model.valueobjects.MemberId;
 import com.collabrium.groups.management.domain.services.InvitationCommandService;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.InvitationRepository;
@@ -24,11 +22,6 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
 
     this.invitationRepository = invitationRepository;
     this.iamQueryPort = iamQueryPort;
-  }
-
-  @Override
-  public void handle(RejectInvitationCommand command) {
-
   }
 
   @Override
@@ -53,11 +46,6 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
         );
 
     invitationRepository.delete(invitation);
-  }
-
-  @Override
-  public void handle(AcceptInvitationCommand command) {
-
   }
 
   @Override
