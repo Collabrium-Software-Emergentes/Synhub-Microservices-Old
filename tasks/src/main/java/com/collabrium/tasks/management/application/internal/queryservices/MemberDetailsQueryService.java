@@ -1,0 +1,70 @@
+package com.collabrium.tasks.management.application.internal.queryservices;
+
+import com.collabrium.tasks.management.application.internal.dto.MemberDetailsDTO;
+import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
+import com.collabrium.tasks.management.domain.exceptions.MemberNotFoundException;
+import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
+import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByUserIdQuery;
+import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
+import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnlyResource;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class MemberDetailsQueryService {
+
+  private final MemberRepository memberRepository;
+  private final IamQueryPort iamQueryPort;
+
+  public MemberDetailsQueryService(
+      MemberRepository memberRepository,
+      IamQueryPort iamQueryPort
+  ) {
+
+    this.memberRepository = memberRepository;
+    this.iamQueryPort = iamQueryPort;
+  }
+
+  public Optional<MemberDetailsDTO> handle(GetMemberDetailsByUserIdQuery query) {
+
+    var user = iamQueryPort.getUserOnlyById(query.userId());
+
+    validateUser(query.userId(), user);
+
+    var member = memberRepository
+        .findById(user.memberId())
+        .orElseThrow(() ->
+            MemberNotFoundException.forId(user.memberId())
+        );
+
+    var memberDetailsDTO
+        = new MemberDetailsDTO(
+            member.getId(),
+            user.username(),
+            user.name(),
+            user.surname(),
+            user.imgUrl(),
+            user.email(),
+            member.getGroupId() != null
+                ? member.getGroupId().value()
+                : null
+    );
+
+    return Optional.of(memberDetailsDTO);
+  }
+
+  private void validateUser(
+      Long userId,
+      UserOnlyResource user
+  ) {
+
+    if (user == null) {
+      throw UserNotFoundException.forId(userId);
+    }
+
+    if (user.memberId() == null) {
+      throw MemberNotFoundException.forUser(userId);
+    }
+  }
+}

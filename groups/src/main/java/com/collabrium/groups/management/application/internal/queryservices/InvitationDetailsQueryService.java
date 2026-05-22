@@ -1,7 +1,7 @@
 package com.collabrium.groups.management.application.internal.queryservices;
 
 import com.collabrium.groups.management.application.internal.dto.InvitationDetailsDTO;
-import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
+import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.GroupNotFoundException;
 import com.collabrium.groups.management.domain.exceptions.LeaderNotFoundException;
 import com.collabrium.groups.management.domain.exceptions.MemberNotFoundException;

@@ -1,4 +1,4 @@
-package com.collabrium.groups.management.application.internal.ports;
+package com.collabrium.groups.management.application.internal.outboundservices.ports;
 
 import com.collabrium.groups.shared.infrastructure.clients.iam.resources.UserOnlyResource;
 

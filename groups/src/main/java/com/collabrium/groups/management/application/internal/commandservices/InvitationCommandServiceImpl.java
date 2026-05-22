@@ -1,6 +1,6 @@
 package com.collabrium.groups.management.application.internal.commandservices;
 
-import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
+import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.*;
 import com.collabrium.groups.management.domain.model.aggregates.Invitation;
 import com.collabrium.groups.management.domain.model.commands.CancelInvitationCommand;

@@ -1,6 +1,6 @@
 package com.collabrium.groups.management.infrastructure.adapters;
 
-import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
+import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.groups.shared.infrastructure.clients.iam.IamFeignClient;
 import com.collabrium.groups.shared.infrastructure.clients.iam.resources.UserOnlyResource;
 import org.springframework.stereotype.Component;
