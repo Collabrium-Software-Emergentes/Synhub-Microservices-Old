@@ -1,7 +1,6 @@
 package com.collabrium.groups.shared.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

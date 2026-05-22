@@ -1,6 +1,6 @@
 package com.collabrium.tasks.shared.infrastructure.security;
 
-import com.collabrium.tasks.shared.interfaces.rest.exceptions.AuthenticationErrorResource;
+import com.collabrium.tasks.shared.interfaces.rest.resources.AuthenticationErrorResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -34,8 +34,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     LOGGER.error("Authentication error", authException);
 
-    String code;
-    String message;
+    String code = "AUTH-001";
+    String message = "Unauthorized";
     List<String> details;
 
     Throwable cause = authException.getCause();
