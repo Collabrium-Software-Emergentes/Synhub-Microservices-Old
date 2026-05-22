@@ -3,7 +3,7 @@ package com.collabrium.tasks.management.application.internal.commandservices;
 import com.collabrium.tasks.management.application.internal.outboundservices.messaging.TasksEventPublisher;
 import com.collabrium.tasks.management.domain.exceptions.InvalidMemberException;
 import com.collabrium.tasks.management.domain.model.aggregates.Member;
-import com.collabrium.tasks.management.domain.model.commands.AddGroupToMemberCommand;
+import com.collabrium.tasks.management.domain.model.commands.AssignMemberToGroupCommand;
 import com.collabrium.tasks.management.domain.model.commands.CreateMemberCommand;
 import com.collabrium.tasks.management.domain.model.commands.DeleteMembersByGroupIdCommand;
 import com.collabrium.tasks.management.domain.model.commands.RemoveMemberFromGroupCommand;
@@ -57,7 +57,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   }
 
   @Override
-  public Optional<Member> handle(AddGroupToMemberCommand command) {
+  public Optional<Member> handle(AssignMemberToGroupCommand command) {
 
     validateAddGroupCommand(command);
 
@@ -132,7 +132,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
   }
 
-  private void validateAddGroupCommand(AddGroupToMemberCommand command) {
+  private void validateAddGroupCommand(AssignMemberToGroupCommand command) {
 
     if (command == null) {
       throw InvalidMemberException.forNullAddGroupCommand();

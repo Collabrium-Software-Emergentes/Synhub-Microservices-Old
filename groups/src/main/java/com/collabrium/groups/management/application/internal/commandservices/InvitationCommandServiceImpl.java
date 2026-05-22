@@ -1,12 +1,15 @@
 package com.collabrium.groups.management.application.internal.commandservices;
 
+import com.collabrium.groups.management.application.internal.outboundservices.messaging.GroupsEventPublisher;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.*;
 import com.collabrium.groups.management.domain.model.aggregates.Invitation;
 import com.collabrium.groups.management.domain.model.commands.CancelInvitationCommand;
 import com.collabrium.groups.management.domain.model.commands.ProcessInvitationCommand;
+import com.collabrium.groups.management.domain.model.events.InvitationAcceptedEvent;
 import com.collabrium.groups.management.domain.model.valueobjects.MemberId;
 import com.collabrium.groups.management.domain.services.InvitationCommandService;
+import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.GroupRepository;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.InvitationRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +17,20 @@ import org.springframework.stereotype.Service;
 public class InvitationCommandServiceImpl implements InvitationCommandService {
 
   private final InvitationRepository invitationRepository;
+  private final GroupRepository groupRepository;
+  private final GroupsEventPublisher groupsEventPublisher;
   private final IamQueryPort iamQueryPort;
 
   public InvitationCommandServiceImpl(
-      InvitationRepository invitationRepository, IamQueryPort iamQueryPort
+      InvitationRepository invitationRepository,
+      GroupRepository groupRepository,
+      GroupsEventPublisher groupsEventPublisher,
+      IamQueryPort iamQueryPort
   ) {
 
     this.invitationRepository = invitationRepository;
+    this.groupRepository = groupRepository;
+    this.groupsEventPublisher = groupsEventPublisher;
     this.iamQueryPort = iamQueryPort;
   }
 
@@ -104,10 +114,23 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
       Invitation invitation
   ) {
 
-    // TODO:
-    // - aumentar member count
-    // - publicar evento
-    // - eliminar invitación
+    var group = invitation.getGroup();
+
+    var memberId =
+        invitation.getMemberId();
+
+    group.increaseMemberCount();
+
+    groupRepository.save(group);
+
+    groupsEventPublisher.publishInvitationAccepted(
+        new InvitationAcceptedEvent(
+            group.getId(),
+            memberId.value()
+        )
+    );
+
+    invitationRepository.delete(invitation);
   }
 
   private void rejectInvitation(

@@ -22,6 +22,7 @@ public class RabbitMQConfiguration {
   // =========================
   public static final String USER_LEADER_CREATED_KEY = "user.leader.created";
   public static final String LEADER_CREATED_KEY = "leader.created";
+  public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
 
   // =========================
   // QUEUES

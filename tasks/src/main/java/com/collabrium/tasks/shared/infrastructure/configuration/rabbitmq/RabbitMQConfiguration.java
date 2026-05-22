@@ -16,6 +16,7 @@ public class RabbitMQConfiguration {
   // =========================
   public static final String IAM_EXCHANGE = "iam.exchange";
   public static final String TASKS_EXCHANGE = "tasks.exchange";
+  public static final String GROUPS_EXCHANGE = "groups.exchange";
 
   // =========================
   // ROUTING KEYS
@@ -23,10 +24,14 @@ public class RabbitMQConfiguration {
   public static final String USER_MEMBER_CREATED_KEY = "user.member.created";
   public static final String MEMBER_CREATED_KEY = "member.created";
 
+  public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
+
   // =========================
   // QUEUES
   // =========================
   public static final String USER_MEMBER_CREATED_QUEUE = "tasks.user.member.created.queue";
+
+  public static final String INVITATION_ACCEPTED_QUEUE = "tasks.invitation.accepted.queue";
 
   // =========================
   // EXCHANGE BEAN
@@ -40,12 +45,22 @@ public class RabbitMQConfiguration {
     return new TopicExchange(TASKS_EXCHANGE);
   }
 
+  @Bean
+  public TopicExchange groupsExchange() {
+    return new TopicExchange(GROUPS_EXCHANGE);
+  }
+
   // =========================
   // QUEUE
   // =========================
   @Bean
   public Queue userMemberCreatedQueue() {
     return new Queue(USER_MEMBER_CREATED_QUEUE);
+  }
+
+  @Bean
+  public Queue invitationAcceptedQueue() {
+    return new Queue(INVITATION_ACCEPTED_QUEUE);
   }
 
   // =========================
@@ -60,6 +75,18 @@ public class RabbitMQConfiguration {
         .bind(userMemberCreatedQueue)
         .to(iamExchange)
         .with(USER_MEMBER_CREATED_KEY);
+  }
+
+  @Bean
+  public Binding invitationAcceptedBinding(
+      Queue invitationAcceptedQueue,
+      TopicExchange groupsExchange
+  ) {
+
+    return BindingBuilder
+        .bind(invitationAcceptedQueue)
+        .to(groupsExchange)
+        .with(INVITATION_ACCEPTED_KEY);
   }
 
   @Bean
