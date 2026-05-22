@@ -1,16 +1,14 @@
 package com.collabrium.groups.management.interfaces.rest.controllers;
 
 import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery;
+import com.collabrium.groups.management.domain.model.queries.GetGroupByIdQuery;
 import com.collabrium.groups.management.domain.services.GroupQueryService;
 import com.collabrium.groups.management.interfaces.rest.resources.GroupResource;
 import com.collabrium.groups.management.interfaces.rest.transform.GroupResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/groups")
@@ -24,6 +22,25 @@ public class GroupController {
   ) {
 
     this.groupQueryService = groupQueryService;
+  }
+
+  @GetMapping("/{groupId}")
+  @Operation(summary = "Search group by its id.", description = "Search group by id.")
+  public ResponseEntity<GroupResource> getGroupById(
+      @PathVariable Long groupId
+  ) {
+
+    var getGroupByIdQuery = new GetGroupByIdQuery(groupId);
+
+    var groupOptional = groupQueryService.handle(getGroupByIdQuery);
+
+    if (groupOptional.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
+
+    return ResponseEntity.ok(groupResource);
   }
 
   @GetMapping("/search")

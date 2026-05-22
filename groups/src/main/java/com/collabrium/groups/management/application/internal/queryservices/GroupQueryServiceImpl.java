@@ -2,10 +2,7 @@ package com.collabrium.groups.management.application.internal.queryservices;
 
 import com.collabrium.groups.management.application.internal.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.model.aggregates.Group;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByLeaderIdQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByMemberIdQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByUserIdQuery;
+import com.collabrium.groups.management.domain.model.queries.*;
 import com.collabrium.groups.management.domain.model.valueobjects.GroupCode;
 import com.collabrium.groups.management.domain.services.GroupQueryService;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.GroupRepository;
@@ -26,6 +23,11 @@ public class GroupQueryServiceImpl implements GroupQueryService {
 
     this.groupRepository = groupRepository;
     this.iamQueryPort = iamQueryPort;
+  }
+
+  @Override
+  public Optional<Group> handle(GetGroupByIdQuery query) {
+    return groupRepository.findById(query.groupId());
   }
 
   @Override

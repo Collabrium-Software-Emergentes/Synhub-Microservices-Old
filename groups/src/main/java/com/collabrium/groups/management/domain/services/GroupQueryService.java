@@ -1,14 +1,13 @@
 package com.collabrium.groups.management.domain.services;
 
 import com.collabrium.groups.management.domain.model.aggregates.Group;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByUserIdQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByLeaderIdQuery;
-import com.collabrium.groups.management.domain.model.queries.GetGroupByMemberIdQuery;
+import com.collabrium.groups.management.domain.model.queries.*;
 
 import java.util.Optional;
 
 public interface GroupQueryService {
+
+  Optional<Group> handle(GetGroupByIdQuery query);
 
   Optional<Group> handle(GetGroupByLeaderIdQuery query);
 
