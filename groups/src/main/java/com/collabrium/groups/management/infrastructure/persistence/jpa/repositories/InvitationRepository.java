@@ -28,5 +28,14 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
       """)
   List<Invitation> findByGroupId(Long groupId);
 
+  @Query("""
+    SELECT i
+    FROM Invitation i
+    JOIN FETCH i.group g
+    JOIN FETCH g.leader
+    WHERE i.id = :invitationId
+    """)
+  Optional<Invitation> findDetailedById(Long invitationId);
+
   boolean existsByMemberId(MemberId memberId);
 }

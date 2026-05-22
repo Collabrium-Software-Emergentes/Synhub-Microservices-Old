@@ -1,15 +1,14 @@
 package com.collabrium.groups.management.interfaces.rest.controllers;
 
 import com.collabrium.groups.management.domain.model.commands.CancelInvitationCommand;
+import com.collabrium.groups.management.domain.model.commands.ProcessInvitationCommand;
 import com.collabrium.groups.management.domain.services.InvitationCommandService;
 import com.collabrium.groups.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/invitations")
@@ -34,6 +33,21 @@ public class InvitationController {
     var cancelInvitationCommand = new CancelInvitationCommand(user.userId());
 
     invitationCommandService.handle(cancelInvitationCommand);
+
+    return ResponseEntity.noContent().build();
+  }
+
+  @PatchMapping("/{invitationId}")
+  @Operation(summary = "Accept or decline an invitation", description = "Accept or decline an invitation for a leader")
+  public ResponseEntity<Void> processInvitation(
+      @PathVariable Long invitationId,
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @RequestParam(defaultValue = "false") boolean accept
+  ) {
+
+    var processInvitationCommand = new ProcessInvitationCommand(user.userId(), invitationId, accept);
+
+    invitationCommandService.handle(processInvitationCommand);
 
     return ResponseEntity.noContent().build();
   }
