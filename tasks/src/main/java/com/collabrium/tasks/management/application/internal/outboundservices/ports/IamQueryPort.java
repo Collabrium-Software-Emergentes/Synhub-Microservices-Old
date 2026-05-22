@@ -5,4 +5,6 @@ import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnly
 public interface IamQueryPort {
 
   UserOnlyResource getUserOnlyById(Long id);
+
+  UserOnlyResource getUserByMemberId(Long memberId);
 }

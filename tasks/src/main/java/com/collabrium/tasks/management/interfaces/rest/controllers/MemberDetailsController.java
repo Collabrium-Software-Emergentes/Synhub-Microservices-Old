@@ -1,6 +1,7 @@
 package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.application.internal.queryservices.MemberDetailsQueryService;
+import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByUserIdQuery;
 import com.collabrium.tasks.management.interfaces.rest.resources.MemberResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.MemberResourceFromDTOAssembler;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,6 +38,25 @@ public class MemberDetailsController {
     var getMemberDetailsByUserIdQuery = new GetMemberDetailsByUserIdQuery(user.userId());
 
     var memberDetails = memberDetailsQueryService.handle(getMemberDetailsByUserIdQuery);
+
+    if (memberDetails.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var memberResource = MemberResourceFromDTOAssembler.toResourceFromDTO(memberDetails.get());
+
+    return ResponseEntity.ok(memberResource);
+  }
+
+  @GetMapping("/details/{memberId}")
+  @Operation(summary = "Get member details by member ID", description = "Fetches the details of a member by their ID.")
+  public ResponseEntity<MemberResource> getMemberById(
+      @PathVariable Long memberId
+  ) {
+
+    var getMemberDetailsByIdQuery = new GetMemberDetailsByIdQuery(memberId);
+
+    var memberDetails = memberDetailsQueryService.handle(getMemberDetailsByIdQuery);
 
     if (memberDetails.isEmpty()) {
       return ResponseEntity.notFound().build();

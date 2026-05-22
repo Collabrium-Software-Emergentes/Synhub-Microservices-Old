@@ -4,6 +4,7 @@ import com.collabrium.tasks.management.application.internal.dto.MemberDetailsDTO
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.tasks.management.domain.exceptions.MemberNotFoundException;
 import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
+import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByUserIdQuery;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnlyResource;
@@ -24,6 +25,35 @@ public class MemberDetailsQueryService {
 
     this.memberRepository = memberRepository;
     this.iamQueryPort = iamQueryPort;
+  }
+
+  public Optional<MemberDetailsDTO> handle(GetMemberDetailsByIdQuery query) {
+
+    var member = memberRepository
+        .findById(query.memberId())
+        .orElseThrow(() ->
+            MemberNotFoundException.forId(query.memberId())
+        );
+
+    var user = iamQueryPort.getUserByMemberId(query.memberId());
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(query.memberId());
+    }
+
+    var memberDetailsDTO = new MemberDetailsDTO(
+        member.getId(),
+        user.username(),
+        user.name(),
+        user.surname(),
+        user.imgUrl(),
+        user.email(),
+        member.getGroupId() != null
+            ? member.getGroupId().value()
+            : null
+    );
+
+    return Optional.of(memberDetailsDTO);
   }
 
   public Optional<MemberDetailsDTO> handle(GetMemberDetailsByUserIdQuery query) {
