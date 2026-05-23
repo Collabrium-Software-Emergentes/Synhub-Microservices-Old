@@ -3,6 +3,7 @@ package com.collabrium.tasks.management.interfaces.rest.controllers;
 import com.collabrium.tasks.management.application.internal.commandservices.TaskDetailsCommandService;
 import com.collabrium.tasks.management.application.internal.queryservices.TaskDetailsQueryService;
 import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
@@ -79,4 +80,26 @@ public class MemberTaskDetailsController {
     return ResponseEntity.ok(taskResources);
   }
 
+  @GetMapping("/member/tasks/next")
+  @Operation(
+      summary = "Get next task by authenticated member",
+      description = "Fetches the nearest pending task for the authenticated member."
+  )
+  public ResponseEntity<TaskResource> getNextTaskByAuthenticatedMember(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var query = new GetNextTaskDetailsByUserIdQuery(user.userId());
+
+    var task = taskDetailsQueryService.handle(query);
+
+    if (task.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var resource = TaskResourceFromDTOAssembler
+        .toResourceFromDTO(task.get());
+
+    return ResponseEntity.ok(resource);
+  }
 }

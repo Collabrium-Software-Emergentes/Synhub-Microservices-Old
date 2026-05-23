@@ -5,13 +5,20 @@ import com.collabrium.tasks.management.application.internal.mappers.TaskDetailsD
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.tasks.management.domain.exceptions.MemberNotFoundException;
 import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
+import com.collabrium.tasks.management.domain.model.aggregates.Task;
 import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.valueobjects.TaskStatus;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
 import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnlyResource;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service class responsible for handling task details query operations.
@@ -91,6 +98,59 @@ public class TaskDetailsQueryService {
             )
         )
         .toList();
+  }
+
+  public Optional<TaskDetailsDTO> handle(GetNextTaskDetailsByUserIdQuery query) {
+
+    var user =
+        iamQueryPort.getUserOnlyById(
+            query.userId()
+        );
+
+    validateUser(
+        query.userId(),
+        user
+    );
+
+    var member =
+        memberRepository
+            .findById(user.memberId())
+            .orElseThrow(() ->
+                MemberNotFoundException.forId(
+                    user.memberId()
+                )
+            );
+
+    var now =
+        OffsetDateTime.now(ZoneOffset.UTC);
+
+    var nextTask =
+        taskRepository.findByMember_Id(
+                member.getId()
+            )
+            .stream()
+            .filter(task ->
+                task.getStatus() == TaskStatus.IN_PROGRESS
+            )
+            .filter(task ->
+                task.getDueDate() != null
+            )
+            .filter(task ->
+                !task.getDueDate().isBefore(now)
+            )
+            .min(
+                Comparator.comparing(
+                    Task::getDueDate
+                )
+            );
+
+    return nextTask.map(task ->
+        TaskDetailsDTOAssembler.toDTO(
+            task,
+            task.getMember(),
+            user
+        )
+    );
   }
 
   /**
