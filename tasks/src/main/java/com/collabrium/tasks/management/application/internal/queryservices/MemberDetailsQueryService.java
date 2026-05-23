@@ -10,10 +10,13 @@ import com.collabrium.tasks.management.domain.model.aggregates.Member;
 import com.collabrium.tasks.management.domain.model.queries.GetExtendedGroupByUserIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetMembersDetailsByGroupIdQuery;
+import com.collabrium.tasks.management.domain.model.valueobjects.GroupId;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnlyResource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -137,6 +140,20 @@ public class MemberDetailsQueryService {
     return Optional.of(dto);
   }
 
+  public List<MemberDetailsDTO> handle(
+      GetMembersDetailsByGroupIdQuery query
+  ) {
+
+    var members =
+        memberRepository.findMembersByGroupId(
+            new GroupId(query.groupId())
+        );
+
+    return members.stream()
+        .map(this::buildMemberDetails)
+        .toList();
+  }
+
   private MemberDetailsDTO buildMemberDetails(
       Member member
   ) {
@@ -145,6 +162,12 @@ public class MemberDetailsQueryService {
         iamQueryPort.getUserByMemberId(
             member.getId()
         );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
 
     return new MemberDetailsDTO(
         member.getId(),

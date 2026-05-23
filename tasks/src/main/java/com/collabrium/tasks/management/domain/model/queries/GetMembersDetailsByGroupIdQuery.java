@@ -1,6 +1,6 @@
 package com.collabrium.tasks.management.domain.model.queries;
 
-public record GetMembersByGroupIdQuery(
+public record GetMembersDetailsByGroupIdQuery(
     Long groupId
 ) {
 }

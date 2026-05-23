@@ -4,6 +4,7 @@ import com.collabrium.tasks.management.application.internal.queryservices.Member
 import com.collabrium.tasks.management.domain.model.queries.GetExtendedGroupByUserIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetMembersDetailsByGroupIdQuery;
 import com.collabrium.tasks.management.interfaces.rest.resources.ExtendedGroupResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.MemberResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.ExtendedGroupResourceFromDTOAssembler;
@@ -13,10 +14,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/member")
@@ -30,6 +30,30 @@ public class MemberDetailsController {
   ) {
 
     this.memberDetailsQueryService = memberDetailsQueryService;
+  }
+
+  @GetMapping()
+  @Operation(
+      summary = "Get members by groupId",
+      description = "Fetches all the members of a group."
+  )
+  public ResponseEntity<List<MemberResource>> getMembersDetailsByGroupId(
+      @RequestParam Long groupId
+  ) {
+
+    var query =
+        new GetMembersDetailsByGroupIdQuery(groupId);
+
+    var membersDetails =
+        memberDetailsQueryService.handle(query);
+
+    var resources =
+        membersDetails
+            .stream()
+            .map(MemberResourceFromDTOAssembler::toResourceFromDTO)
+            .toList();
+
+    return ResponseEntity.ok(resources);
   }
 
   @GetMapping("/details")
