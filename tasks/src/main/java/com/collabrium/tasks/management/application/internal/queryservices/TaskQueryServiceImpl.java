@@ -7,6 +7,7 @@ import com.collabrium.tasks.management.domain.model.valueobjects.TaskStatus;
 import com.collabrium.tasks.management.domain.services.TaskQueryService;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class TaskQueryServiceImpl implements TaskQueryService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Optional<Task> handle(GetTaskByIdQuery query) {
 
     return taskRepository.findById(query.taskId());

@@ -138,4 +138,43 @@ public class InvalidTaskException extends RuntimeException {
         "Group ID cannot be null"
     );
   }
+
+  // =========================================================
+  // DELETE TASK
+  // =========================================================
+
+  public static InvalidTaskException forNullDeleteCommand() {
+    return new InvalidTaskException(
+        "DeleteTaskCommand cannot be null"
+    );
+  }
+
+  public static InvalidTaskException forTaskNotFound(
+      Long taskId
+  ) {
+
+    return new InvalidTaskException(
+        "Task with id " + taskId + " was not found"
+    );
+  }
+
+  // =========================================================
+  // DELETE TASKS BY MEMBER
+  // =========================================================
+
+  public static InvalidTaskException forNullDeleteByMemberCommand() {
+    return new InvalidTaskException(
+        "DeleteTasksByMemberId command cannot be null"
+    );
+  }
+
+  // =========================================================
+  // DELETE TASKS BY GROUP
+  // =========================================================
+
+  public static InvalidTaskException forNullDeleteByGroupCommand() {
+    return new InvalidTaskException(
+        "DeleteTasksByGroupIdCommand cannot be null"
+    );
+  }
 }
