@@ -1,6 +1,8 @@
 package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.application.internal.commandservices.TaskDetailsCommandService;
+import com.collabrium.tasks.management.application.internal.queryservices.TaskDetailsQueryService;
+import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
@@ -12,21 +14,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/members")
+@RequestMapping("/api/v1")
 @Tag(name = "Tasks Member ", description = "Tasks Member endpoints")
 public class MemberTaskDetailsController {
 
   private final TaskDetailsCommandService taskDetailsCommandService;
+  private final TaskDetailsQueryService taskDetailsQueryService;
 
   public MemberTaskDetailsController(
-      TaskDetailsCommandService taskDetailsCommandService
+      TaskDetailsCommandService taskDetailsCommandService,
+      TaskDetailsQueryService taskDetailsQueryService
   ) {
 
     this.taskDetailsCommandService = taskDetailsCommandService;
+    this.taskDetailsQueryService = taskDetailsQueryService;
   }
 
-  @PostMapping("/{memberId}/tasks")
+  @PostMapping("/members/{memberId}/tasks")
   @Operation(
       summary = "Create a new task",
       description = "Creates a new task"
@@ -50,4 +57,26 @@ public class MemberTaskDetailsController {
 
     return ResponseEntity.ok(taskResource);
   }
+
+  @GetMapping("member/tasks")
+  @Operation(
+      summary = "Get all tasks by authenticated member",
+      description = "Fetches all tasks for the authenticated member."
+  )
+  public ResponseEntity<List<TaskResource>> getTasksByMemberAuthenticated(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getAllTasksDetailsByUserIdQuery = new GetAllTasksDetailsByUserIdQuery(user.userId());
+
+    var tasks = taskDetailsQueryService.handle(getAllTasksDetailsByUserIdQuery);
+
+    var taskResources =
+        tasks.stream()
+            .map(TaskResourceFromDTOAssembler::toResourceFromDTO)
+            .toList();
+
+    return ResponseEntity.ok(taskResources);
+  }
+
 }

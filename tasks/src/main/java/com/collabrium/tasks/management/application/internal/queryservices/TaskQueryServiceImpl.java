@@ -36,12 +36,6 @@ public class TaskQueryServiceImpl implements TaskQueryService {
   }
 
   @Override
-  public List<Task> handle(GetAllTasksByMemberId query) {
-
-    return taskRepository.findByMember_Id(query.memberId());
-  }
-
-  @Override
   public List<Task> handle(GetAllTaskByStatusQuery query) {
 
     TaskStatus taskStatus = TaskStatus.valueOf(query.taskStatus());

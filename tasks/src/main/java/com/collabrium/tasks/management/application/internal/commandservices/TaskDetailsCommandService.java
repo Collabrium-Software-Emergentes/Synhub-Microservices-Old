@@ -1,7 +1,7 @@
 package com.collabrium.tasks.management.application.internal.commandservices;
 
 import com.collabrium.tasks.management.application.internal.dto.TaskDetailsDTO;
-import com.collabrium.tasks.management.application.internal.dto.TaskMemberDTO;
+import com.collabrium.tasks.management.application.internal.mappers.TaskDetailsDTOAssembler;
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.tasks.management.domain.exceptions.InvalidTaskException;
@@ -88,10 +88,10 @@ public class TaskDetailsCommandService {
         taskRepository.save(task);
 
     var dto =
-        getTaskDetailsDTO(
+        TaskDetailsDTOAssembler.toDTO(
+            savedTask,
             member,
-            memberUser,
-            savedTask
+            memberUser
         );
 
     return Optional.of(dto);
@@ -161,33 +161,5 @@ public class TaskDetailsCommandService {
               group.id()
           );
     }
-  }
-
-  private static TaskDetailsDTO getTaskDetailsDTO(Member member, UserOnlyResource user, Task savedTask) {
-    var memberDTO =
-        new TaskMemberDTO(
-            member.getId(),
-            user.name(),
-            user.surname(),
-            user.imgUrl()
-        );
-
-    return new TaskDetailsDTO(
-        savedTask.getId(),
-        savedTask.getTitle(),
-        savedTask.getDescription(),
-        savedTask.getDueDate().toString(),
-        savedTask.getCreatedAt().toString(),
-        savedTask.getUpdatedAt() != null
-            ? savedTask.getUpdatedAt().toString()
-            : null,
-        savedTask.getStatus().name(),
-        savedTask.getTimesRearranged(),
-        savedTask.getTimePassed(),
-        memberDTO,
-        savedTask.getGroupId() != null
-            ? savedTask.getGroupId().value()
-            : null
-    );
   }
 }
