@@ -1,9 +1,12 @@
 package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.application.internal.queryservices.MemberDetailsQueryService;
+import com.collabrium.tasks.management.domain.model.queries.GetExtendedGroupByUserIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberDetailsByUserIdQuery;
+import com.collabrium.tasks.management.interfaces.rest.resources.ExtendedGroupResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.MemberResource;
+import com.collabrium.tasks.management.interfaces.rest.transform.ExtendedGroupResourceFromDTOAssembler;
 import com.collabrium.tasks.management.interfaces.rest.transform.MemberResourceFromDTOAssembler;
 import com.collabrium.tasks.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,5 +68,28 @@ public class MemberDetailsController {
     var memberResource = MemberResourceFromDTOAssembler.toResourceFromDTO(memberDetails.get());
 
     return ResponseEntity.ok(memberResource);
+  }
+
+  @GetMapping("/group")
+  @Operation(
+      summary = "Get group by member authenticated",
+      description = "Retrieve the group associated with the authenticated member"
+  )
+  public ResponseEntity<ExtendedGroupResource> getGroupByUserId(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getExtendedGroupByUserIdQuery = new GetExtendedGroupByUserIdQuery(user.userId());
+
+    var extendedGroup = memberDetailsQueryService.handle(getExtendedGroupByUserIdQuery);
+
+    if (extendedGroup.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var extendedGroupResource = ExtendedGroupResourceFromDTOAssembler.toResourceFromDTO(extendedGroup.get());
+
+    return ResponseEntity.ok(extendedGroupResource);
+
   }
 }
