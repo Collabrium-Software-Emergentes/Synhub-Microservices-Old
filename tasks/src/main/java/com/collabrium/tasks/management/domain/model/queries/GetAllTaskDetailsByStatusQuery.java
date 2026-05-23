@@ -1,6 +1,6 @@
 package com.collabrium.tasks.management.domain.model.queries;
 
-public record GetAllTaskByStatusQuery(
+public record GetAllTaskDetailsByStatusQuery(
     String taskStatus
 ) {
 }

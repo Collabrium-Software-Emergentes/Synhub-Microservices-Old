@@ -2,10 +2,7 @@ package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.application.internal.commandservices.TaskDetailsCommandService;
 import com.collabrium.tasks.management.application.internal.queryservices.TaskDetailsQueryService;
-import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetTaskDetailsByIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetTasksDetailsByMemberIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.*;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
@@ -143,6 +140,24 @@ public class TaskDetailsController {
 
     var tasks =
         taskDetailsQueryService.handle(query);
+
+    var resources =
+        tasks.stream()
+            .map(TaskResourceFromDTOAssembler::toResourceFromDTO)
+            .toList();
+
+    return ResponseEntity.ok(resources);
+  }
+
+  @GetMapping("/tasks/status/{status}")
+  @Operation(summary = "Get all tasks by status", description = "Get all tasks by status")
+  public ResponseEntity<List<TaskResource>> getAllTasksByStatus(
+      @PathVariable String status
+  ) {
+
+    var getAllTaskDetailsByStatusQuery = new GetAllTaskDetailsByStatusQuery(status);
+
+    var tasks = taskDetailsQueryService.handle(getAllTaskDetailsByStatusQuery);
 
     var resources =
         tasks.stream()

@@ -7,16 +7,12 @@ import com.collabrium.tasks.management.domain.exceptions.InvalidTaskException;
 import com.collabrium.tasks.management.domain.exceptions.MemberNotFoundException;
 import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.tasks.management.domain.model.aggregates.Task;
-import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetTaskDetailsByIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetTasksDetailsByMemberIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.*;
 import com.collabrium.tasks.management.domain.model.valueobjects.TaskStatus;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
 import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnlyResource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -97,7 +93,7 @@ public class TaskDetailsQueryService {
         .map(task ->
             TaskDetailsDTOAssembler.toDTO(
                 task,
-                task.getMember(),
+                member,
                 user
             )
         )
@@ -148,7 +144,7 @@ public class TaskDetailsQueryService {
     return nextTask.map(task ->
         TaskDetailsDTOAssembler.toDTO(
             task,
-            task.getMember(),
+            member,
             user
         )
     );
@@ -230,6 +226,20 @@ public class TaskDetailsQueryService {
     return Optional.of(dto);
   }
 
+  public List<TaskDetailsDTO> handle(GetAllTaskDetailsByStatusQuery query){
+
+    var status =
+        TaskStatus.valueOf(
+            query.taskStatus()
+        );
+
+    return taskRepository
+        .findByStatus(status)
+        .stream()
+        .map(this::buildTaskDetailsDTO)
+        .toList();
+  }
+
   /**
    * Validates the existence and completeness of a user resource.
    * This method ensures that the user exists in the IAM system and that
@@ -252,5 +262,33 @@ public class TaskDetailsQueryService {
     if (user.memberId() == null) {
       throw MemberNotFoundException.forUser(userId);
     }
+  }
+
+  private TaskDetailsDTO buildTaskDetailsDTO(
+      Task task
+  ) {
+
+    var member = task.getMember();
+
+    if (member == null) {
+      throw InvalidTaskException.forNullMember();
+    }
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    return TaskDetailsDTOAssembler.toDTO(
+        task,
+        member,
+        user
+    );
   }
 }
