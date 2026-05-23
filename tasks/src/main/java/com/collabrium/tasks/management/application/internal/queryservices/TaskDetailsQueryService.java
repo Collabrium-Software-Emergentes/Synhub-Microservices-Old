@@ -8,6 +8,7 @@ import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.tasks.management.domain.model.aggregates.Task;
 import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetTasksDetailsByMemberIdQuery;
 import com.collabrium.tasks.management.domain.model.valueobjects.TaskStatus;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
@@ -133,9 +134,6 @@ public class TaskDetailsQueryService {
                 task.getStatus() == TaskStatus.IN_PROGRESS
             )
             .filter(task ->
-                task.getDueDate() != null
-            )
-            .filter(task ->
                 !task.getDueDate().isBefore(now)
             )
             .min(
@@ -151,6 +149,44 @@ public class TaskDetailsQueryService {
             user
         )
     );
+  }
+
+  public List<TaskDetailsDTO> handle(GetTasksDetailsByMemberIdQuery query) {
+
+    var member =
+        memberRepository
+            .findById(query.memberId())
+            .orElseThrow(() ->
+                MemberNotFoundException.forId(
+                    query.memberId()
+                )
+            );
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    var tasks =
+        taskRepository.findByMember_Id(
+            member.getId()
+        );
+
+    return tasks.stream()
+        .map(task ->
+            TaskDetailsDTOAssembler.toDTO(
+                task,
+                member,
+                user
+            )
+        )
+        .toList();
   }
 
   /**

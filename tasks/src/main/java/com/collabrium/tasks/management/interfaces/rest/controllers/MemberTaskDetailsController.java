@@ -4,6 +4,7 @@ import com.collabrium.tasks.management.application.internal.commandservices.Task
 import com.collabrium.tasks.management.application.internal.queryservices.TaskDetailsQueryService;
 import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetTasksDetailsByMemberIdQuery;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
@@ -101,5 +102,30 @@ public class MemberTaskDetailsController {
         .toResourceFromDTO(task.get());
 
     return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/members/{memberId}/tasks")
+  @Operation(
+      summary = "Get all tasks by member id",
+      description = "Get all tasks by member id"
+  )
+  public ResponseEntity<List<TaskResource>> getAllTasksByMemberId(
+      @PathVariable Long memberId
+  ) {
+
+    var query =
+        new GetTasksDetailsByMemberIdQuery(
+            memberId
+        );
+
+    var tasks =
+        taskDetailsQueryService.handle(query);
+
+    var resources =
+        tasks.stream()
+            .map(TaskResourceFromDTOAssembler::toResourceFromDTO)
+            .toList();
+
+    return ResponseEntity.ok(resources);
   }
 }
