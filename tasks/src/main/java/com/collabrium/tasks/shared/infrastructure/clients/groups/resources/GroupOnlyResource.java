@@ -5,6 +5,7 @@ public record GroupOnlyResource(
     String name,
     String imgUrl,
     String description,
-    String code
+    String code,
+    Long leaderId
 ) {
 }

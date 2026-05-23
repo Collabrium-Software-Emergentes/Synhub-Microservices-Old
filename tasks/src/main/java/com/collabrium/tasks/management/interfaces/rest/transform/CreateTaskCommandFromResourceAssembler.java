@@ -10,14 +10,16 @@ public class CreateTaskCommandFromResourceAssembler {
 
   public static CreateTaskCommand toCommandFromResource(
       CreateTaskResource resource,
-      Long memberId
+      Long memberId,
+      Long userId
   ) {
 
     return new CreateTaskCommand(
         resource.title(),
         resource.description(),
         resource.dueDate(),
-        memberId
+        memberId,
+        userId
     );
   }
 }

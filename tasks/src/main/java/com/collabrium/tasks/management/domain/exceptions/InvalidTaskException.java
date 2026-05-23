@@ -81,6 +81,44 @@ public class InvalidTaskException extends RuntimeException {
     );
   }
 
+  public static InvalidTaskException forUserIsNotLeader(
+      Long userId
+  ) {
+
+    return new InvalidTaskException(
+        "User with id " + userId + " is not a leader"
+    );
+  }
+
+  public static InvalidTaskException forMemberWithoutGroup(
+      Long memberId
+  ) {
+
+    return new InvalidTaskException(
+        "Member with id " + memberId + " does not belong to a group"
+    );
+  }
+
+  public static InvalidTaskException forGroupNotFound(
+      Long groupId
+  ) {
+
+    return new InvalidTaskException(
+        "Group with id " + groupId + " was not found"
+    );
+  }
+
+  public static InvalidTaskException forLeaderNotBelongingToGroup(
+      Long userId,
+      Long groupId
+  ) {
+
+    return new InvalidTaskException(
+        "Leader user with id " + userId +
+            " does not belong to group " + groupId
+    );
+  }
+
   // =========================================================
   // MEMBER
   // =========================================================

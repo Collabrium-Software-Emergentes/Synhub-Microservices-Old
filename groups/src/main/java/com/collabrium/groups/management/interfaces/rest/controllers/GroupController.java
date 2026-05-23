@@ -4,7 +4,9 @@ import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery
 import com.collabrium.groups.management.domain.model.queries.GetGroupByIdQuery;
 import com.collabrium.groups.management.domain.services.GroupQueryService;
 import com.collabrium.groups.management.interfaces.rest.resources.GroupResource;
+import com.collabrium.groups.management.interfaces.rest.resources.GroupWithLeaderResource;
 import com.collabrium.groups.management.interfaces.rest.transform.GroupResourceFromEntityAssembler;
+import com.collabrium.groups.management.interfaces.rest.transform.GroupWithLeaderResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,7 @@ public class GroupController {
 
   @GetMapping("/{groupId}")
   @Operation(summary = "Search group by its id.", description = "Search group by id.")
-  public ResponseEntity<GroupResource> getGroupById(
+  public ResponseEntity<GroupWithLeaderResource> getGroupById(
       @PathVariable Long groupId
   ) {
 
@@ -38,7 +40,7 @@ public class GroupController {
       return ResponseEntity.notFound().build();
     }
 
-    var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
+    var groupResource = GroupWithLeaderResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
 
     return ResponseEntity.ok(groupResource);
   }
