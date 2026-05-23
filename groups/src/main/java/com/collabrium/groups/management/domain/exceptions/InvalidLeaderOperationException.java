@@ -6,10 +6,6 @@ public class InvalidLeaderOperationException extends RuntimeException {
     super(message);
   }
 
-  public InvalidLeaderOperationException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   public static InvalidLeaderOperationException forNullSolutionDuration() {
     return new InvalidLeaderOperationException("Solution duration cannot be null");
   }

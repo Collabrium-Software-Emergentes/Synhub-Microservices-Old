@@ -2,14 +2,8 @@ package com.collabrium.groups.management.domain.exceptions;
 
 public class InvalidCodeException extends RuntimeException {
 
-  private static final String DEFAULT_MESSAGE = "Invalid group code format";
-
   public InvalidCodeException(String message) {
     super(message);
-  }
-
-  public InvalidCodeException(String message, Throwable cause) {
-    super(message, cause);
   }
 
   public static InvalidCodeException forNull() {

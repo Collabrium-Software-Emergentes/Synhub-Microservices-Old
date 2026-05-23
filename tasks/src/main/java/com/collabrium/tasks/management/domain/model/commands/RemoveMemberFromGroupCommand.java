@@ -1,0 +1,7 @@
+package com.collabrium.tasks.management.domain.model.commands;
+
+public record RemoveMemberFromGroupCommand(
+    Long groupId,
+    Long memberId
+) {
+}

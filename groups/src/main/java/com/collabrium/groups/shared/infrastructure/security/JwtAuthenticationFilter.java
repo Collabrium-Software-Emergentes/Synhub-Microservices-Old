@@ -1,7 +1,6 @@
 package com.collabrium.groups.shared.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +49,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username =
             claims.getSubject();
 
+        Long userId =
+            claims.get("user_id", Integer.class).longValue();
+
         List<String> roles =
             claims.get("roles", List.class);
 
@@ -57,9 +59,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             .map(SimpleGrantedAuthority::new)
             .toList();
 
+        var authenticatedUser =
+            new AuthenticatedUser(
+                userId,
+                username,
+                roles
+            );
+
         var authentication =
             new UsernamePasswordAuthenticationToken(
-                username,
+                authenticatedUser,
                 null,
                 authorities
             );

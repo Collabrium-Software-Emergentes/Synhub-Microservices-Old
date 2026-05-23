@@ -14,9 +14,6 @@ public record GroupCode(String value) {
   private static final int CODE_LENGTH = 9;
   private static final Pattern CODE_PATTERN = Pattern.compile("[0-9A-Z]{" + CODE_LENGTH + "}");
 
-  private static final String INVALID_CODE_MESSAGE =
-      "Group code must be exactly 9 alphanumeric characters (0-9, A-Z)";
-
   public GroupCode {
     validateCode(value);
   }

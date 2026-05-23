@@ -1,11 +1,7 @@
 package com.collabrium.iam.authentication.application.internal.queryservices;
 
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
-import com.collabrium.iam.authentication.domain.model.queries.GetAllUsersQuery;
-import com.collabrium.iam.authentication.domain.model.queries.GetUserByIdQuery;
-import com.collabrium.iam.authentication.domain.model.queries.GetUserByLeaderIdQuery;
-import com.collabrium.iam.authentication.domain.model.queries.GetUserByMemberIdQuery;
-import com.collabrium.iam.authentication.domain.model.queries.GetUserByUsernameQuery;
+import com.collabrium.iam.authentication.domain.model.queries.*;
 import com.collabrium.iam.authentication.domain.model.valueobjects.LeaderId;
 import com.collabrium.iam.authentication.domain.model.valueobjects.MemberId;
 import com.collabrium.iam.authentication.domain.services.UserQueryService;
@@ -52,7 +48,7 @@ public class UserQueryServiceImpl implements UserQueryService {
    * @see GetUserByIdQuery
    */
   @Override
-  public Optional<User> handle(GetUserByIdQuery query) {
+  public Optional<User> handle(GetUserOnlyByIdQuery query) {
     return userRepository.findById(query.userId());
   }
 

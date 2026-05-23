@@ -6,10 +6,6 @@ public class InvalidGroupException extends RuntimeException {
     super(message);
   }
 
-  public InvalidGroupException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   public static InvalidGroupException forNullName() {
     return new InvalidGroupException("Group name cannot be null");
   }

@@ -2,8 +2,6 @@ package com.collabrium.groups.management.domain.exceptions;
 
 public class InvalidImageUrlException extends RuntimeException {
 
-  private static final String DEFAULT_MESSAGE = "Invalid image URL";
-
   public InvalidImageUrlException(String message) {
     super(message);
   }

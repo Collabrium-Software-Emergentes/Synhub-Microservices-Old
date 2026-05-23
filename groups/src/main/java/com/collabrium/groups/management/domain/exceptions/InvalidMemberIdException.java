@@ -2,8 +2,6 @@ package com.collabrium.groups.management.domain.exceptions;
 
 public class InvalidMemberIdException extends RuntimeException {
 
-  private static final String DEFAULT_MESSAGE = "Invalid member ID";
-
   public InvalidMemberIdException(String message) {
     super(message);
   }

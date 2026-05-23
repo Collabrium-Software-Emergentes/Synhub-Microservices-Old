@@ -37,5 +37,5 @@ public interface UserCommandService {
 
   void handle(UpdateUserLeaderIdCommand command);
 
-  Optional<User> handle(UpdateUserMemberIdCommand command);
+  void handle(UpdateUserMemberIdCommand command);
 }
