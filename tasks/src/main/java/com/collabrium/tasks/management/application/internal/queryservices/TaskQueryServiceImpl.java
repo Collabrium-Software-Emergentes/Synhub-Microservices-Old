@@ -52,10 +52,4 @@ public class TaskQueryServiceImpl implements TaskQueryService {
 
     return taskRepository.findByGroupId(groupId);
   }
-
-  @Override
-  public Optional<Task> handle(GetTaskDetailsByIdQuery query) {
-
-    return taskRepository.findById(query.taskId());
-  }
 }

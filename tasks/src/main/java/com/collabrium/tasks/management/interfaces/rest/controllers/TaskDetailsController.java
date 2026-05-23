@@ -4,6 +4,7 @@ import com.collabrium.tasks.management.application.internal.commandservices.Task
 import com.collabrium.tasks.management.application.internal.queryservices.TaskDetailsQueryService;
 import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetTaskDetailsByIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetTasksDetailsByMemberIdQuery;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
@@ -20,19 +21,41 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Tasks Member ", description = "Tasks Member endpoints")
-public class MemberTaskDetailsController {
+@Tag(name = "Tasks Details ", description = "Tasks Details endpoints")
+public class TaskDetailsController {
 
   private final TaskDetailsCommandService taskDetailsCommandService;
   private final TaskDetailsQueryService taskDetailsQueryService;
 
-  public MemberTaskDetailsController(
+  public TaskDetailsController(
       TaskDetailsCommandService taskDetailsCommandService,
       TaskDetailsQueryService taskDetailsQueryService
   ) {
 
     this.taskDetailsCommandService = taskDetailsCommandService;
     this.taskDetailsQueryService = taskDetailsQueryService;
+  }
+
+  @GetMapping("/tasks/{taskId}")
+  @Operation(
+      summary = "Get a task by id",
+      description = "Get a task by id"
+  )
+  public ResponseEntity<TaskResource> getTaskDetailsById(
+      @PathVariable Long taskId
+  ) {
+
+    var getTaskDetailsByIdQuery = new GetTaskDetailsByIdQuery(taskId);
+
+    var taskDetails = taskDetailsQueryService.handle(getTaskDetailsByIdQuery);
+
+    if (taskDetails.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var taskResource = TaskResourceFromDTOAssembler.toResourceFromDTO(taskDetails.get());
+
+    return ResponseEntity.ok(taskResource);
   }
 
   @PostMapping("/members/{memberId}/tasks")

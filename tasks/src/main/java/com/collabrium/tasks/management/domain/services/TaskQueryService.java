@@ -31,6 +31,4 @@ public interface TaskQueryService {
    * Retrieves tasks by their group ID.
    */
   List<Task> handle(GetAllTasksByGroupIdQuery query);
-
-  Optional<Task> handle(GetTaskDetailsByIdQuery query);
 }
