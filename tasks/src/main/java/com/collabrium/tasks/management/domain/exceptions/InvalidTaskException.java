@@ -177,4 +177,36 @@ public class InvalidTaskException extends RuntimeException {
         "DeleteTasksByGroupIdCommand cannot be null"
     );
   }
+
+  public static InvalidTaskException forUserWithoutRole(
+      Long userId
+  ) {
+
+    return new InvalidTaskException(
+        "User with id " + userId +
+            " is neither a leader nor a member"
+    );
+  }
+
+  public static InvalidTaskException forLeaderWithoutGroup(
+      Long userId
+  ) {
+
+    return new InvalidTaskException(
+        "Leader with id " + userId +
+            " does not belong to any group"
+    );
+  }
+
+  public static InvalidTaskException forUserNotBelongingToGroup(
+      Long userId,
+      Long groupId
+  ) {
+
+    return new InvalidTaskException(
+        "User with id " + userId +
+            " does not belong to group with id " +
+            groupId + "."
+    );
+  }
 }

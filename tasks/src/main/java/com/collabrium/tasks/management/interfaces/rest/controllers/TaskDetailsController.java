@@ -2,6 +2,7 @@ package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.application.internal.commandservices.TaskDetailsCommandService;
 import com.collabrium.tasks.management.application.internal.queryservices.TaskDetailsQueryService;
+import com.collabrium.tasks.management.domain.model.commands.UpdateTaskStatusCommand;
 import com.collabrium.tasks.management.domain.model.queries.*;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
@@ -165,5 +166,26 @@ public class TaskDetailsController {
             .toList();
 
     return ResponseEntity.ok(resources);
+  }
+
+  @PutMapping("/tasks/{taskId}/status/{status}")
+  @Operation(summary = "Update task status", description = "Update task status")
+  public ResponseEntity<TaskResource> updateTaskStatus(
+      @PathVariable Long taskId,
+      @PathVariable String status,
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var updateTaskStatusCommand = new UpdateTaskStatusCommand(taskId, status, user.userId());
+
+    var task = taskDetailsCommandService.handle(updateTaskStatusCommand);
+
+    if (task.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var taskResource = TaskResourceFromDTOAssembler.toResourceFromDTO(task.get());
+
+    return ResponseEntity.ok(taskResource);
   }
 }

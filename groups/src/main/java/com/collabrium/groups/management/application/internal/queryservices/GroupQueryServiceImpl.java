@@ -27,12 +27,14 @@ public class GroupQueryServiceImpl implements GroupQueryService {
 
   @Override
   public Optional<Group> handle(GetGroupByIdQuery query) {
+
     return groupRepository.findById(query.groupId());
   }
 
   @Override
   public Optional<Group> handle(GetGroupByLeaderIdQuery query) {
-    return Optional.empty();
+
+    return groupRepository.findByLeaderId(query.leaderId());
   }
 
   @Override
@@ -45,6 +47,7 @@ public class GroupQueryServiceImpl implements GroupQueryService {
 
   @Override
   public Optional<Group> handle(GetGroupByMemberIdQuery query) {
+
     return Optional.empty();
   }
 

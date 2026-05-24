@@ -5,4 +5,6 @@ import com.collabrium.tasks.shared.infrastructure.clients.groups.resources.Group
 public interface GroupsQueryPort {
 
   GroupOnlyResource getGroupOnlyById(Long id);
+
+  GroupOnlyResource getGroupByLeaderId(Long leaderId);
 }

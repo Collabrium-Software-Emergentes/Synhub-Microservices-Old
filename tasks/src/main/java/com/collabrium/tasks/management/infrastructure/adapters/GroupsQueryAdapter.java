@@ -21,4 +21,9 @@ public class GroupsQueryAdapter implements GroupsQueryPort {
   public GroupOnlyResource getGroupOnlyById(Long id) {
     return client.getGroupOnlyById(id);
   }
+
+  @Override
+  public GroupOnlyResource getGroupByLeaderId(Long leaderId) {
+    return client.getGroupByLeaderId(leaderId);
+  }
 }
