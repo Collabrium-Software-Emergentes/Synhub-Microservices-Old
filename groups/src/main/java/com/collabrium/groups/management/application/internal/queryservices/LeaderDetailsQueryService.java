@@ -1,14 +1,18 @@
 package com.collabrium.groups.management.application.internal.queryservices;
 
 import com.collabrium.groups.management.application.internal.dto.MemberDetailsDTO;
+import com.collabrium.groups.management.application.internal.dto.TaskDetailsDTO;
+import com.collabrium.groups.management.application.internal.dto.TaskMemberDetailsDTO;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.groups.management.application.internal.dto.LeaderDetailsDTO;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.groups.management.domain.exceptions.InvalidGroupException;
 import com.collabrium.groups.management.domain.exceptions.InvalidLeaderException;
 import com.collabrium.groups.management.domain.exceptions.UserNotFoundException;
+import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.queries.GetLeaderDetailsByUserIdQuery;
 import com.collabrium.groups.management.domain.model.queries.GetMembersOfMyGroupQuery;
+import com.collabrium.groups.management.domain.model.queries.GetTasksOfMyGroupQuery;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.GroupRepository;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.LeaderRepository;
 import com.collabrium.groups.shared.infrastructure.clients.iam.resources.UserOnlyResource;
@@ -74,14 +78,9 @@ public class LeaderDetailsQueryService {
         );
 
     var group =
-        groupRepository
-            .findByLeaderId(user.leaderId())
-            .orElseThrow(() ->
-                InvalidGroupException
-                    .forLeaderWithoutGroup(
-                        user.leaderId()
-                    )
-            );
+        getLeaderGroup(
+            user.leaderId()
+        );
 
     return tasksQueryPort
         .getMembersByGroupId(group.getId())
@@ -93,6 +92,44 @@ public class LeaderDetailsQueryService {
                 member.name(),
                 member.surname(),
                 member.imgUrl()
+            )
+        )
+        .toList();
+  }
+
+  public List<TaskDetailsDTO> handle(
+      GetTasksOfMyGroupQuery query
+  ) {
+
+    var user =
+        getExistingLeaderUser(
+            query.userId()
+        );
+
+    var group =
+        getLeaderGroup(
+            user.leaderId()
+        );
+
+    return tasksQueryPort
+        .getTasksByGroupId(group.getId())
+        .stream()
+        .map(task ->
+            new TaskDetailsDTO(
+                task.id(),
+                task.title(),
+                task.description(),
+                task.dueDate(),
+                task.createdAt(),
+                task.updatedAt(),
+                task.status(),
+                new TaskMemberDetailsDTO(
+                    task.member().id(),
+                    task.member().name(),
+                    task.member().surname(),
+                    task.member().urlImage()
+                ),
+                task.groupId()
             )
         )
         .toList();
@@ -121,5 +158,19 @@ public class LeaderDetailsQueryService {
     }
 
     return user;
+  }
+
+  private Group getLeaderGroup(
+      Long leaderId
+  ) {
+
+    return groupRepository
+        .findByLeaderId(leaderId)
+        .orElseThrow(() ->
+            InvalidGroupException
+                .forLeaderWithoutGroup(
+                    leaderId
+                )
+        );
   }
 }

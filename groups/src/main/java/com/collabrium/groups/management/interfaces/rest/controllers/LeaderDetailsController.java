@@ -3,10 +3,13 @@ package com.collabrium.groups.management.interfaces.rest.controllers;
 import com.collabrium.groups.management.application.internal.queryservices.LeaderDetailsQueryService;
 import com.collabrium.groups.management.domain.model.queries.GetLeaderDetailsByUserIdQuery;
 import com.collabrium.groups.management.domain.model.queries.GetMembersOfMyGroupQuery;
+import com.collabrium.groups.management.domain.model.queries.GetTasksOfMyGroupQuery;
 import com.collabrium.groups.management.interfaces.rest.resources.LeaderDetailsResource;
 import com.collabrium.groups.management.interfaces.rest.resources.MembersDetailsResource;
+import com.collabrium.groups.management.interfaces.rest.resources.TaskDetailsResource;
 import com.collabrium.groups.management.interfaces.rest.transform.LeaderDetailsResourceFromDTOAssembler;
 import com.collabrium.groups.management.interfaces.rest.transform.MemberDetailsResourceFromDTOAssembler;
+import com.collabrium.groups.management.interfaces.rest.transform.TaskDetailsResourceFromDTOAssembler;
 import com.collabrium.groups.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -74,5 +77,30 @@ public class LeaderDetailsController {
         .toList();
 
     return ResponseEntity.ok(membersResources);
+  }
+
+  @GetMapping("/groups/tasks")
+  @Operation(
+      summary = "Get all group tasks",
+      description = "Retrieve all tasks of the authenticated leader's group"
+  )
+  public ResponseEntity<List<TaskDetailsResource>> getAllTasksByGroupId(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var query =
+        new GetTasksOfMyGroupQuery(
+            user.userId()
+        );
+
+    var tasksDetails =
+        leaderDetailsQueryService.handle(query);
+
+    var tasksResources =
+        tasksDetails.stream()
+            .map(TaskDetailsResourceFromDTOAssembler::toResourceFromDTO)
+            .toList();
+
+    return ResponseEntity.ok(tasksResources);
   }
 }
