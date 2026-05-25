@@ -116,5 +116,17 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   @Override
   public void handle(LeaveGroupCommand command) {
 
+    var group =
+        groupRepository
+            .findById(command.groupId())
+            .orElseThrow(() ->
+                GroupNotFoundException.forId(
+                    command.groupId()
+                )
+            );
+
+    group.decreaseMemberCount();
+
+    groupRepository.save(group);
   }
 }

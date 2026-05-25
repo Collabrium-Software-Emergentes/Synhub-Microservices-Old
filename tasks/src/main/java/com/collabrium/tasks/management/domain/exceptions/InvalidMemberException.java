@@ -51,4 +51,36 @@ public class InvalidMemberException extends RuntimeException {
         "Task cannot be null"
     );
   }
+
+  public static InvalidMemberException forUserIsNotMember(
+      Long userId
+  ) {
+
+    return new InvalidMemberException(
+        "User with id " + userId + " is not a member"
+    );
+  }
+
+  public static InvalidMemberException forNullLeaveGroupCommand() {
+
+    return new InvalidMemberException(
+        "Leave group command cannot be null"
+    );
+  }
+
+  public static InvalidMemberException forNullUserId() {
+
+    return new InvalidMemberException(
+        "User id cannot be null"
+    );
+  }
+
+  public static InvalidMemberException forMemberWithoutGroup(
+      Long memberId
+  ) {
+
+    return new InvalidMemberException(
+        "Member with id " + memberId + " does not belong to any group"
+    );
+  }
 }

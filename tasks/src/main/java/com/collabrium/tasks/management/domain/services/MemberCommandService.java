@@ -1,10 +1,7 @@
 package com.collabrium.tasks.management.domain.services;
 
 import com.collabrium.tasks.management.domain.model.aggregates.Member;
-import com.collabrium.tasks.management.domain.model.commands.AssignMemberToGroupCommand;
-import com.collabrium.tasks.management.domain.model.commands.CreateMemberCommand;
-import com.collabrium.tasks.management.domain.model.commands.DeleteMembersByGroupIdCommand;
-import com.collabrium.tasks.management.domain.model.commands.RemoveMemberFromGroupCommand;
+import com.collabrium.tasks.management.domain.model.commands.*;
 
 import java.util.Optional;
 
@@ -17,4 +14,6 @@ public interface MemberCommandService {
   Optional<Member> handle(RemoveMemberFromGroupCommand command);
 
   void handle(DeleteMembersByGroupIdCommand command);
+
+  void handle(LeaveGroupCommand command);
 }

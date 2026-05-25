@@ -23,14 +23,13 @@ public class RabbitMQConfiguration {
   // =========================
   public static final String USER_MEMBER_CREATED_KEY = "user.member.created";
   public static final String MEMBER_CREATED_KEY = "member.created";
-
   public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
+  public static final String MEMBER_LEFT_GROUP_KEY = "member.left.group";
 
   // =========================
   // QUEUES
   // =========================
   public static final String USER_MEMBER_CREATED_QUEUE = "tasks.user.member.created.queue";
-
   public static final String INVITATION_ACCEPTED_QUEUE = "tasks.invitation.accepted.queue";
 
   // =========================
