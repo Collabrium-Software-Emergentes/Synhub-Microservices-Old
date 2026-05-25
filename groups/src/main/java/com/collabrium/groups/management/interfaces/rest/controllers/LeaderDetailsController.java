@@ -2,8 +2,11 @@ package com.collabrium.groups.management.interfaces.rest.controllers;
 
 import com.collabrium.groups.management.application.internal.queryservices.LeaderDetailsQueryService;
 import com.collabrium.groups.management.domain.model.queries.GetLeaderDetailsByUserIdQuery;
+import com.collabrium.groups.management.domain.model.queries.GetMembersOfMyGroupQuery;
 import com.collabrium.groups.management.interfaces.rest.resources.LeaderDetailsResource;
+import com.collabrium.groups.management.interfaces.rest.resources.MembersDetailsResource;
 import com.collabrium.groups.management.interfaces.rest.transform.LeaderDetailsResourceFromDTOAssembler;
+import com.collabrium.groups.management.interfaces.rest.transform.MemberDetailsResourceFromDTOAssembler;
 import com.collabrium.groups.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,8 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
-@RequestMapping(value = "/api/v1/leader")
+@RequestMapping(value = "/api/v1")
 @Tag(name = "Leaders Details", description = "Leader details management API")
 public class LeaderDetailsController {
 
@@ -27,7 +32,7 @@ public class LeaderDetailsController {
     this.leaderDetailsQueryService = leaderDetailsQueryService;
   }
 
-  @GetMapping("/details")
+  @GetMapping("/leader/details")
   @Operation(
       summary = "Get authenticated leader details",
       description = "Returns the details of the authenticated leader"
@@ -48,5 +53,26 @@ public class LeaderDetailsController {
         .toResourceFromDTO(leaderDetailsOptional.get());
 
     return ResponseEntity.ok(leaderDetailsResource);
+  }
+
+  @GetMapping("/groups/members")
+  @Operation(
+      summary = "Get all group members",
+      description = "Retrieve all members of a group"
+  )
+  public ResponseEntity<List<MembersDetailsResource>> getAllMembersByGroupId(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getMembersOfMyGroupQuery = new GetMembersOfMyGroupQuery(user.userId());
+
+    var membersDetails = leaderDetailsQueryService.handle(getMembersOfMyGroupQuery);
+
+    var membersResources = membersDetails
+        .stream()
+        .map(MemberDetailsResourceFromDTOAssembler::toResourceFromDTO)
+        .toList();
+
+    return ResponseEntity.ok(membersResources);
   }
 }
