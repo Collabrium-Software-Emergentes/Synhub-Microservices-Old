@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -275,6 +274,22 @@ public class TaskDetailsQueryService {
         .toList();
   }
 
+  public List<TaskDetailsDTO> handle(
+      GetAllTasksDetailsByGroupIdQuery query
+  ) {
+
+    validateGroupId(query.groupId());
+
+    var tasks =
+        taskRepository.findByGroupId_Value(
+            query.groupId()
+        );
+
+    return tasks.stream()
+        .map(this::buildTaskDetailsDTO)
+        .toList();
+  }
+
   /**
    * Validates the existence and completeness of a user resource.
    * This method ensures that the user exists in the IAM system and that
@@ -325,5 +340,15 @@ public class TaskDetailsQueryService {
         member,
         user
     );
+  }
+
+  private void validateGroupId(
+      Long groupId
+  ) {
+
+    if (groupId == null) {
+      throw InvalidTaskException
+          .forNullGroupId();
+    }
   }
 }

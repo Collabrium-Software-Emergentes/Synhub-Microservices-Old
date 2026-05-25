@@ -1,7 +1,6 @@
 package com.collabrium.tasks.management.domain.services;
 
 import com.collabrium.tasks.management.domain.model.aggregates.Task;
-import com.collabrium.tasks.management.domain.model.queries.GetAllTasksByGroupIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetAllTasksQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetTaskByIdQuery;
 
@@ -19,9 +18,4 @@ public interface TaskQueryService {
    * Retrieves tasks assigned to a specific member.
    */
   Optional<Task> handle(GetTaskByIdQuery query);
-
-  /**
-   * Retrieves tasks by their group ID.
-   */
-  List<Task> handle(GetAllTasksByGroupIdQuery query);
 }

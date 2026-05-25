@@ -210,4 +210,25 @@ public class TaskDetailsController {
 
     return ResponseEntity.ok(resource);
   }
+
+  @GetMapping("/tasks")
+  @Operation(
+      summary = "Get all tasks by groupId",
+      description = "Get all tasks by groupId"
+  )
+  public ResponseEntity<List<TaskResource>> getTasksByGroupId(
+      @RequestParam Long groupId
+  ) {
+
+    var getAllTasksDetailsByGroupIdQuery = new GetAllTasksDetailsByGroupIdQuery(groupId);
+
+    var tasks = taskDetailsQueryService.handle(getAllTasksDetailsByGroupIdQuery);
+
+    var resources =
+        tasks.stream()
+            .map(TaskResourceFromDTOAssembler::toResourceFromDTO)
+            .toList();
+
+    return ResponseEntity.ok(resources);
+  }
 }
