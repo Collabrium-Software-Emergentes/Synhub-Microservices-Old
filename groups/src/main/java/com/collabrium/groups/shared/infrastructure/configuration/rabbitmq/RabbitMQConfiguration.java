@@ -25,6 +25,7 @@ public class RabbitMQConfiguration {
   public static final String LEADER_CREATED_KEY = "leader.created";
   public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
   public static final String MEMBER_LEFT_GROUP_KEY = "member.left.group";
+  public static final String MEMBER_REMOVED_FROM_GROUP_KEY = "member.removed.from.group";
 
   // =========================
   // QUEUES

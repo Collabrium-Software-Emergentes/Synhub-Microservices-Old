@@ -89,7 +89,7 @@ public class InvitationDetailsQueryService {
     }
 
     if (user.memberId() == null) {
-      throw new MemberNotFoundException(userId);
+      throw MemberNotFoundException.forUserId(userId);
     }
   }
 

@@ -2,10 +2,13 @@ package com.collabrium.groups.management.application.internal.outboundservices.m
 
 import com.collabrium.groups.management.domain.model.events.InvitationAcceptedEvent;
 import com.collabrium.groups.management.domain.model.events.LeaderCreatedEvent;
+import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
 
 public interface GroupsEventPublisher {
 
   void publishLeaderCreated(LeaderCreatedEvent event);
 
   void publishInvitationAccepted(InvitationAcceptedEvent event);
+
+  void publishMemberRemovedFromGroup(RemoveMemberEvent event);
 }

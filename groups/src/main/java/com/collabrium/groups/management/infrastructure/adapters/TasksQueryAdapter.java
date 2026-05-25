@@ -2,6 +2,7 @@ package com.collabrium.groups.management.infrastructure.adapters;
 
 import com.collabrium.groups.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.groups.shared.infrastructure.clients.tasks.TasksFeignClient;
+import com.collabrium.groups.shared.infrastructure.clients.tasks.resources.MemberOnlyResource;
 import com.collabrium.groups.shared.infrastructure.clients.tasks.resources.MemberResource;
 import com.collabrium.groups.shared.infrastructure.clients.tasks.resources.TaskResource;
 import org.springframework.stereotype.Component;
@@ -28,5 +29,10 @@ public class TasksQueryAdapter implements TasksQueryPort {
   @Override
   public List<TaskResource> getTasksByGroupId(Long groupId) {
     return client.getAllTasksByGroupId(groupId);
+  }
+
+  @Override
+  public MemberOnlyResource getMemberOnlyById(Long memberId) {
+    return client.getMemberOnlyById(memberId);
   }
 }

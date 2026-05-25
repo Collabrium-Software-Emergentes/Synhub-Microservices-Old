@@ -55,4 +55,15 @@ public class InvalidGroupException extends RuntimeException {
         "Group with id " + groupId + " was not found"
     );
   }
+
+  public static InvalidGroupException forMemberNotBelongingToGroup(
+      Long memberId,
+      Long groupId
+  ) {
+
+    return new InvalidGroupException(
+        "Member with id " + memberId +
+            " does not belong to group with id " + groupId
+    );
+  }
 }

@@ -81,7 +81,7 @@ public class InvitationDetailsCommandService {
     }
 
     if (user.memberId() == null) {
-      throw new MemberNotFoundException(userId);
+      throw MemberNotFoundException.forUserId(userId);
     }
   }
 
