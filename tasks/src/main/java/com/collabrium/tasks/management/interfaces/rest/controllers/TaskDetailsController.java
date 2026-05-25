@@ -188,4 +188,26 @@ public class TaskDetailsController {
 
     return ResponseEntity.ok(taskResource);
   }
+
+  @GetMapping("/members/{memberId}/tasks/next")
+  @Operation(
+      summary = "Get the next task by member id",
+      description = "Get the next task by member id"
+  )
+  public ResponseEntity<TaskResource> getLastNextByMemberId(
+      @PathVariable Long memberId
+  ) {
+
+    var getNextTaskDetailsByMemberIdQuery = new GetNextTaskDetailsByMemberIdQuery(memberId);
+
+    var task = taskDetailsQueryService.handle(getNextTaskDetailsByMemberIdQuery);
+
+    if (task.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var resource = TaskResourceFromDTOAssembler.toResourceFromDTO(task.get());
+
+    return ResponseEntity.ok(resource);
+  }
 }

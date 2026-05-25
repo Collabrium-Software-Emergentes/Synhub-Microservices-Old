@@ -125,20 +125,55 @@ public class TaskDetailsQueryService {
         OffsetDateTime.now(ZoneOffset.UTC);
 
     var nextTask =
-        taskRepository.findByMember_Id(
-                member.getId()
-            )
-            .stream()
-            .filter(task ->
-                task.getStatus() == TaskStatus.IN_PROGRESS
-            )
-            .filter(task ->
-                !task.getDueDate().isBefore(now)
-            )
-            .min(
-                Comparator.comparing(
-                    Task::getDueDate
+        taskRepository
+            .findFirstByMember_IdAndStatusAndDueDateAfterOrderByDueDateAsc(
+                member.getId(),
+                TaskStatus.IN_PROGRESS,
+                now
+            );
+
+    return nextTask.map(task ->
+        TaskDetailsDTOAssembler.toDTO(
+            task,
+            member,
+            user
+        )
+    );
+  }
+
+  public Optional<TaskDetailsDTO> handle(GetNextTaskDetailsByMemberIdQuery query) {
+
+    var member =
+        memberRepository
+            .findById(query.memberId())
+            .orElseThrow(() ->
+                MemberNotFoundException.forId(
+                    query.memberId()
                 )
+            );
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    var now =
+        OffsetDateTime.now(
+            ZoneOffset.UTC
+        );
+
+    var nextTask =
+        taskRepository
+            .findFirstByMember_IdAndStatusAndDueDateAfterOrderByDueDateAsc(
+                member.getId(),
+                TaskStatus.IN_PROGRESS,
+                now
             );
 
     return nextTask.map(task ->
