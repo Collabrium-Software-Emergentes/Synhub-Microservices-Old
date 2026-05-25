@@ -10,7 +10,8 @@ public class UpdateTaskCommandFromResourceAssembler {
 
   public static UpdateTaskCommand toCommandFromResource(
       UpdateTaskResource resource,
-      Long taskId
+      Long taskId,
+      Long userId
   ) {
 
     return new UpdateTaskCommand(
@@ -18,7 +19,8 @@ public class UpdateTaskCommandFromResourceAssembler {
         resource.title(),
         resource.description(),
         resource.dueDate(),
-        resource.memberId()
+        resource.memberId(),
+        userId
     );
   }
 }

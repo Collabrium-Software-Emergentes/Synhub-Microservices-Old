@@ -209,4 +209,18 @@ public class InvalidTaskException extends RuntimeException {
             groupId + "."
     );
   }
+
+  public static InvalidTaskException forMemberNotBelongingToGroup(
+      Long memberId,
+      Long groupId
+  ) {
+
+    return new InvalidTaskException(
+        String.format(
+            "Member with id %d does not belong to group %d",
+            memberId,
+            groupId
+        )
+    );
+  }
 }

@@ -10,11 +10,13 @@ import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.tasks.management.domain.model.aggregates.Member;
 import com.collabrium.tasks.management.domain.model.aggregates.Task;
 import com.collabrium.tasks.management.domain.model.commands.CreateTaskCommand;
+import com.collabrium.tasks.management.domain.model.commands.UpdateTaskCommand;
 import com.collabrium.tasks.management.domain.model.commands.UpdateTaskStatusCommand;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
 import com.collabrium.tasks.shared.infrastructure.clients.groups.resources.GroupOnlyResource;
 import com.collabrium.tasks.shared.infrastructure.clients.iam.resources.UserOnlyResource;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -134,6 +136,70 @@ public class TaskDetailsCommandService {
     );
 
     task.updateStatus(command);
+
+    var updatedTask =
+        taskRepository.save(task);
+
+    return Optional.of(
+        buildTaskDetailsDTO(updatedTask)
+    );
+  }
+
+  @Transactional
+  public Optional<TaskDetailsDTO> handle(UpdateTaskCommand command) {
+
+    if (command == null) {
+      throw InvalidTaskException.forNullUpdateCommand();
+    }
+
+    var task =
+        getExistingTask(command.taskId());
+
+    var taskGroupId =
+        getTaskGroupId(task);
+
+    var user =
+        getExistingUser(command.userId());
+
+    validateUserBelongsToTaskGroup(
+        user,
+        taskGroupId
+    );
+
+    var newMember =
+        getExistingMember(command.memberId());
+
+    validateMemberGroup(newMember);
+
+    if (
+        !newMember.getGroupId()
+            .value()
+            .equals(taskGroupId)
+    ) {
+
+      throw InvalidTaskException
+          .forMemberNotBelongingToGroup(
+              newMember.getId(),
+              taskGroupId
+          );
+    }
+
+    var currentMember =
+        task.getMember();
+
+    if (
+        currentMember == null ||
+            !currentMember.getId()
+                .equals(newMember.getId())
+    ) {
+
+      task.setMember(newMember);
+      task.setGroupId(
+          newMember.getGroupId()
+      );
+    }
+
+    task.updateTask(command);
 
     var updatedTask =
         taskRepository.save(task);

@@ -6,8 +6,10 @@ import com.collabrium.tasks.management.domain.model.commands.UpdateTaskStatusCom
 import com.collabrium.tasks.management.domain.model.queries.*;
 import com.collabrium.tasks.management.interfaces.rest.resources.CreateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskResource;
+import com.collabrium.tasks.management.interfaces.rest.resources.UpdateTaskResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.CreateTaskCommandFromResourceAssembler;
 import com.collabrium.tasks.management.interfaces.rest.transform.TaskResourceFromDTOAssembler;
+import com.collabrium.tasks.management.interfaces.rest.transform.UpdateTaskCommandFromResourceAssembler;
 import com.collabrium.tasks.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -230,5 +232,30 @@ public class TaskDetailsController {
             .toList();
 
     return ResponseEntity.ok(resources);
+  }
+
+  @PutMapping("/tasks/{taskId}")
+  @Operation(
+      summary = "Update task",
+      description = "Update task"
+  )
+  public ResponseEntity<TaskResource> updateTask(
+      @PathVariable Long taskId,
+      @RequestBody UpdateTaskResource resource,
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var updateTaskCommand = UpdateTaskCommandFromResourceAssembler
+        .toCommandFromResource(resource, taskId, user.userId());
+
+    var task = taskDetailsCommandService.handle(updateTaskCommand);
+
+    if (task.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var taskResource = TaskResourceFromDTOAssembler.toResourceFromDTO(task.get());
+
+    return ResponseEntity.ok(taskResource);
   }
 }
