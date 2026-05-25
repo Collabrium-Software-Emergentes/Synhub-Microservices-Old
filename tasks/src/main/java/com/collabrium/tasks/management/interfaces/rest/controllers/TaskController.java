@@ -1,0 +1,66 @@
+package com.collabrium.tasks.management.interfaces.rest.controllers;
+
+import com.collabrium.tasks.management.domain.model.commands.DeleteTaskCommand;
+import com.collabrium.tasks.management.domain.model.queries.GetTaskByIdQuery;
+import com.collabrium.tasks.management.domain.services.TaskCommandService;
+import com.collabrium.tasks.management.domain.services.TaskQueryService;
+import com.collabrium.tasks.management.interfaces.rest.resources.TaskDetailsResource;
+import com.collabrium.tasks.management.interfaces.rest.transform.TaskDetailsResourceFromEntityAssembler;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(value = "/api/v1/tasks")
+@Tag(name = "Task", description = "Task management API")
+public class TaskController {
+
+  private final TaskQueryService taskQueryService;
+  private final TaskCommandService taskCommandService;
+
+  public TaskController(
+      TaskQueryService taskQueryService,
+      TaskCommandService taskCommandService
+  ) {
+
+    this.taskQueryService = taskQueryService;
+    this.taskCommandService = taskCommandService;
+  }
+
+  @GetMapping("/details/{taskId}")
+  @Operation(
+      summary = "Get task details by id",
+      description = "Get task details by id"
+  )
+  public ResponseEntity<TaskDetailsResource> getTaskDetailsById(
+      @PathVariable Long taskId
+  ) {
+
+    var getTaskByIdQuery = new GetTaskByIdQuery(taskId);
+
+    var task = this.taskQueryService.handle(getTaskByIdQuery);
+
+    if (task.isEmpty()) return ResponseEntity.notFound().build();
+
+    var taskResource = TaskDetailsResourceFromEntityAssembler.toResourceFromEntity(task.get());
+
+    return ResponseEntity.ok(taskResource);
+  }
+
+  @DeleteMapping("/{taskId}")
+  @Operation(
+      summary = "Delete a task by id",
+      description = "Delete a task by id"
+  )
+  public ResponseEntity<Void> deleteTask(
+      @PathVariable Long taskId
+  ) {
+
+    var deleteTaskCommand = new DeleteTaskCommand(taskId);
+    
+    this.taskCommandService.handle(deleteTaskCommand);
+
+    return ResponseEntity.noContent().build();
+  }
+}

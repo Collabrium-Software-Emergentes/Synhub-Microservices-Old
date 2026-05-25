@@ -44,7 +44,7 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
     }
 
     if (user.memberId() == null) {
-      throw new MemberNotFoundException(command.userId());
+      throw MemberNotFoundException.forUserId(command.userId());
     }
 
     MemberId memberId = MemberId.of(user.memberId());

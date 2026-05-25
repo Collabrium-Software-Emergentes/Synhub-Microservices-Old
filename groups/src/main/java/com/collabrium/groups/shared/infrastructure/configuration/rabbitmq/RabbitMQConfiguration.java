@@ -16,6 +16,7 @@ public class RabbitMQConfiguration {
   // =========================
   public static final String IAM_EXCHANGE = "iam.exchange";
   public static final String GROUPS_EXCHANGE = "groups.exchange";
+  public static final String TASKS_EXCHANGE = "tasks.exchange";
 
   // =========================
   // ROUTING KEYS
@@ -23,11 +24,14 @@ public class RabbitMQConfiguration {
   public static final String USER_LEADER_CREATED_KEY = "user.leader.created";
   public static final String LEADER_CREATED_KEY = "leader.created";
   public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
+  public static final String MEMBER_LEFT_GROUP_KEY = "member.left.group";
+  public static final String MEMBER_REMOVED_FROM_GROUP_KEY = "member.removed.from.group";
 
   // =========================
   // QUEUES
   // =========================
   public static final String USER_LEADER_CREATED_QUEUE = "groups.user.leader.created.queue";
+  public static final String MEMBER_LEFT_GROUP_QUEUE = "groups.member.left.group.queue";
 
   // =========================
   // EXCHANGE BEANS
@@ -41,12 +45,21 @@ public class RabbitMQConfiguration {
     return new TopicExchange(GROUPS_EXCHANGE);
   }
 
+  @Bean TopicExchange tasksExchange() {
+    return new TopicExchange(TASKS_EXCHANGE);
+  }
+
   // =========================
   // QUEUE
   // =========================
   @Bean
   public Queue userLeaderCreatedQueue() {
     return new Queue(USER_LEADER_CREATED_QUEUE);
+  }
+
+  @Bean
+  public Queue memberLeftGroupQueue() {
+    return new Queue(MEMBER_LEFT_GROUP_QUEUE);
   }
 
   // =========================
@@ -61,6 +74,16 @@ public class RabbitMQConfiguration {
         .bind(userLeaderCreatedQueue)
         .to(iamExchange)
         .with(USER_LEADER_CREATED_KEY);
+  }
+
+  @Bean Binding memberLeftGroupBinding(
+      Queue memberLeftGroupQueue,
+      TopicExchange tasksExchange
+  ) {
+    return BindingBuilder
+        .bind(memberLeftGroupQueue)
+        .to(tasksExchange)
+        .with(MEMBER_LEFT_GROUP_KEY);
   }
 
   @Bean

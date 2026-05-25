@@ -22,4 +22,6 @@ public interface MemberQueryService {
    * @return a list of all members
    */
   List<Member> handle(GetAllMembersQuery query);
+
+  List<Member> handle(GetAllMembersByGroupIdQuery query);
 }

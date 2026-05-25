@@ -138,4 +138,89 @@ public class InvalidTaskException extends RuntimeException {
         "Group ID cannot be null"
     );
   }
+
+  // =========================================================
+  // DELETE TASK
+  // =========================================================
+
+  public static InvalidTaskException forNullDeleteCommand() {
+    return new InvalidTaskException(
+        "DeleteTaskCommand cannot be null"
+    );
+  }
+
+  public static InvalidTaskException forTaskNotFound(
+      Long taskId
+  ) {
+
+    return new InvalidTaskException(
+        "Task with id " + taskId + " was not found"
+    );
+  }
+
+  // =========================================================
+  // DELETE TASKS BY MEMBER
+  // =========================================================
+
+  public static InvalidTaskException forNullDeleteByMemberCommand() {
+    return new InvalidTaskException(
+        "DeleteTasksByMemberId command cannot be null"
+    );
+  }
+
+  // =========================================================
+  // DELETE TASKS BY GROUP
+  // =========================================================
+
+  public static InvalidTaskException forNullDeleteByGroupCommand() {
+    return new InvalidTaskException(
+        "DeleteTasksByGroupIdCommand cannot be null"
+    );
+  }
+
+  public static InvalidTaskException forUserWithoutRole(
+      Long userId
+  ) {
+
+    return new InvalidTaskException(
+        "User with id " + userId +
+            " is neither a leader nor a member"
+    );
+  }
+
+  public static InvalidTaskException forLeaderWithoutGroup(
+      Long userId
+  ) {
+
+    return new InvalidTaskException(
+        "Leader with id " + userId +
+            " does not belong to any group"
+    );
+  }
+
+  public static InvalidTaskException forUserNotBelongingToGroup(
+      Long userId,
+      Long groupId
+  ) {
+
+    return new InvalidTaskException(
+        "User with id " + userId +
+            " does not belong to group with id " +
+            groupId + "."
+    );
+  }
+
+  public static InvalidTaskException forMemberNotBelongingToGroup(
+      Long memberId,
+      Long groupId
+  ) {
+
+    return new InvalidTaskException(
+        String.format(
+            "Member with id %d does not belong to group %d",
+            memberId,
+            groupId
+        )
+    );
+  }
 }

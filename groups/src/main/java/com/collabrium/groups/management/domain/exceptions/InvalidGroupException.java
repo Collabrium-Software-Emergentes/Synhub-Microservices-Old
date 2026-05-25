@@ -37,4 +37,33 @@ public class InvalidGroupException extends RuntimeException {
   public static InvalidGroupException forMemberCountDecrementWhenZero() {
     return new InvalidGroupException("Cannot decrease member count when it is already zero");
   }
+
+  public static InvalidGroupException forLeaderWithoutGroup(
+      Long leaderId
+  ) {
+
+    return new InvalidGroupException(
+        "Leader with id " + leaderId + " does not belong to any group"
+    );
+  }
+
+  public static InvalidGroupException forGroupNotFound(
+      Long groupId
+  ) {
+
+    return new InvalidGroupException(
+        "Group with id " + groupId + " was not found"
+    );
+  }
+
+  public static InvalidGroupException forMemberNotBelongingToGroup(
+      Long memberId,
+      Long groupId
+  ) {
+
+    return new InvalidGroupException(
+        "Member with id " + memberId +
+            " does not belong to group with id " + groupId
+    );
+  }
 }

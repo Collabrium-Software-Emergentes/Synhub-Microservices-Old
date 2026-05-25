@@ -2,6 +2,7 @@ package com.collabrium.groups.management.interfaces.rest.controllers;
 
 import com.collabrium.groups.management.domain.model.queries.GetGroupByCodeQuery;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByIdQuery;
+import com.collabrium.groups.management.domain.model.queries.GetGroupByLeaderIdQuery;
 import com.collabrium.groups.management.domain.services.GroupQueryService;
 import com.collabrium.groups.management.interfaces.rest.resources.GroupResource;
 import com.collabrium.groups.management.interfaces.rest.resources.GroupWithLeaderResource;
@@ -62,6 +63,23 @@ public class GroupController {
     var groupResource = GroupResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
 
     return ResponseEntity.ok(groupResource);
+  }
 
+  @GetMapping
+  public ResponseEntity<GroupWithLeaderResource> getGroupByLeaderId(
+      @RequestParam Long leaderId
+  ) {
+
+    var getGroupByLeaderIdQuery = new GetGroupByLeaderIdQuery(leaderId);
+
+    var groupOptional = groupQueryService.handle(getGroupByLeaderIdQuery);
+
+    if (groupOptional.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var groupResource = GroupWithLeaderResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
+
+    return ResponseEntity.ok(groupResource);
   }
 }

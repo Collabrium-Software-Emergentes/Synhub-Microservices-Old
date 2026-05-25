@@ -35,9 +35,9 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
 
   @OneToMany(
       mappedBy = "member",
-      fetch = FetchType.EAGER,
       cascade = CascadeType.ALL,
-      orphanRemoval = true
+      orphanRemoval = true,
+      fetch = FetchType.LAZY
   )
   private List<Task> tasks = new ArrayList<>();
 

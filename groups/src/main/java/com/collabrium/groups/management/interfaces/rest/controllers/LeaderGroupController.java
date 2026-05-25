@@ -1,5 +1,6 @@
 package com.collabrium.groups.management.interfaces.rest.controllers;
 
+import com.collabrium.groups.management.domain.model.commands.RemoveMemberFromMyGroupCommand;
 import com.collabrium.groups.management.domain.model.queries.GetGroupByUserIdQuery;
 import com.collabrium.groups.management.domain.services.GroupCommandService;
 import com.collabrium.groups.management.domain.services.GroupQueryService;
@@ -96,5 +97,22 @@ public class LeaderGroupController {
     var resource = GroupResourceFromEntityAssembler.toResourceFromEntity(groupOptional.get());
 
     return ResponseEntity.ok(resource);
+  }
+
+  @DeleteMapping("/members/{memberId}")
+  @Operation(
+      summary = "Remove a member from the group",
+      description = "Removes a member from the group"
+  )
+  public ResponseEntity<Void> removeMemberFromGroup(
+      @PathVariable Long memberId,
+      @AuthenticationPrincipal AuthenticatedUser user
+  ){
+
+    var removeMemberFromMyGroupCommand = new RemoveMemberFromMyGroupCommand(user.userId(), memberId);
+
+    groupCommandService.handle(removeMemberFromMyGroupCommand);
+
+    return ResponseEntity.noContent().build();
   }
 }

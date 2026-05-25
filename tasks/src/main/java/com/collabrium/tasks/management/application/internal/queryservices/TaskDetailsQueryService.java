@@ -3,11 +3,11 @@ package com.collabrium.tasks.management.application.internal.queryservices;
 import com.collabrium.tasks.management.application.internal.dto.TaskDetailsDTO;
 import com.collabrium.tasks.management.application.internal.mappers.TaskDetailsDTOAssembler;
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
+import com.collabrium.tasks.management.domain.exceptions.InvalidTaskException;
 import com.collabrium.tasks.management.domain.exceptions.MemberNotFoundException;
 import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.tasks.management.domain.model.aggregates.Task;
-import com.collabrium.tasks.management.domain.model.queries.GetAllTasksDetailsByUserIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetNextTaskDetailsByUserIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.*;
 import com.collabrium.tasks.management.domain.model.valueobjects.TaskStatus;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +92,7 @@ public class TaskDetailsQueryService {
         .map(task ->
             TaskDetailsDTOAssembler.toDTO(
                 task,
-                task.getMember(),
+                member,
                 user
             )
         )
@@ -125,32 +124,170 @@ public class TaskDetailsQueryService {
         OffsetDateTime.now(ZoneOffset.UTC);
 
     var nextTask =
-        taskRepository.findByMember_Id(
-                member.getId()
-            )
-            .stream()
-            .filter(task ->
-                task.getStatus() == TaskStatus.IN_PROGRESS
-            )
-            .filter(task ->
-                task.getDueDate() != null
-            )
-            .filter(task ->
-                !task.getDueDate().isBefore(now)
-            )
-            .min(
-                Comparator.comparing(
-                    Task::getDueDate
-                )
+        taskRepository
+            .findFirstByMember_IdAndStatusAndDueDateAfterOrderByDueDateAsc(
+                member.getId(),
+                TaskStatus.IN_PROGRESS,
+                now
             );
 
     return nextTask.map(task ->
         TaskDetailsDTOAssembler.toDTO(
             task,
-            task.getMember(),
+            member,
             user
         )
     );
+  }
+
+  public Optional<TaskDetailsDTO> handle(GetNextTaskDetailsByMemberIdQuery query) {
+
+    var member =
+        memberRepository
+            .findById(query.memberId())
+            .orElseThrow(() ->
+                MemberNotFoundException.forId(
+                    query.memberId()
+                )
+            );
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    var now =
+        OffsetDateTime.now(
+            ZoneOffset.UTC
+        );
+
+    var nextTask =
+        taskRepository
+            .findFirstByMember_IdAndStatusAndDueDateAfterOrderByDueDateAsc(
+                member.getId(),
+                TaskStatus.IN_PROGRESS,
+                now
+            );
+
+    return nextTask.map(task ->
+        TaskDetailsDTOAssembler.toDTO(
+            task,
+            member,
+            user
+        )
+    );
+  }
+
+  public List<TaskDetailsDTO> handle(GetTasksDetailsByMemberIdQuery query) {
+
+    var member =
+        memberRepository
+            .findById(query.memberId())
+            .orElseThrow(() ->
+                MemberNotFoundException.forId(
+                    query.memberId()
+                )
+            );
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    var tasks =
+        taskRepository.findByMember_Id(
+            member.getId()
+        );
+
+    return tasks.stream()
+        .map(task ->
+            TaskDetailsDTOAssembler.toDTO(
+                task,
+                member,
+                user
+            )
+        )
+        .toList();
+  }
+
+  public Optional<TaskDetailsDTO> handle(GetTaskDetailsByIdQuery query) {
+
+    var task =
+        taskRepository
+            .findById(query.taskId())
+            .orElseThrow(() ->
+                InvalidTaskException.forTaskNotFound(
+                    query.taskId()
+                )
+            );
+
+    var member = task.getMember();
+
+    if (member == null) {
+      throw InvalidTaskException.forNullMember();
+    }
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    var dto =
+        TaskDetailsDTOAssembler.toDTO(
+            task,
+            member,
+            user
+        );
+
+    return Optional.of(dto);
+  }
+
+  public List<TaskDetailsDTO> handle(GetAllTaskDetailsByStatusQuery query){
+
+    var status =
+        TaskStatus.valueOf(
+            query.taskStatus()
+        );
+
+    return taskRepository
+        .findByStatus(status)
+        .stream()
+        .map(this::buildTaskDetailsDTO)
+        .toList();
+  }
+
+  public List<TaskDetailsDTO> handle(
+      GetAllTasksDetailsByGroupIdQuery query
+  ) {
+
+    validateGroupId(query.groupId());
+
+    var tasks =
+        taskRepository.findByGroupId_Value(
+            query.groupId()
+        );
+
+    return tasks.stream()
+        .map(this::buildTaskDetailsDTO)
+        .toList();
   }
 
   /**
@@ -174,6 +311,44 @@ public class TaskDetailsQueryService {
 
     if (user.memberId() == null) {
       throw MemberNotFoundException.forUser(userId);
+    }
+  }
+
+  private TaskDetailsDTO buildTaskDetailsDTO(
+      Task task
+  ) {
+
+    var member = task.getMember();
+
+    if (member == null) {
+      throw InvalidTaskException.forNullMember();
+    }
+
+    var user =
+        iamQueryPort.getUserByMemberId(
+            member.getId()
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forMember(
+          member.getId()
+      );
+    }
+
+    return TaskDetailsDTOAssembler.toDTO(
+        task,
+        member,
+        user
+    );
+  }
+
+  private void validateGroupId(
+      Long groupId
+  ) {
+
+    if (groupId == null) {
+      throw InvalidTaskException
+          .forNullGroupId();
     }
   }
 }

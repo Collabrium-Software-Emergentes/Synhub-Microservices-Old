@@ -1,13 +1,13 @@
 package com.collabrium.tasks.management.application.internal.commandservices;
 
 import com.collabrium.tasks.management.application.internal.outboundservices.messaging.TasksEventPublisher;
+import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.tasks.management.domain.exceptions.InvalidMemberException;
+import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.tasks.management.domain.model.aggregates.Member;
-import com.collabrium.tasks.management.domain.model.commands.AssignMemberToGroupCommand;
-import com.collabrium.tasks.management.domain.model.commands.CreateMemberCommand;
-import com.collabrium.tasks.management.domain.model.commands.DeleteMembersByGroupIdCommand;
-import com.collabrium.tasks.management.domain.model.commands.RemoveMemberFromGroupCommand;
+import com.collabrium.tasks.management.domain.model.commands.*;
 import com.collabrium.tasks.management.domain.model.events.MemberCreatedEvent;
+import com.collabrium.tasks.management.domain.model.events.MemberLeftGroupEvent;
 import com.collabrium.tasks.management.domain.model.valueobjects.GroupId;
 import com.collabrium.tasks.management.domain.services.MemberCommandService;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.MemberRepository;
@@ -22,16 +22,19 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
   private final MemberRepository memberRepository;
   private final TaskRepository taskRepository;
+  private final IamQueryPort iamQueryPort;
   private final TasksEventPublisher tasksEventPublisher;
 
   public MemberCommandServiceImpl(
       MemberRepository memberRepository,
       TaskRepository taskRepository,
+      IamQueryPort iamQueryPort,
       TasksEventPublisher tasksEventPublisher
   ) {
 
     this.memberRepository = memberRepository;
     this.taskRepository = taskRepository;
+    this.iamQueryPort = iamQueryPort;
     this.tasksEventPublisher = tasksEventPublisher;
   }
 
@@ -114,6 +117,39 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
   }
 
+  @Override
+  @Transactional
+  public void handle(LeaveGroupCommand command) {
+
+    validateLeaveGroupCommand(command);
+
+    var member =
+        getExistingMemberFromUser(
+            command.userId()
+        );
+
+    var groupId =
+        member.getGroupId();
+
+    if (groupId == null) {
+      throw InvalidMemberException
+          .forMemberWithoutGroup(
+              member.getId()
+          );
+    }
+
+    detachMemberFromGroup(member);
+
+    var memberLeftGroupEvent =
+        new MemberLeftGroupEvent(
+            groupId.value()
+        );
+
+    tasksEventPublisher.publishMemberLeftGroup(
+        memberLeftGroupEvent
+    );
+  }
+
   private void detachMemberFromGroup(Member member) {
 
     taskRepository.deleteAllByMember_Id(
@@ -151,5 +187,47 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     if (command == null) {
       throw InvalidMemberException.forNullDeleteMembersCommand();
     }
+  }
+
+  private void validateLeaveGroupCommand(
+      LeaveGroupCommand command
+  ) {
+
+    if (command == null) {
+      throw InvalidMemberException
+          .forNullLeaveGroupCommand();
+    }
+
+    if (command.userId() == null) {
+      throw InvalidMemberException
+          .forNullUserId();
+    }
+  }
+
+  private Member getExistingMemberFromUser(
+      Long userId
+  ) {
+
+    var user =
+        iamQueryPort.getUserOnlyById(userId);
+
+    if (user == null) {
+      throw UserNotFoundException
+          .forId(userId);
+    }
+
+    if (user.memberId() == null) {
+      throw InvalidMemberException
+          .forUserIsNotMember(userId);
+    }
+
+    return memberRepository
+        .findById(user.memberId())
+        .orElseThrow(() ->
+            InvalidMemberException
+                .forMemberNotFound(
+                    user.memberId()
+                )
+        );
   }
 }
