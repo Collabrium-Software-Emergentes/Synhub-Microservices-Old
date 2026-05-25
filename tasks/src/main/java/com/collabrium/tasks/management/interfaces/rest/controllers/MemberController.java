@@ -1,6 +1,7 @@
 package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.domain.model.commands.LeaveGroupCommand;
+import com.collabrium.tasks.management.domain.model.queries.GetAllMembersByGroupIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberByIdQuery;
 import com.collabrium.tasks.management.domain.services.MemberCommandService;
 import com.collabrium.tasks.management.domain.services.MemberQueryService;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/member")
@@ -58,5 +61,26 @@ public class MemberController {
     memberCommandService.handle(leaveGroupCommand);
 
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/basic")
+  @Operation(
+      summary = "Get all members by group ID",
+      description = "Fetches a list of all members belonging to the specified group."
+  )
+  public ResponseEntity<List<MemberOnlyResource>> getAllMembersByGroupId(
+      @RequestParam Long groupId
+  ) {
+
+    var getAllMembersByGroupIdQuery = new GetAllMembersByGroupIdQuery(groupId);
+
+    var members = memberQueryService.handle(getAllMembersByGroupIdQuery);
+
+    var membersResources = members
+        .stream()
+        .map(MemberOnlyResourceFromEntityAssembler::toResourceFromEntity)
+        .toList();
+
+    return ResponseEntity.ok(membersResources);
   }
 }
