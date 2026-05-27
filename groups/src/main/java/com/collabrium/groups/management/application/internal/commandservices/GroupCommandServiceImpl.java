@@ -55,7 +55,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
    *
    * @param command the create group command containing group name, description,
    *                image URL, and user ID
-   * @return an Optional containing the created Group, or empty if creation fails
+   * @return an Optional containing the created Group or empty if creation fails
    * @throws UserNotFoundException if the user does not exist
    * @throws InvalidLeaderException if the user is not a leader
    * @throws GroupAlreadyExistsException if the leader already owns a group
@@ -307,7 +307,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   }
 
   /**
-   * Generates a unique group code that does not already exist in the repository.
+   * Generates a unique group of code that does not already exist in the repository.
    *
    * <p>This method continuously generates random group codes until a unique one is found.</p>
    *
