@@ -1,6 +1,7 @@
 package com.collabrium.groups.management.infrastructure.messaging;
 
 import com.collabrium.groups.management.application.internal.outboundservices.messaging.GroupsEventPublisher;
+import com.collabrium.groups.management.domain.model.events.GroupDeletedEvent;
 import com.collabrium.groups.management.domain.model.events.InvitationAcceptedEvent;
 import com.collabrium.groups.management.domain.model.events.LeaderCreatedEvent;
 import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
@@ -51,5 +52,13 @@ public class GroupsEventPublisherImpl implements GroupsEventPublisher {
     );
   }
 
+  @Override
+  public void publishGroupDeleted(GroupDeletedEvent event) {
 
+    rabbitTemplate.convertAndSend(
+        GROUPS_EXCHANGE,
+        GROUP_DELETED_KEY,
+        event
+    );
+  }
 }

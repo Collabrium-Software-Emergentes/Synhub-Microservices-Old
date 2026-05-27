@@ -77,7 +77,7 @@ public class InvitationDetailsCommandService {
   ) {
 
     if (user == null) {
-      throw new UserNotFoundException(userId);
+      throw UserNotFoundException.forId(userId);
     }
 
     if (user.memberId() == null) {
