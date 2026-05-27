@@ -39,70 +39,67 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   }
 
   @Override
-  public void handle(CreateMemberCommand command) {
+  public void handle(
+      CreateMemberCommand command
+  ) {
 
     validateCreateCommand(command);
 
-    var member = new Member(command);
+    var member =
+        new Member(command);
 
-    var savedMember = memberRepository.save(member);
+    var savedMember =
+        memberRepository.save(member);
 
-    var memberCreatedEvent =
+    tasksEventPublisher.publishMemberCreated(
         new MemberCreatedEvent(
             command.userId(),
             savedMember.getId()
-        );
-
-    tasksEventPublisher.publishMemberCreated(
-        memberCreatedEvent
+        )
     );
-
   }
 
   @Override
-  public Optional<Member> handle(AssignMemberToGroupCommand command) {
+  @Transactional
+  public Optional<Member> handle(
+      AssignMemberToGroupCommand command
+  ) {
 
-    validateAddGroupCommand(command);
+    validateAssignGroupCommand(command);
 
-    var member = memberRepository
-        .findById(command.memberId())
-        .orElseThrow(() ->
-            InvalidMemberException.forMemberNotFound(
-                command.memberId()
-            )
-        );
+    var member =
+        getExistingMember(command.memberId());
 
     member.assignGroup(
         new GroupId(command.groupId())
     );
 
-    var updatedMember =
-        memberRepository.save(member);
-
-    return Optional.of(updatedMember);
+    return Optional.of(
+        memberRepository.save(member)
+    );
   }
 
   @Override
   @Transactional
-  public Optional<Member> handle(RemoveMemberFromGroupCommand command) {
+  public Optional<Member> handle(
+      RemoveMemberFromGroupCommand command
+  ) {
 
     validateRemoveGroupCommand(command);
 
-    var member = memberRepository
-        .findById(command.memberId())
-        .orElseThrow(() ->
-            InvalidMemberException.forMemberNotFound(
-                command.memberId()
-            )
-        );
+    var member =
+        getExistingMember(command.memberId());
 
-    detachMemberFromGroup(member);
+    detachMemberAndDeleteTasks(member);
 
     return Optional.of(member);
   }
 
   @Override
-  public void handle(DeleteMembersByGroupIdCommand command) {
+  @Transactional
+  public void handle(
+      DeleteMembersByGroupIdCommand command
+  ) {
 
     validateDeleteMembersCommand(command);
 
@@ -112,80 +109,141 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     var members =
         memberRepository.findMembersByGroupId(groupId);
 
-    for (var member : members) {
-      detachMemberFromGroup(member);
-    }
+    members.forEach(this::detachMemberFromGroup);
   }
 
   @Override
   @Transactional
-  public void handle(LeaveGroupCommand command) {
+  public void handle(
+      LeaveGroupCommand command
+  ) {
 
     validateLeaveGroupCommand(command);
 
     var member =
-        getExistingMemberFromUser(
-            command.userId()
-        );
+        getExistingMemberFromUser(command.userId());
 
     var groupId =
         member.getGroupId();
 
     if (groupId == null) {
       throw InvalidMemberException
-          .forMemberWithoutGroup(
-              member.getId()
-          );
+          .forMemberWithoutGroup(member.getId());
     }
 
-    detachMemberFromGroup(member);
-
-    var memberLeftGroupEvent =
-        new MemberLeftGroupEvent(
-            groupId.value()
-        );
+    detachMemberAndDeleteTasks(member);
 
     tasksEventPublisher.publishMemberLeftGroup(
-        memberLeftGroupEvent
+        new MemberLeftGroupEvent(groupId.value())
     );
   }
 
-  private void detachMemberFromGroup(Member member) {
+  @Override
+  @Transactional
+  public void handle(
+      DeleteGroupDataCommand command
+  ) {
 
-    taskRepository.deleteAllByMember_Id(
-        member.getId()
-    );
+    validateDeleteGroupDataCommand(command);
+
+    var groupId =
+        new GroupId(command.groupId());
+
+    var members =
+        memberRepository.findMembersByGroupId(groupId);
+
+    members.forEach(this::detachMemberFromGroup);
+
+    taskRepository.deleteAllByGroupId(groupId);
+  }
+
+  private void detachMemberFromGroup(
+      Member member
+  ) {
 
     member.removeGroup();
 
     memberRepository.save(member);
   }
 
-  private void validateCreateCommand(CreateMemberCommand command) {
+  private void detachMemberAndDeleteTasks(
+      Member member
+  ) {
+
+    taskRepository.deleteAllByMember_Id(
+        member.getId()
+    );
+
+    detachMemberFromGroup(member);
+  }
+
+  private Member getExistingMember(
+      Long memberId
+  ) {
+
+    return memberRepository
+        .findById(memberId)
+        .orElseThrow(() ->
+            InvalidMemberException.forMemberNotFound(memberId)
+        );
+  }
+
+  private Member getExistingMemberFromUser(
+      Long userId
+  ) {
+
+    var user =
+        iamQueryPort.getUserOnlyById(userId);
+
+    if (user == null) {
+      throw UserNotFoundException.forId(userId);
+    }
+
+    if (user.memberId() == null) {
+      throw InvalidMemberException
+          .forUserIsNotMember(userId);
+    }
+
+    return getExistingMember(user.memberId());
+  }
+
+  private void validateCreateCommand(
+      CreateMemberCommand command
+  ) {
 
     if (command == null) {
-      throw InvalidMemberException.forNullCreateCommand();
+      throw InvalidMemberException
+          .forNullCreateCommand();
     }
   }
 
-  private void validateAddGroupCommand(AssignMemberToGroupCommand command) {
+  private void validateAssignGroupCommand(
+      AssignMemberToGroupCommand command
+  ) {
 
     if (command == null) {
-      throw InvalidMemberException.forNullAddGroupCommand();
+      throw InvalidMemberException
+          .forNullAddGroupCommand();
     }
   }
 
-  private void validateRemoveGroupCommand(RemoveMemberFromGroupCommand command) {
+  private void validateRemoveGroupCommand(
+      RemoveMemberFromGroupCommand command
+  ) {
 
     if (command == null) {
-      throw InvalidMemberException.forNullRemoveGroupCommand();
+      throw InvalidMemberException
+          .forNullRemoveGroupCommand();
     }
   }
 
-  private void validateDeleteMembersCommand(DeleteMembersByGroupIdCommand command) {
+  private void validateDeleteMembersCommand(
+      DeleteMembersByGroupIdCommand command
+  ) {
 
     if (command == null) {
-      throw InvalidMemberException.forNullDeleteMembersCommand();
+      throw InvalidMemberException
+          .forNullDeleteMembersCommand();
     }
   }
 
@@ -204,30 +262,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
   }
 
-  private Member getExistingMemberFromUser(
-      Long userId
+  private void validateDeleteGroupDataCommand(
+      DeleteGroupDataCommand command
   ) {
 
-    var user =
-        iamQueryPort.getUserOnlyById(userId);
-
-    if (user == null) {
-      throw UserNotFoundException
-          .forId(userId);
-    }
-
-    if (user.memberId() == null) {
+    if (command == null) {
       throw InvalidMemberException
-          .forUserIsNotMember(userId);
+          .forNullDeleteMembersCommand();
     }
 
-    return memberRepository
-        .findById(user.memberId())
-        .orElseThrow(() ->
-            InvalidMemberException
-                .forMemberNotFound(
-                    user.memberId()
-                )
-        );
+    if (command.groupId() == null) {
+      throw InvalidMemberException
+          .forNullGroupId();
+    }
   }
 }

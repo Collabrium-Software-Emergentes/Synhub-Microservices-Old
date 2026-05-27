@@ -145,9 +145,7 @@ public class LeaderDetailsQueryService {
         );
 
     if (user == null) {
-      throw new UserNotFoundException(
-          userId
-      );
+      throw UserNotFoundException.forId(userId);
     }
 
     if (user.leaderId() == null) {

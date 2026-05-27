@@ -1,15 +1,16 @@
 package com.collabrium.tasks.management.interfaces.messaging.listeners;
 
+import com.collabrium.tasks.management.domain.model.events.GroupDeletedEvent;
 import com.collabrium.tasks.management.domain.model.events.InvitationAcceptedEvent;
 import com.collabrium.tasks.management.domain.model.events.MemberRemovedFromGroupEvent;
 import com.collabrium.tasks.management.domain.services.MemberCommandService;
 import com.collabrium.tasks.management.interfaces.messaging.transform.AssignMemberToGroupCommandFromEventAssembler;
+import com.collabrium.tasks.management.interfaces.messaging.transform.DeleteGroupDataCommandFromEventAssembler;
 import com.collabrium.tasks.management.interfaces.messaging.transform.RemoveMemberFromGroupCommandFromEventAssembler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import static com.collabrium.tasks.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.INVITATION_ACCEPTED_QUEUE;
-import static com.collabrium.tasks.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.MEMBER_REMOVED_FROM_GROUP_QUEUE;
+import static com.collabrium.tasks.shared.infrastructure.configuration.rabbitmq.RabbitMQConfiguration.*;
 
 @Component
 public class GroupsEventsListener {
@@ -42,6 +43,18 @@ public class GroupsEventsListener {
 
     var command =
         RemoveMemberFromGroupCommandFromEventAssembler
+            .toCommandFromEvent(event);
+
+    memberCommandService.handle(command);
+  }
+
+  @RabbitListener(queues = GROUP_DELETED_QUEUE)
+  public void handleGroupDeleted(
+      GroupDeletedEvent event
+  ) {
+
+    var command =
+        DeleteGroupDataCommandFromEventAssembler
             .toCommandFromEvent(event);
 
     memberCommandService.handle(command);

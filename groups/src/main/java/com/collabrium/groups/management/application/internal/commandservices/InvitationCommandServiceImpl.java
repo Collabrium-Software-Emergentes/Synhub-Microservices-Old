@@ -40,7 +40,7 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
     var user = iamQueryPort.getUserOnlyById(command.userId());
 
     if (user == null) {
-      throw new UserNotFoundException(command.userId());
+      throw UserNotFoundException.forId(command.userId());
     }
 
     if (user.memberId() == null) {
@@ -82,7 +82,7 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
     var user = iamQueryPort.getUserOnlyById(userId);
 
     if (user == null) {
-      throw new UserNotFoundException(userId);
+      throw UserNotFoundException.forId(userId);
     }
 
     if (user.leaderId() == null) {

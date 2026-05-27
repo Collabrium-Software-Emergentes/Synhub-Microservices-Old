@@ -56,7 +56,7 @@ public class InvitationDetailsQueryService {
     var user = iamQueryPort.getUserOnlyById(query.userId());
 
     if (user == null) {
-      throw new UserNotFoundException(query.userId());
+      throw UserNotFoundException.forId(query.userId());
     }
 
     if (user.leaderId() == null) {
@@ -85,7 +85,7 @@ public class InvitationDetailsQueryService {
   ) {
 
     if (user == null) {
-      throw new UserNotFoundException(userId);
+      throw UserNotFoundException.forId(userId);
     }
 
     if (user.memberId() == null) {
