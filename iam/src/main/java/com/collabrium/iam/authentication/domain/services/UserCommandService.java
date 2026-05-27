@@ -14,26 +14,13 @@ public interface UserCommandService {
    * @return user and token
    */
   Optional<ImmutablePair<User, String>> handle(SignInCommand command);
+
   /**
    * Handle sign-up command
    * This method handles the sign-up command and returns the user
    * @return user
    */
   Optional<User> handle(SignUpCommand command);
-
-  /**
-   * Handle creates user leader command
-   * This method handles the create user leader command and returns the user
-   * @return user
-   */
-  Optional<User> handle(CreateUserLeaderCommand command);
-
-  /**
-   * Handle creates user member command
-   * This method handles the create user member command and returns the user
-   * @return user
-   */
-  Optional<User> handle(CreateUserMemberCommand command);
 
   void handle(UpdateUserLeaderIdCommand command);
 
