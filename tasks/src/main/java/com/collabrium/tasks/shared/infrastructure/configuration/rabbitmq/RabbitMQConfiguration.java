@@ -26,6 +26,7 @@ public class RabbitMQConfiguration {
   public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
   public static final String MEMBER_LEFT_GROUP_KEY = "member.left.group";
   public static final String MEMBER_REMOVED_FROM_GROUP_KEY = "member.removed.from.group";
+  public static final String GROUP_DELETED_KEY = "group.deleted";
 
   // =========================
   // QUEUES
@@ -33,6 +34,7 @@ public class RabbitMQConfiguration {
   public static final String USER_MEMBER_CREATED_QUEUE = "tasks.user.member.created.queue";
   public static final String INVITATION_ACCEPTED_QUEUE = "tasks.invitation.accepted.queue";
   public static final String MEMBER_REMOVED_FROM_GROUP_QUEUE = "tasks.member.removed.from.group.queue";
+  public static final String GROUP_DELETED_QUEUE = "tasks.group.deleted.queue";
 
   // =========================
   // EXCHANGE BEAN
@@ -67,6 +69,11 @@ public class RabbitMQConfiguration {
   @Bean
   public Queue memberRemovedFromGroupQueue() {
     return new Queue(MEMBER_REMOVED_FROM_GROUP_QUEUE);
+  }
+
+  @Bean
+  public Queue groupDeletedQueue() {
+    return new Queue(GROUP_DELETED_QUEUE);
   }
 
   // =========================
@@ -105,6 +112,18 @@ public class RabbitMQConfiguration {
         .bind(memberRemovedFromGroupQueue)
         .to(groupsExchange)
         .with(MEMBER_REMOVED_FROM_GROUP_KEY);
+  }
+
+  @Bean
+  public Binding groupDeletedBinding(
+      Queue groupDeletedQueue,
+      TopicExchange groupsExchange
+  ) {
+
+    return BindingBuilder
+        .bind(groupDeletedQueue)
+        .to(groupsExchange)
+        .with(GROUP_DELETED_KEY);
   }
 
   @Bean
