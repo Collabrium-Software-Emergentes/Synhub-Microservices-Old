@@ -164,7 +164,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
    *
    * <p>This method validates that the leader exists and owns a group,
    * that the member exists and belongs to the group, then decreases
-   * the group's member count and publishes a {@link RemoveMemberEvent}.</p>
+   * the group's member count, and publishes a {@link RemoveMemberEvent}.</p>
    *
    * @param command the remove member command containing leader's user ID
    *                and the member ID to remove
@@ -333,7 +333,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
    *
    * @param memberGroupId the group ID associated with the member
    * @param groupId the expected group ID
-   * @param memberId the member ID (used for exception message)
+   * @param memberId the member ID (used for an exception message)
    * @throws InvalidGroupException if the member's group ID does not match the expected group ID
    */
   private void validateMemberBelongsToGroup(
