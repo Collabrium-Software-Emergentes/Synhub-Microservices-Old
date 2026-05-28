@@ -245,6 +245,44 @@ services:
     networks:
       - collabrium-network
 
+  # =========================================
+  # REQUESTS SERVICE
+  # =========================================
+  requests-service:
+    build:
+      context: ./requests
+      dockerfile: Dockerfile
+
+    container_name: collabrium-requests-service
+
+    env_file:
+      - ./requests/.env.prod
+
+    ports:
+      - "8084:8084"
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8084/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+      discovery-server:
+        condition: service_healthy
+
+    networks:
+      - collabrium-network
+
 # =========================================
 # NETWORKS
 # =========================================
