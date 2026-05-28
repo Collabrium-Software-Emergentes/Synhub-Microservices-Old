@@ -6,6 +6,12 @@ public class InvalidRequestException extends RuntimeException {
     super(message);
   }
 
+  public static InvalidRequestException forNullCreateCommand() {
+    return new InvalidRequestException(
+        "Create request command cannot be null"
+    );
+  }
+
   public static InvalidRequestException forNullDescription() {
     return new InvalidRequestException(
         "Request description cannot be null"
@@ -15,6 +21,57 @@ public class InvalidRequestException extends RuntimeException {
   public static InvalidRequestException forEmptyDescription() {
     return new InvalidRequestException(
         "Request description cannot be empty"
+    );
+  }
+
+  public static InvalidRequestException forInvalidRequestType(
+      String requestType
+  ) {
+
+    return new InvalidRequestException(
+        "Invalid request type: " + requestType
+    );
+  }
+
+  public static InvalidRequestException forInvalidTaskId(
+      Long taskId
+  ) {
+
+    return new InvalidRequestException(
+        "Invalid task id: " + taskId
+    );
+  }
+
+  public static InvalidRequestException forInvalidUserId(
+      Long userId
+  ) {
+
+    return new InvalidRequestException(
+        "Invalid user id: " + userId
+    );
+  }
+
+  public static InvalidRequestException forUserIsNotMember(
+      Long userId
+  ) {
+
+    return new InvalidRequestException(
+        "User with id " +
+            userId +
+            " is not a member"
+    );
+  }
+
+  public static InvalidRequestException forTaskDoesNotBelongToMember(
+      Long taskId,
+      Long memberId
+  ) {
+
+    return new InvalidRequestException(
+        "Task with id " +
+            taskId +
+            " does not belong to member with id " +
+            memberId
     );
   }
 
