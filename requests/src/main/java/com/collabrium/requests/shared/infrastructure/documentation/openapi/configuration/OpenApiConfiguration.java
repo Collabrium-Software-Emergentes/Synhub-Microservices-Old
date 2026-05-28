@@ -1,4 +1,4 @@
-package com.collabrium.tasks.shared.infrastructure.documentation.openapi.configuration;
+package com.collabrium.requests.shared.infrastructure.documentation.openapi.configuration;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
@@ -16,7 +16,7 @@ public class OpenApiConfiguration {
   private static final String SECURITY_SCHEME_NAME = "bearerAuth";
 
   @Bean
-  public OpenAPI tasksPlatformOpenAPI() {
+  public OpenAPI requestsPlatformOpenAPI() {
 
     return new OpenAPI()
         .info(apiInfo())
@@ -28,8 +28,8 @@ public class OpenApiConfiguration {
   private Info apiInfo() {
 
     return new Info()
-        .title("Tasks Platform API")
-        .description("Tasks Platform application REST API documentation.")
+        .title("Requests Platform API")
+        .description("Requests Platform application REST API documentation.")
         .version("v1.0.0")
         .license(new License()
             .name("Apache 2.0")
@@ -39,7 +39,7 @@ public class OpenApiConfiguration {
   private ExternalDocumentation externalDocs() {
 
     return new ExternalDocumentation()
-        .description("Tasks Platform Documentation")
+        .description("Requests Platform Documentation")
         .url("https://github.com/Collabrium-Software-Emergentes/Synhub-Microservices-Old.git");
   }
 
