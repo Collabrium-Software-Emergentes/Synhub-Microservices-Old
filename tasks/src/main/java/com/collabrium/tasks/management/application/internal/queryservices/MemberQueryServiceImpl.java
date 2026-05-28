@@ -2,7 +2,6 @@ package com.collabrium.tasks.management.application.internal.queryservices;
 
 import com.collabrium.tasks.management.domain.model.aggregates.Member;
 import com.collabrium.tasks.management.domain.model.queries.GetAllMembersByGroupIdQuery;
-import com.collabrium.tasks.management.domain.model.queries.GetAllMembersQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetMemberByIdQuery;
 import com.collabrium.tasks.management.domain.model.valueobjects.GroupId;
 import com.collabrium.tasks.management.domain.services.MemberQueryService;
@@ -27,11 +26,6 @@ public class MemberQueryServiceImpl implements MemberQueryService {
   @Override
   public Optional<Member> handle(GetMemberByIdQuery query) {
     return memberRepository.findById(query.memberId());
-  }
-
-  @Override
-  public List<Member> handle(GetAllMembersQuery query) {
-    return memberRepository.findAll();
   }
 
   @Override

@@ -98,23 +98,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   @Override
   @Transactional
   public void handle(
-      DeleteMembersByGroupIdCommand command
-  ) {
-
-    validateDeleteMembersCommand(command);
-
-    var groupId =
-        new GroupId(command.groupId());
-
-    var members =
-        memberRepository.findMembersByGroupId(groupId);
-
-    members.forEach(this::detachMemberFromGroup);
-  }
-
-  @Override
-  @Transactional
-  public void handle(
       LeaveGroupCommand command
   ) {
 
@@ -234,16 +217,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     if (command == null) {
       throw InvalidMemberException
           .forNullRemoveGroupCommand();
-    }
-  }
-
-  private void validateDeleteMembersCommand(
-      DeleteMembersByGroupIdCommand command
-  ) {
-
-    if (command == null) {
-      throw InvalidMemberException
-          .forNullDeleteMembersCommand();
     }
   }
 
