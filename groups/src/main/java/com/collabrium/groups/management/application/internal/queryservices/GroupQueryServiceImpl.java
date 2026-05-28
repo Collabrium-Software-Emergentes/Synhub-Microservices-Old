@@ -46,12 +46,6 @@ public class GroupQueryServiceImpl implements GroupQueryService {
   }
 
   @Override
-  public Optional<Group> handle(GetGroupByMemberIdQuery query) {
-
-    return Optional.empty();
-  }
-
-  @Override
   public Optional<Group> handle(GetGroupByUserIdQuery query) {
 
     var user = iamQueryPort.getUserOnlyById(query.userId());
