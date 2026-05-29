@@ -134,4 +134,31 @@ public class InvalidRequestException extends RuntimeException {
             taskId
     );
   }
+
+  public static InvalidRequestException forNullUpdateStatusCommand() {
+
+    return new InvalidRequestException(
+        "Update request status command cannot be null"
+    );
+  }
+
+  public static InvalidRequestException forInvalidRequestStatus(
+      String requestStatus
+  ) {
+
+    return new InvalidRequestException(
+        "Invalid request status: " +
+            requestStatus
+    );
+  }
+
+  public static InvalidRequestException forRequestUpdateError(
+      String error
+  ) {
+
+    return new InvalidRequestException(
+        "Error while updating request: " +
+            error
+    );
+  }
 }

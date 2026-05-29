@@ -23,8 +23,8 @@ import java.util.List;
     value = "/api/v1/tasks/{taskId}/requests",
     produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(
-    name = "Request",
-    description = "Request management API"
+    name = "Request Details",
+    description = "Request Details management API"
 )
 public class RequestDetailsController {
 
