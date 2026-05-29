@@ -1,6 +1,6 @@
 package com.collabrium.requests.management.domain.model.queries;
 
-public record GetRequestsByTaskIdQuery(
+public record GetRequestsDetailsByTaskIdQuery(
     Long taskId
 ) {
 }

@@ -94,4 +94,44 @@ public class InvalidRequestException extends RuntimeException {
         "Get requests by task id query cannot be null"
     );
   }
+
+  public static InvalidRequestException forNullGetRequestByIdQuery() {
+
+    return new InvalidRequestException(
+        "Get request by id query cannot be null"
+    );
+  }
+
+  public static InvalidRequestException forInvalidRequestId(
+      Long requestId
+  ) {
+
+    return new InvalidRequestException(
+        "Invalid request id: " + requestId
+    );
+  }
+
+  public static InvalidRequestException forRequestNotFound(
+      Long requestId
+  ) {
+
+    return new InvalidRequestException(
+        "Request with id " +
+            requestId +
+            " was not found"
+    );
+  }
+
+  public static InvalidRequestException forRequestDoesNotBelongToTask(
+      Long requestId,
+      Long taskId
+  ) {
+
+    return new InvalidRequestException(
+        "Request with id " +
+            requestId +
+            " does not belong to task with id " +
+            taskId
+    );
+  }
 }

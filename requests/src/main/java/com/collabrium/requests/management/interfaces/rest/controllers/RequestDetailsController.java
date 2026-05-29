@@ -2,7 +2,8 @@ package com.collabrium.requests.management.interfaces.rest.controllers;
 
 import com.collabrium.requests.management.application.internal.commandservices.RequestDetailsCommandService;
 import com.collabrium.requests.management.application.internal.queryservices.RequestDetailsQueryService;
-import com.collabrium.requests.management.domain.model.queries.GetRequestsByTaskIdQuery;
+import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
+import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
 import com.collabrium.requests.management.interfaces.rest.resources.CreateRequestResource;
 import com.collabrium.requests.management.interfaces.rest.resources.RequestDetailsResource;
 import com.collabrium.requests.management.interfaces.rest.transform.CreateRequestCommandFromResourceAssembler;
@@ -68,7 +69,7 @@ public class RequestDetailsController {
       @PathVariable Long taskId
   ) {
 
-    var getRequestsByTaskIdQuery = new GetRequestsByTaskIdQuery(taskId);
+    var getRequestsByTaskIdQuery = new GetRequestsDetailsByTaskIdQuery(taskId);
 
     var requests = requestDetailsQueryService.handle(getRequestsByTaskIdQuery);
 
@@ -78,5 +79,27 @@ public class RequestDetailsController {
         .toList();
 
     return ResponseEntity.ok(requestsResources);
+  }
+
+  @GetMapping("/{requestId}")
+  @Operation(summary = "Get a request by id", description = "Get a request by id")
+  public ResponseEntity<RequestDetailsResource> getRequestById(
+      @PathVariable Long taskId,
+      @PathVariable Long requestId
+  ) {
+
+    var getRequestDetailsByIdQuery = new GetRequestDetailsByIdQuery(taskId, requestId);
+
+    var requestDetails = requestDetailsQueryService.handle(getRequestDetailsByIdQuery);
+
+    if (requestDetails.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var requestDetailsResource =
+        RequestDetailsResourceFromDTOAssembler
+            .toResourceFromDTO(requestDetails.get());
+
+    return ResponseEntity.ok(requestDetailsResource);
   }
 }

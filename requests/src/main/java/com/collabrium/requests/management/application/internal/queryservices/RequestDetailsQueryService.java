@@ -6,13 +6,15 @@ import com.collabrium.requests.management.application.internal.dto.TaskMemberDet
 import com.collabrium.requests.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
 import com.collabrium.requests.management.domain.exceptions.TaskNotFoundException;
-import com.collabrium.requests.management.domain.model.queries.GetRequestsByTaskIdQuery;
+import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
+import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
 import com.collabrium.requests.management.domain.model.valueobjects.TaskId;
 import com.collabrium.requests.management.infrastructure.persistence.jpa.repositories.RequestRepository;
 import com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RequestDetailsQueryService {
@@ -30,7 +32,7 @@ public class RequestDetailsQueryService {
   }
 
   public List<RequestDetailsDTO> handle(
-      GetRequestsByTaskIdQuery query
+      GetRequestsDetailsByTaskIdQuery query
   ) {
 
     validateQuery(query);
@@ -67,6 +69,61 @@ public class RequestDetailsQueryService {
         .toList();
   }
 
+  public Optional<RequestDetailsDTO> handle(
+      GetRequestDetailsByIdQuery query
+  ) {
+
+    validateQuery(query);
+
+    var request =
+        requestRepository.findById(
+            query.requestId()
+        ).orElseThrow(() ->
+            InvalidRequestException
+                .forRequestNotFound(
+                    query.requestId()
+                )
+        );
+
+    if (
+        !request.getTaskId().value().equals(
+            query.taskId()
+        )
+    ) {
+
+      throw InvalidRequestException
+          .forRequestDoesNotBelongToTask(
+              query.requestId(),
+              query.taskId()
+          );
+    }
+
+    var task =
+        tasksQueryPort.getTaskDetailsById(
+            query.taskId()
+        );
+
+    if (task == null) {
+      throw TaskNotFoundException.forId(
+          query.taskId()
+      );
+    }
+
+    var taskDetails =
+        mapToTaskDetailsDTO(task);
+
+    var requestDetails =
+        new RequestDetailsDTO(
+            request.getId(),
+            request.getDescription(),
+            request.getRequestType(),
+            request.getRequestStatus(),
+            taskDetails
+        );
+
+    return Optional.of(requestDetails);
+  }
+
   private TaskDetailsDTO mapToTaskDetailsDTO(
       TaskResource task
   ) {
@@ -93,7 +150,7 @@ public class RequestDetailsQueryService {
   }
 
   private void validateQuery(
-      GetRequestsByTaskIdQuery query
+      GetRequestsDetailsByTaskIdQuery query
   ) {
 
     if (query == null) {
@@ -109,6 +166,38 @@ public class RequestDetailsQueryService {
       throw InvalidRequestException
           .forInvalidTaskId(
               query.taskId()
+          );
+    }
+  }
+
+  private void validateQuery(
+      GetRequestDetailsByIdQuery query
+  ) {
+
+    if (query == null) {
+      throw InvalidRequestException
+          .forNullGetRequestByIdQuery();
+    }
+
+    if (
+        query.taskId() == null ||
+            query.taskId() <= 0
+    ) {
+
+      throw InvalidRequestException
+          .forInvalidTaskId(
+              query.taskId()
+          );
+    }
+
+    if (
+        query.requestId() == null ||
+            query.requestId() <= 0
+    ) {
+
+      throw InvalidRequestException
+          .forInvalidRequestId(
+              query.requestId()
           );
     }
   }
