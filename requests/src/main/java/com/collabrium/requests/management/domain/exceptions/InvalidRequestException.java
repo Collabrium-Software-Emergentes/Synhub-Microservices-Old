@@ -161,4 +161,20 @@ public class InvalidRequestException extends RuntimeException {
             error
     );
   }
+
+  public static InvalidRequestException forNullDeleteCommand() {
+
+    return new InvalidRequestException(
+        "Delete request command cannot be null"
+    );
+  }
+
+  public static InvalidRequestException forRequestDeleteError(
+      String message
+  ) {
+
+    return new InvalidRequestException(
+        "Error while deleting request: " + message
+    );
+  }
 }

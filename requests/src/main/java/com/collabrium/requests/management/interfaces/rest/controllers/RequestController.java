@@ -1,5 +1,6 @@
 package com.collabrium.requests.management.interfaces.rest.controllers;
 
+import com.collabrium.requests.management.domain.model.commands.DeleteRequestCommand;
 import com.collabrium.requests.management.domain.model.commands.UpdateRequestStatusCommand;
 import com.collabrium.requests.management.domain.services.RequestCommandService;
 import com.collabrium.requests.management.interfaces.rest.resources.RequestResource;
@@ -8,10 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(
@@ -52,5 +50,19 @@ public class RequestController {
     var requestResource = RequestResourceFromEntityAssembler.toResourceFromEntity(request.get());
 
     return ResponseEntity.ok(requestResource);
+  }
+
+  @DeleteMapping("/{requestId}")
+  @Operation(summary = "Delete a request by id", description = "Delete a request by id")
+  public ResponseEntity<Void> deleteRequestById(
+      @PathVariable Long taskId,
+      @PathVariable Long requestId
+  ) {
+
+    var deleteRequestCommand = new DeleteRequestCommand(taskId, requestId);
+
+    requestCommandService.handle(deleteRequestCommand);
+
+    return ResponseEntity.noContent().build();
   }
 }

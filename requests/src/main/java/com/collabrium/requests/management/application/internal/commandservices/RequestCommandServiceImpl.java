@@ -4,6 +4,7 @@ import com.collabrium.requests.management.application.internal.outboundservices.
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
 import com.collabrium.requests.management.domain.exceptions.TaskNotFoundException;
 import com.collabrium.requests.management.domain.model.aggregates.Request;
+import com.collabrium.requests.management.domain.model.commands.DeleteRequestCommand;
 import com.collabrium.requests.management.domain.model.commands.UpdateRequestStatusCommand;
 import com.collabrium.requests.management.domain.model.valueobjects.RequestStatus;
 import com.collabrium.requests.management.domain.services.RequestCommandService;
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class RequestCommandServiceImpl implements RequestCommandService {
+public class RequestCommandServiceImpl
+    implements RequestCommandService {
 
   private final RequestRepository requestRepository;
   private final TasksQueryPort tasksQueryPort;
@@ -32,41 +34,14 @@ public class RequestCommandServiceImpl implements RequestCommandService {
       UpdateRequestStatusCommand command
   ) {
 
-    validateCommand(command);
+    validateUpdateCommand(command);
 
-    var task =
-        tasksQueryPort.getTaskDetailsById(
-            command.taskId()
-        );
+    validateTaskExists(command.taskId());
 
-    if (task == null) {
-      throw TaskNotFoundException.forId(
-          command.taskId()
-      );
-    }
-
-    var request =
-        requestRepository.findById(
-            command.requestId()
-        ).orElseThrow(() ->
-            InvalidRequestException
-                .forRequestNotFound(
-                    command.requestId()
-                )
-        );
-
-    if (
-        !request.getTaskId().value().equals(
-            command.taskId()
-        )
-    ) {
-
-      throw InvalidRequestException
-          .forRequestDoesNotBelongToTask(
-              command.requestId(),
-              command.taskId()
-          );
-    }
+    var request = getValidatedRequest(
+        command.requestId(),
+        command.taskId()
+    );
 
     request.updateRequestStatus(
         command.requestStatus()
@@ -74,10 +49,9 @@ public class RequestCommandServiceImpl implements RequestCommandService {
 
     try {
 
-      var updatedRequest =
-          requestRepository.save(request);
-
-      return Optional.of(updatedRequest);
+      return Optional.of(
+          requestRepository.save(request)
+      );
 
     } catch (Exception exception) {
 
@@ -88,7 +62,85 @@ public class RequestCommandServiceImpl implements RequestCommandService {
     }
   }
 
-  private void validateCommand(
+  @Override
+  public void handle(
+      DeleteRequestCommand command
+  ) {
+
+    validateDeleteCommand(command);
+
+    validateTaskExists(command.taskId());
+
+    var request = getValidatedRequest(
+        command.requestId(),
+        command.taskId()
+    );
+
+    try {
+
+      requestRepository.delete(request);
+
+    } catch (Exception exception) {
+
+      throw InvalidRequestException
+          .forRequestDeleteError(
+              exception.getMessage()
+          );
+    }
+  }
+
+  private Request getValidatedRequest(
+      Long requestId,
+      Long taskId
+  ) {
+
+    var request =
+        requestRepository.findById(requestId)
+            .orElseThrow(() ->
+                InvalidRequestException
+                    .forRequestNotFound(
+                        requestId
+                    )
+            );
+
+    validateRequestBelongsToTask(
+        request,
+        taskId
+    );
+
+    return request;
+  }
+
+  private void validateRequestBelongsToTask(
+      Request request,
+      Long taskId
+  ) {
+
+    if (
+        !request.getTaskId().value().equals(taskId)
+    ) {
+
+      throw InvalidRequestException
+          .forRequestDoesNotBelongToTask(
+              request.getId(),
+              taskId
+          );
+    }
+  }
+
+  private void validateTaskExists(
+      Long taskId
+  ) {
+
+    var task =
+        tasksQueryPort.getTaskDetailsById(taskId);
+
+    if (task == null) {
+      throw TaskNotFoundException.forId(taskId);
+    }
+  }
+
+  private void validateUpdateCommand(
       UpdateRequestStatusCommand command
   ) {
 
@@ -97,31 +149,51 @@ public class RequestCommandServiceImpl implements RequestCommandService {
           .forNullUpdateStatusCommand();
     }
 
-    if (
-        command.requestId() == null ||
-            command.requestId() <= 0
-    ) {
-
-      throw InvalidRequestException
-          .forInvalidRequestId(
-              command.requestId()
-          );
-    }
-
-    if (
-        command.taskId() == null ||
-            command.taskId() <= 0
-    ) {
-
-      throw InvalidRequestException
-          .forInvalidTaskId(
-              command.taskId()
-          );
-    }
+    validateIds(
+        command.requestId(),
+        command.taskId()
+    );
 
     validateRequestStatus(
         command.requestStatus()
     );
+  }
+
+  private void validateDeleteCommand(
+      DeleteRequestCommand command
+  ) {
+
+    if (command == null) {
+      throw InvalidRequestException
+          .forNullDeleteCommand();
+    }
+
+    validateIds(
+        command.requestId(),
+        command.taskId()
+    );
+  }
+
+  private void validateIds(
+      Long requestId,
+      Long taskId
+  ) {
+
+    if (requestId == null || requestId <= 0) {
+
+      throw InvalidRequestException
+          .forInvalidRequestId(
+              requestId
+          );
+    }
+
+    if (taskId == null || taskId <= 0) {
+
+      throw InvalidRequestException
+          .forInvalidTaskId(
+              taskId
+          );
+    }
   }
 
   private void validateRequestStatus(
