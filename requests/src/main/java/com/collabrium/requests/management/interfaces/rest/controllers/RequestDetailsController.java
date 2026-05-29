@@ -1,6 +1,8 @@
 package com.collabrium.requests.management.interfaces.rest.controllers;
 
 import com.collabrium.requests.management.application.internal.commandservices.RequestDetailsCommandService;
+import com.collabrium.requests.management.application.internal.queryservices.RequestDetailsQueryService;
+import com.collabrium.requests.management.domain.model.queries.GetRequestsByTaskIdQuery;
 import com.collabrium.requests.management.interfaces.rest.resources.CreateRequestResource;
 import com.collabrium.requests.management.interfaces.rest.resources.RequestDetailsResource;
 import com.collabrium.requests.management.interfaces.rest.transform.CreateRequestCommandFromResourceAssembler;
@@ -13,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(
     value = "/api/v1/tasks/{taskId}/requests",
@@ -24,12 +28,15 @@ import org.springframework.web.bind.annotation.*;
 public class RequestDetailsController {
 
   private final RequestDetailsCommandService requestDetailsCommandService;
+  private final RequestDetailsQueryService requestDetailsQueryService;
 
   public RequestDetailsController(
-      RequestDetailsCommandService requestDetailsCommandService
+      RequestDetailsCommandService requestDetailsCommandService,
+      RequestDetailsQueryService requestDetailsQueryService
   ) {
 
     this.requestDetailsCommandService = requestDetailsCommandService;
+    this.requestDetailsQueryService = requestDetailsQueryService;
   }
 
   @PostMapping
@@ -53,5 +60,23 @@ public class RequestDetailsController {
     var requestDetailsResource = RequestDetailsResourceFromDTOAssembler.toResourceFromDTO(requestDetails.get());
 
     return ResponseEntity.ok(requestDetailsResource);
+  }
+
+  @GetMapping
+  @Operation(summary = "Get requests from a task", description = "Get a list of requests from a task id")
+  public ResponseEntity<List<RequestDetailsResource>> getRequestsByTaskId(
+      @PathVariable Long taskId
+  ) {
+
+    var getRequestsByTaskIdQuery = new GetRequestsByTaskIdQuery(taskId);
+
+    var requests = requestDetailsQueryService.handle(getRequestsByTaskIdQuery);
+
+    var requestsResources = requests
+        .stream()
+        .map(RequestDetailsResourceFromDTOAssembler::toResourceFromDTO)
+        .toList();
+
+    return ResponseEntity.ok(requestsResources);
   }
 }

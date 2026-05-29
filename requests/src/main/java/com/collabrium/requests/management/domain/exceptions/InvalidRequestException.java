@@ -87,4 +87,11 @@ public class InvalidRequestException extends RuntimeException {
             newStatus
     );
   }
+
+  public static InvalidRequestException forNullGetRequestsByTaskIdQuery() {
+
+    return new InvalidRequestException(
+        "Get requests by task id query cannot be null"
+    );
+  }
 }
