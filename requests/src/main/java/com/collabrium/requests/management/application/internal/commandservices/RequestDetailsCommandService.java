@@ -16,6 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Service implementation for handling request-related commands.
+ * Provides business logic for creating requests and validating
+ * user and task associations.
+ */
 @Service
 public class RequestDetailsCommandService {
 
@@ -34,6 +39,33 @@ public class RequestDetailsCommandService {
     this.tasksQueryPort = tasksQueryPort;
   }
 
+  /**
+   * Creates a new request based on the provided command.
+   *
+   * <p>This method performs comprehensive validation including:
+   * <ul>
+   *   <li>Command and field validation (description, request type, IDs)</li>
+   *   <li>User existence verification</li>
+   *   <li>Member profile validation (user must be a member)</li>
+   *   <li>Task existence verification</li>
+   *   <li>Task ownership validation (a task must belong to the member)</li>
+   * </ul>
+   * </p>
+   *
+   * <p>Upon successful validation, a new Request entity is created,
+   * persisted, and returned as a DTO with task details.</p>
+   *
+   * @param command the create request command containing user ID, task ID,
+   *                description, and request type
+   * @return an Optional containing the RequestDetailsDTO with the created
+   *         request information and associated task details
+   * @throws InvalidRequestException if the command is null, description is
+   *         null/blank, a request type is invalid, or IDs are invalid
+   * @throws UserNotFoundException if the user does not exist in the system
+   * @throws InvalidRequestException if the user is not a member
+   * @throws TaskNotFoundException if the task does not exist
+   * @throws InvalidRequestException if the task does not belong to the member
+   */
   public Optional<RequestDetailsDTO> handle(
       CreateRequestCommand command
   ) {
@@ -104,6 +136,17 @@ public class RequestDetailsCommandService {
     return Optional.of(requestDetails);
   }
 
+  /**
+   * Maps a TaskResource to a TaskDetailsDTO.
+   *
+   * <p>This method extracts the member information from the task resource
+   * and constructs a DTO containing all relevant task details, including
+   * member information.</p>
+   *
+   * @param task the TaskResource from the external tasks service
+   * @return a TaskDetailsDTO containing the task's full information
+   *         and associated member details
+   */
   private TaskDetailsDTO mapToTaskDetailsDTO(
       com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource task
   ) {
@@ -129,6 +172,16 @@ public class RequestDetailsCommandService {
     );
   }
 
+  /**
+   * Validates the create request command and its fields.
+   *
+   * <p>This method performs null checks and delegates field-specific
+   * validations to their respective private methods.</p>
+   *
+   * @param command the create request command to validate
+   * @throws InvalidRequestException if the command is null, the description is
+   *         invalid, a request type is invalid, or IDs are invalid
+   */
   private void validateCreateCommand(
       CreateRequestCommand command
   ) {
@@ -155,6 +208,14 @@ public class RequestDetailsCommandService {
     );
   }
 
+  /**
+   * Validates the request description.
+   *
+   * <p>The description must not be null, empty, or contain only whitespace.</p>
+   *
+   * @param description the description text to validate
+   * @throws InvalidRequestException if the description is null, empty, or blank
+   */
   private void validateDescription(
       String description
   ) {
@@ -170,6 +231,16 @@ public class RequestDetailsCommandService {
     }
   }
 
+  /**
+   * Validates the request type string.
+   *
+   * <p>This method attempts to convert the string to a RequestType enum value.
+   * If conversion fails, an exception is thrown.</p>
+   *
+   * @param requestType the request type string to validate (e.g., "JOIN", "LEAVE")
+   * @throws InvalidRequestException if the request type string does not match
+   *         any valid RequestType enum value
+   */
   private void validateRequestType(
       String requestType
   ) {
@@ -187,6 +258,14 @@ public class RequestDetailsCommandService {
     }
   }
 
+  /**
+   * Validates the task ID.
+   *
+   * <p>The task ID must not be null and must be greater than zero.</p>
+   *
+   * @param taskId the task ID to validate
+   * @throws InvalidRequestException if the task ID is null or less than or equal to zero
+   */
   private void validateTaskId(
       Long taskId
   ) {
@@ -197,6 +276,14 @@ public class RequestDetailsCommandService {
     }
   }
 
+  /**
+   * Validates the user ID.
+   *
+   * <p>The user ID must not be null and must be greater than zero.</p>
+   *
+   * @param userId the user ID to validate
+   * @throws InvalidRequestException if the user ID is null or less than or equal to zero
+   */
   private void validateUserId(
       Long userId
   ) {
