@@ -177,4 +177,12 @@ public class InvalidRequestException extends RuntimeException {
         "Error while deleting request: " + message
     );
   }
+
+  public static InvalidRequestException
+  forNullGetMyRequestsAsMemberQuery() {
+
+    return new InvalidRequestException(
+      "Get my requests as member query cannot be null"
+    );
+  }
 }

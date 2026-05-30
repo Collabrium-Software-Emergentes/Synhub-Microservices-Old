@@ -4,9 +4,11 @@ import com.collabrium.requests.management.application.internal.dto.RequestDetail
 import com.collabrium.requests.management.application.internal.dto.TaskDetailsDTO;
 import com.collabrium.requests.management.application.internal.dto.TaskMemberDetailsDTO;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.GroupsQueryPort;
+import com.collabrium.requests.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
 import com.collabrium.requests.management.domain.exceptions.TaskNotFoundException;
+import com.collabrium.requests.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.requests.management.domain.model.queries.GetMyRequestsAsMemberQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestDetailsQueryService {
@@ -24,16 +27,19 @@ public class RequestDetailsQueryService {
   private final RequestRepository requestRepository;
   private final TasksQueryPort tasksQueryPort;
   private final GroupsQueryPort groupsQueryPort;
+  private final IamQueryPort iamQueryPort;
 
   public RequestDetailsQueryService(
-      RequestRepository requestRepository,
-      TasksQueryPort tasksQueryPort,
-      GroupsQueryPort groupsQueryPort
+    RequestRepository requestRepository,
+    TasksQueryPort tasksQueryPort,
+    GroupsQueryPort groupsQueryPort,
+    IamQueryPort iamQueryPort
   ) {
 
     this.requestRepository = requestRepository;
     this.tasksQueryPort = tasksQueryPort;
     this.groupsQueryPort = groupsQueryPort;
+    this.iamQueryPort = iamQueryPort;
   }
 
   public List<RequestDetailsDTO> handle(
@@ -129,9 +135,74 @@ public class RequestDetailsQueryService {
     return Optional.of(requestDetails);
   }
 
-  public List<RequestDetailsDTO> handle(GetMyRequestsAsMemberQuery query) {
+  public List<RequestDetailsDTO> handle(
+    GetMyRequestsAsMemberQuery query
+  ) {
 
-    return null;
+    validateQuery(query);
+
+    var user =
+      iamQueryPort.getUserOnlyById(
+        query.userId()
+      );
+
+    if (user == null) {
+      throw UserNotFoundException.forId(
+        query.userId()
+      );
+    }
+
+    if (user.memberId() == null) {
+      throw InvalidRequestException
+        .forUserIsNotMember(
+          query.userId()
+        );
+    }
+
+    var tasks =
+      tasksQueryPort.getTasksDetailsByMemberId(
+        user.memberId()
+      );
+
+    if (
+      tasks == null ||
+        tasks.isEmpty()
+    ) {
+      return List.of();
+    }
+
+    var taskMap =
+      tasks.stream()
+        .collect(
+          Collectors.toMap(
+            TaskResource::id,
+            this::mapToTaskDetailsDTO
+          )
+        );
+
+    var taskIds =
+      tasks.stream()
+        .map(TaskResource::id)
+        .toList();
+
+    var requests =
+      requestRepository.findAllByTaskIdValueIn(
+        taskIds
+      );
+
+    return requests.stream()
+      .map(request ->
+        new RequestDetailsDTO(
+          request.getId(),
+          request.getDescription(),
+          request.getRequestType(),
+          request.getRequestStatus(),
+          taskMap.get(
+            request.getTaskId().value()
+          )
+        )
+      )
+      .toList();
   }
 
   private TaskDetailsDTO mapToTaskDetailsDTO(
@@ -209,6 +280,27 @@ public class RequestDetailsQueryService {
           .forInvalidRequestId(
               query.requestId()
           );
+    }
+  }
+
+  private void validateQuery(
+    GetMyRequestsAsMemberQuery query
+  ) {
+
+    if (query == null) {
+      throw InvalidRequestException
+        .forNullGetMyRequestsAsMemberQuery();
+    }
+
+    if (
+      query.userId() == null ||
+        query.userId() <= 0
+    ) {
+
+      throw InvalidRequestException
+        .forInvalidUserId(
+          query.userId()
+        );
     }
   }
 }

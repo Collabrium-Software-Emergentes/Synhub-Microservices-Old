@@ -11,4 +11,6 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<Request, Long> {
 
   List<Request> findAllByTaskId(TaskId taskId);
+
+  List<Request> findAllByTaskIdValueIn(List<Long> taskIds);
 }
