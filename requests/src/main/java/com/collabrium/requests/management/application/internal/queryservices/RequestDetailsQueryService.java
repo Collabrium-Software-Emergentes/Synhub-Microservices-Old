@@ -3,9 +3,11 @@ package com.collabrium.requests.management.application.internal.queryservices;
 import com.collabrium.requests.management.application.internal.dto.RequestDetailsDTO;
 import com.collabrium.requests.management.application.internal.dto.TaskDetailsDTO;
 import com.collabrium.requests.management.application.internal.dto.TaskMemberDetailsDTO;
+import com.collabrium.requests.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
 import com.collabrium.requests.management.domain.exceptions.TaskNotFoundException;
+import com.collabrium.requests.management.domain.model.queries.GetMyRequestsAsMemberQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
 import com.collabrium.requests.management.domain.model.valueobjects.TaskId;
@@ -21,14 +23,17 @@ public class RequestDetailsQueryService {
 
   private final RequestRepository requestRepository;
   private final TasksQueryPort tasksQueryPort;
+  private final GroupsQueryPort groupsQueryPort;
 
   public RequestDetailsQueryService(
       RequestRepository requestRepository,
-      TasksQueryPort tasksQueryPort
+      TasksQueryPort tasksQueryPort,
+      GroupsQueryPort groupsQueryPort
   ) {
 
     this.requestRepository = requestRepository;
     this.tasksQueryPort = tasksQueryPort;
+    this.groupsQueryPort = groupsQueryPort;
   }
 
   public List<RequestDetailsDTO> handle(
@@ -122,6 +127,11 @@ public class RequestDetailsQueryService {
         );
 
     return Optional.of(requestDetails);
+  }
+
+  public List<RequestDetailsDTO> handle(GetMyRequestsAsMemberQuery query) {
+
+    return null;
   }
 
   private TaskDetailsDTO mapToTaskDetailsDTO(

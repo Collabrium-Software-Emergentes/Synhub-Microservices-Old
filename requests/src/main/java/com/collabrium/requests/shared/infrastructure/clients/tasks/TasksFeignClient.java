@@ -4,6 +4,9 @@ import com.collabrium.requests.shared.infrastructure.clients.tasks.resources.Tas
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @FeignClient(name = "tasks-service")
 public interface TasksFeignClient {
@@ -11,5 +14,15 @@ public interface TasksFeignClient {
   @GetMapping("/api/v1/tasks/{taskId}")
   TaskResource getTaskDetailsById(
       @PathVariable Long taskId
+  );
+
+  @GetMapping("/api/v1/tasks")
+  List<TaskResource> getAllTasksByGroupId(
+      @RequestParam Long groupId
+  );
+
+  @GetMapping("/api/v1/members/{memberId}/tasks")
+  List<TaskResource> getAllTasksByMemberId(
+      @PathVariable Long memberId
   );
 }

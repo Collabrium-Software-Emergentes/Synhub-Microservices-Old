@@ -5,6 +5,8 @@ import com.collabrium.requests.shared.infrastructure.clients.tasks.TasksFeignCli
 import com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class TasksQueryAdapter implements TasksQueryPort {
 
@@ -20,5 +22,15 @@ public class TasksQueryAdapter implements TasksQueryPort {
   @Override
   public TaskResource getTaskDetailsById(Long taskId) {
     return client.getTaskDetailsById(taskId);
+  }
+
+  @Override
+  public List<TaskResource> getTasksDetailsByGroupId(Long groupId) {
+    return client.getAllTasksByGroupId(groupId);
+  }
+
+  @Override
+  public List<TaskResource> getTasksDetailsByMemberId(Long memberId) {
+    return client.getAllTasksByMemberId(memberId);
   }
 }
