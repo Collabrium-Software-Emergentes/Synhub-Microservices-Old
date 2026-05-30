@@ -1,15 +1,14 @@
 package com.collabrium.requests.management.application.internal.queryservices;
 
+import com.collabrium.requests.management.application.internal.assemblers.RequestDetailsDTOFromEntityAssembler;
+import com.collabrium.requests.management.application.internal.assemblers.TaskDetailsDTOFromTaskResourceAssembler;
 import com.collabrium.requests.management.application.internal.dto.RequestDetailsDTO;
-import com.collabrium.requests.management.application.internal.dto.TaskDetailsDTO;
-import com.collabrium.requests.management.application.internal.dto.TaskMemberDetailsDTO;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
 import com.collabrium.requests.management.domain.exceptions.TaskNotFoundException;
 import com.collabrium.requests.management.domain.exceptions.UserNotFoundException;
-import com.collabrium.requests.management.domain.model.aggregates.Request;
 import com.collabrium.requests.management.domain.model.queries.GetMyRequestsAsMemberQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
@@ -62,11 +61,11 @@ public class RequestDetailsQueryService {
       );
 
     var taskDetails =
-      mapToTaskDetailsDTO(task);
+      TaskDetailsDTOFromTaskResourceAssembler.toDTO(task);
 
     return requests.stream()
       .map(request ->
-        mapToRequestDetailsDTO(
+        RequestDetailsDTOFromEntityAssembler.toDTO(
           request,
           taskDetails
         )
@@ -109,10 +108,10 @@ public class RequestDetailsQueryService {
       );
 
     var taskDetails =
-      mapToTaskDetailsDTO(task);
+      TaskDetailsDTOFromTaskResourceAssembler.toDTO(task);
 
     return Optional.of(
-      mapToRequestDetailsDTO(
+      RequestDetailsDTOFromEntityAssembler.toDTO(
         request,
         taskDetails
       )
@@ -191,7 +190,7 @@ public class RequestDetailsQueryService {
         .collect(
           Collectors.toMap(
             TaskResource::id,
-            this::mapToTaskDetailsDTO
+            TaskDetailsDTOFromTaskResourceAssembler::toDTO
           )
         );
 
@@ -207,7 +206,7 @@ public class RequestDetailsQueryService {
 
     return requests.stream()
       .map(request ->
-        mapToRequestDetailsDTO(
+        RequestDetailsDTOFromEntityAssembler.toDTO(
           request,
           taskMap.get(
             request.getTaskId().value()
@@ -215,45 +214,6 @@ public class RequestDetailsQueryService {
         )
       )
       .toList();
-  }
-
-  private RequestDetailsDTO mapToRequestDetailsDTO(
-    Request request,
-    TaskDetailsDTO taskDetails
-  ) {
-
-    return new RequestDetailsDTO(
-      request.getId(),
-      request.getDescription(),
-      request.getRequestType(),
-      request.getRequestStatus(),
-      taskDetails
-    );
-  }
-
-  private TaskDetailsDTO mapToTaskDetailsDTO(
-    TaskResource task
-  ) {
-
-    var memberDetails =
-      new TaskMemberDetailsDTO(
-        task.member().id(),
-        task.member().name(),
-        task.member().surname(),
-        task.member().urlImage()
-      );
-
-    return new TaskDetailsDTO(
-      task.id(),
-      task.title(),
-      task.description(),
-      task.dueDate(),
-      task.createdAt(),
-      task.updatedAt(),
-      task.status(),
-      memberDetails,
-      task.groupId()
-    );
   }
 
   private TaskResource getTaskOrThrow(

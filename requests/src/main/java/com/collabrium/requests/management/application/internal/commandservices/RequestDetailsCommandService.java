@@ -1,8 +1,8 @@
 package com.collabrium.requests.management.application.internal.commandservices;
 
+import com.collabrium.requests.management.application.internal.assemblers.RequestDetailsDTOFromEntityAssembler;
+import com.collabrium.requests.management.application.internal.assemblers.TaskDetailsDTOFromTaskResourceAssembler;
 import com.collabrium.requests.management.application.internal.dto.RequestDetailsDTO;
-import com.collabrium.requests.management.application.internal.dto.TaskDetailsDTO;
-import com.collabrium.requests.management.application.internal.dto.TaskMemberDetailsDTO;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
@@ -122,54 +122,15 @@ public class RequestDetailsCommandService {
         requestRepository.save(request);
 
     var taskDetails =
-        mapToTaskDetailsDTO(task);
+      TaskDetailsDTOFromTaskResourceAssembler.toDTO(task);
 
     var requestDetails =
-        new RequestDetailsDTO(
-            savedRequest.getId(),
-            savedRequest.getDescription(),
-            savedRequest.getRequestType(),
-            savedRequest.getRequestStatus(),
-            taskDetails
-        );
+      RequestDetailsDTOFromEntityAssembler.toDTO(
+        savedRequest,
+        taskDetails
+      );
 
     return Optional.of(requestDetails);
-  }
-
-  /**
-   * Maps a TaskResource to a TaskDetailsDTO.
-   *
-   * <p>This method extracts the member information from the task resource
-   * and constructs a DTO containing all relevant task details, including
-   * member information.</p>
-   *
-   * @param task the TaskResource from the external tasks service
-   * @return a TaskDetailsDTO containing the task's full information
-   *         and associated member details
-   */
-  private TaskDetailsDTO mapToTaskDetailsDTO(
-      com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource task
-  ) {
-
-    var memberDetails =
-        new TaskMemberDetailsDTO(
-            task.member().id(),
-            task.member().name(),
-            task.member().surname(),
-            task.member().urlImage()
-        );
-
-    return new TaskDetailsDTO(
-        task.id(),
-        task.title(),
-        task.description(),
-        task.dueDate(),
-        task.createdAt(),
-        task.updatedAt(),
-        task.status(),
-        memberDetails,
-        task.groupId()
-    );
   }
 
   /**
