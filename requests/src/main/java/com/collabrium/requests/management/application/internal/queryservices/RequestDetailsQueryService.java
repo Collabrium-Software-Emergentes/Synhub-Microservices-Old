@@ -23,6 +23,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for handling request query operations.
+ * Provides business logic for retrieving request details with various
+ *  filters, including by task ID, request ID, member, and leader context.
+ */
 @Service
 public class RequestDetailsQueryService {
 
@@ -44,6 +49,18 @@ public class RequestDetailsQueryService {
     this.iamQueryPort = iamQueryPort;
   }
 
+  /**
+   * Retrieves all request details for a specific task.
+   *
+   * <p>This method validates the query, verifies the task exists,
+   * fetches all requests associated with the task, and maps them
+   * to DTOs with task details.</p>
+   *
+   * @param query the query containing the task ID
+   * @return a list of RequestDetailsDTO for the specified task
+   * @throws InvalidRequestException if the query is null or task ID is invalid
+   * @throws TaskNotFoundException if the specified task does not exist
+   */
   public List<RequestDetailsDTO> handle(
     GetRequestsDetailsByTaskIdQuery query
   ) {
@@ -73,6 +90,19 @@ public class RequestDetailsQueryService {
       .toList();
   }
 
+  /**
+   * Retrieves detailed information for a specific request by ID.
+   *
+   * <p>This method validates the query, verifies the request exists,
+   * ensures the request belongs to the specified task, and returns
+   * the request details enriched with task information.</p>
+   *
+   * @param query the query containing request ID and task ID
+   * @return an Optional containing the RequestDetailsDTO if found
+   * @throws InvalidRequestException if the query is null, IDs are invalid,
+   *          the request is not found, or the request does not belong to the task
+   * @throws TaskNotFoundException if the specified task does not exist
+   */
   public Optional<RequestDetailsDTO> handle(
     GetRequestDetailsByIdQuery query
   ) {
@@ -118,6 +148,19 @@ public class RequestDetailsQueryService {
     );
   }
 
+  /**
+   * Retrieves all requests made by a user as a member.
+   *
+   * <p>This method validates the query, verifies the user exists,
+   * confirms the user has a member profile, fetches all tasks
+   * assigned to the member, and retrieves all requests associated
+   * with those tasks.</p>
+   *
+   * @param query the query containing the user ID
+   * @return a list of RequestDetailsDTO for all tasks of the member
+   * @throws InvalidRequestException if the query is null, user ID is invalid,
+   *         user is not found, or user is not a member
+   */
   public List<RequestDetailsDTO> handle(
     GetMyRequestsAsMemberQuery query
   ) {
@@ -139,6 +182,20 @@ public class RequestDetailsQueryService {
     return getRequestsFromTasks(tasks);
   }
 
+  /**
+   * Retrieves all requests from the group where the user is a leader.
+   *
+   * <p>This method validates the query, verifies the user exists,
+   * confirms the user has a leader profile, retrieves the group
+   * associated with the leader, fetches all tasks in that group,
+   * and retrieves all requests associated with those tasks.</p>
+   *
+   * @param query the query containing the user ID
+   * @return a list of RequestDetailsDTO for all tasks in the leader's group
+   * @throws InvalidRequestException if the query is null, user ID is invalid,
+   *         user is not found, user is not a leader, or no group is found
+   *         for the leader
+   */
   public List<RequestDetailsDTO> handle(
     GetRequestsOfMyGroupAsLeaderQuery query
   ) {
@@ -173,6 +230,17 @@ public class RequestDetailsQueryService {
     return getRequestsFromTasks(tasks);
   }
 
+  /**
+   * Retrieves and maps requests from a list of tasks.
+   *
+   * <p>This method creates a task map for efficient lookup, fetches
+   * all requests associated with the provided task IDs, and maps
+   * each request to a DTO containing the corresponding task details.</p>
+   *
+   * @param tasks the list of TaskResource to extract requests from
+   * @return a list of RequestDetailsDTO for all requests in the specified tasks,
+   *         or an empty list if no tasks are provided
+   */
   private List<RequestDetailsDTO> getRequestsFromTasks(
     List<TaskResource> tasks
   ) {
@@ -216,6 +284,13 @@ public class RequestDetailsQueryService {
       .toList();
   }
 
+  /**
+   * Retrieves a task by ID or throws an exception if not found.
+   *
+   * @param taskId the ID of the task to retrieve
+   * @return the TaskResource if found
+   * @throws TaskNotFoundException if no task exists with the specified ID
+   */
   private TaskResource getTaskOrThrow(
     Long taskId
   ) {
@@ -234,6 +309,13 @@ public class RequestDetailsQueryService {
     return task;
   }
 
+  /**
+   * Retrieves a user by ID or throws an exception if not found.
+   *
+   * @param userId the ID of the user to retrieve
+   * @return the UserOnlyResource if found
+   * @throws UserNotFoundException if no user exists with the specified ID
+   */
   private UserOnlyResource getUserOrThrow(
     Long userId
   ) {
@@ -252,6 +334,12 @@ public class RequestDetailsQueryService {
     return user;
   }
 
+  /**
+   * Validates that a user has a member profile.
+   *
+   * @param user the user resource to validate
+   * @throws InvalidRequestException if the user's member ID is null
+   */
   private void validateMember(
     UserOnlyResource user
   ) {
@@ -265,6 +353,12 @@ public class RequestDetailsQueryService {
     }
   }
 
+  /**
+   * Validates that a user has a leader profile.
+   *
+   * @param user the user resource to validate
+   * @throws InvalidRequestException if the user's leader ID is null
+   */
   private void validateLeader(
     UserOnlyResource user
   ) {
@@ -278,6 +372,14 @@ public class RequestDetailsQueryService {
     }
   }
 
+  /**
+   * Validates that a user ID is valid.
+   *
+   * <p>A valid user ID must be non-null and greater than zero.</p>
+   *
+   * @param userId the user ID to validate
+   * @throws InvalidRequestException if the user ID is null or less than or equal to zero
+   */
   private void validateUserId(
     Long userId
   ) {
@@ -294,6 +396,14 @@ public class RequestDetailsQueryService {
     }
   }
 
+  /**
+   * Validates a GetRequestsDetailsByTaskIdQuery.
+   *
+   * <p>Ensures the query is not null and contains a valid task ID.</p>
+   *
+   * @param query the query to validate
+   * @throws InvalidRequestException if the query is null or task ID is invalid
+   */
   private void validateQuery(
     GetRequestsDetailsByTaskIdQuery query
   ) {
@@ -316,6 +426,15 @@ public class RequestDetailsQueryService {
     }
   }
 
+  /**
+   * Validates a GetRequestDetailsByIdQuery.
+   *
+   * <p>Ensures the query is not null and contains valid task and request IDs.</p>
+   *
+   * @param query the query to validate
+   * @throws InvalidRequestException if the query is null, task ID is invalid,
+   *         or request ID is invalid
+   */
   private void validateQuery(
     GetRequestDetailsByIdQuery query
   ) {
@@ -349,6 +468,14 @@ public class RequestDetailsQueryService {
     }
   }
 
+  /**
+   * Validates a GetMyRequestsAsMemberQuery.
+   *
+   * <p>Ensures the query is not null and contains a valid user ID.</p>
+   *
+   * @param query the query to validate
+   * @throws InvalidRequestException if the query is null or user ID is invalid
+   */
   private void validateQuery(
     GetMyRequestsAsMemberQuery query
   ) {
@@ -364,6 +491,14 @@ public class RequestDetailsQueryService {
     );
   }
 
+  /**
+   * Validates a GetRequestsOfMyGroupAsLeaderQuery.
+   *
+   * <p>Ensures the query is not null and contains a valid user ID.</p>
+   *
+   * @param query the query to validate
+   * @throws InvalidRequestException if the query is null or user ID is invalid
+   */
   private void validateQuery(
     GetRequestsOfMyGroupAsLeaderQuery query
   ) {
