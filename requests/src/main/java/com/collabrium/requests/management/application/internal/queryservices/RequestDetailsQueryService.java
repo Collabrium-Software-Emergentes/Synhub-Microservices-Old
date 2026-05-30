@@ -9,12 +9,14 @@ import com.collabrium.requests.management.application.internal.outboundservices.
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
 import com.collabrium.requests.management.domain.exceptions.TaskNotFoundException;
 import com.collabrium.requests.management.domain.exceptions.UserNotFoundException;
+import com.collabrium.requests.management.domain.model.aggregates.Request;
 import com.collabrium.requests.management.domain.model.queries.GetMyRequestsAsMemberQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestsOfMyGroupAsLeaderQuery;
 import com.collabrium.requests.management.domain.model.valueobjects.TaskId;
 import com.collabrium.requests.management.infrastructure.persistence.jpa.repositories.RequestRepository;
+import com.collabrium.requests.shared.infrastructure.clients.iam.resources.UserOnlyResource;
 import com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource;
 import org.springframework.stereotype.Service;
 
@@ -44,96 +46,77 @@ public class RequestDetailsQueryService {
   }
 
   public List<RequestDetailsDTO> handle(
-      GetRequestsDetailsByTaskIdQuery query
+    GetRequestsDetailsByTaskIdQuery query
   ) {
 
     validateQuery(query);
 
     var task =
-        tasksQueryPort.getTaskDetailsById(
-            query.taskId()
-        );
-
-    if (task == null) {
-      throw TaskNotFoundException.forId(
-          query.taskId()
+      getTaskOrThrow(
+        query.taskId()
       );
-    }
 
     var requests =
-        requestRepository.findAllByTaskId(
-            new TaskId(query.taskId())
-        );
+      requestRepository.findAllByTaskId(
+        new TaskId(query.taskId())
+      );
 
     var taskDetails =
-        mapToTaskDetailsDTO(task);
+      mapToTaskDetailsDTO(task);
 
     return requests.stream()
-        .map(request ->
-            new RequestDetailsDTO(
-                request.getId(),
-                request.getDescription(),
-                request.getRequestType(),
-                request.getRequestStatus(),
-                taskDetails
-            )
+      .map(request ->
+        mapToRequestDetailsDTO(
+          request,
+          taskDetails
         )
-        .toList();
+      )
+      .toList();
   }
 
   public Optional<RequestDetailsDTO> handle(
-      GetRequestDetailsByIdQuery query
+    GetRequestDetailsByIdQuery query
   ) {
 
     validateQuery(query);
 
     var request =
-        requestRepository.findById(
+      requestRepository.findById(
+        query.requestId()
+      ).orElseThrow(() ->
+        InvalidRequestException
+          .forRequestNotFound(
             query.requestId()
-        ).orElseThrow(() ->
-            InvalidRequestException
-                .forRequestNotFound(
-                    query.requestId()
-                )
-        );
+          )
+      );
 
     if (
-        !request.getTaskId().value().equals(
-            query.taskId()
-        )
+      !request.getTaskId().value().equals(
+        query.taskId()
+      )
     ) {
 
       throw InvalidRequestException
-          .forRequestDoesNotBelongToTask(
-              query.requestId(),
-              query.taskId()
-          );
+        .forRequestDoesNotBelongToTask(
+          query.requestId(),
+          query.taskId()
+        );
     }
 
     var task =
-        tasksQueryPort.getTaskDetailsById(
-            query.taskId()
-        );
-
-    if (task == null) {
-      throw TaskNotFoundException.forId(
-          query.taskId()
+      getTaskOrThrow(
+        query.taskId()
       );
-    }
 
     var taskDetails =
-        mapToTaskDetailsDTO(task);
+      mapToTaskDetailsDTO(task);
 
-    var requestDetails =
-        new RequestDetailsDTO(
-            request.getId(),
-            request.getDescription(),
-            request.getRequestType(),
-            request.getRequestStatus(),
-            taskDetails
-        );
-
-    return Optional.of(requestDetails);
+    return Optional.of(
+      mapToRequestDetailsDTO(
+        request,
+        taskDetails
+      )
+    );
   }
 
   public List<RequestDetailsDTO> handle(
@@ -143,67 +126,18 @@ public class RequestDetailsQueryService {
     validateQuery(query);
 
     var user =
-      iamQueryPort.getUserOnlyById(
+      getUserOrThrow(
         query.userId()
       );
 
-    if (user == null) {
-      throw UserNotFoundException.forId(
-        query.userId()
-      );
-    }
-
-    if (user.memberId() == null) {
-      throw InvalidRequestException
-        .forUserIsNotMember(
-          query.userId()
-        );
-    }
+    validateMember(user);
 
     var tasks =
       tasksQueryPort.getTasksDetailsByMemberId(
         user.memberId()
       );
 
-    if (
-      tasks == null ||
-        tasks.isEmpty()
-    ) {
-      return List.of();
-    }
-
-    var taskMap =
-      tasks.stream()
-        .collect(
-          Collectors.toMap(
-            TaskResource::id,
-            this::mapToTaskDetailsDTO
-          )
-        );
-
-    var taskIds =
-      tasks.stream()
-        .map(TaskResource::id)
-        .toList();
-
-    var requests =
-      requestRepository.findAllByTaskIdValueIn(
-        taskIds
-      );
-
-    return requests.stream()
-      .map(request ->
-        new RequestDetailsDTO(
-          request.getId(),
-          request.getDescription(),
-          request.getRequestType(),
-          request.getRequestStatus(),
-          taskMap.get(
-            request.getTaskId().value()
-          )
-        )
-      )
-      .toList();
+    return getRequestsFromTasks(tasks);
   }
 
   public List<RequestDetailsDTO> handle(
@@ -213,22 +147,11 @@ public class RequestDetailsQueryService {
     validateQuery(query);
 
     var user =
-      iamQueryPort.getUserOnlyById(
+      getUserOrThrow(
         query.userId()
       );
 
-    if (user == null) {
-      throw UserNotFoundException.forId(
-        query.userId()
-      );
-    }
-
-    if (user.leaderId() == null) {
-      throw InvalidRequestException
-        .forUserIsNotLeader(
-          query.userId()
-        );
-    }
+    validateLeader(user);
 
     var group =
       groupsQueryPort.getGroupOnlyByLeaderId(
@@ -236,6 +159,7 @@ public class RequestDetailsQueryService {
       );
 
     if (group == null) {
+
       throw InvalidRequestException
         .forGroupNotFoundForLeader(
           user.leaderId()
@@ -247,10 +171,18 @@ public class RequestDetailsQueryService {
         group.id()
       );
 
+    return getRequestsFromTasks(tasks);
+  }
+
+  private List<RequestDetailsDTO> getRequestsFromTasks(
+    List<TaskResource> tasks
+  ) {
+
     if (
       tasks == null ||
         tasks.isEmpty()
     ) {
+
       return List.of();
     }
 
@@ -275,11 +207,8 @@ public class RequestDetailsQueryService {
 
     return requests.stream()
       .map(request ->
-        new RequestDetailsDTO(
-          request.getId(),
-          request.getDescription(),
-          request.getRequestType(),
-          request.getRequestStatus(),
+        mapToRequestDetailsDTO(
+          request,
           taskMap.get(
             request.getTaskId().value()
           )
@@ -288,81 +217,175 @@ public class RequestDetailsQueryService {
       .toList();
   }
 
-  private TaskDetailsDTO mapToTaskDetailsDTO(
-      TaskResource task
+  private RequestDetailsDTO mapToRequestDetailsDTO(
+    Request request,
+    TaskDetailsDTO taskDetails
   ) {
 
-    var memberDetails =
-        new TaskMemberDetailsDTO(
-            task.member().id(),
-            task.member().name(),
-            task.member().surname(),
-            task.member().urlImage()
-        );
-
-    return new TaskDetailsDTO(
-        task.id(),
-        task.title(),
-        task.description(),
-        task.dueDate(),
-        task.createdAt(),
-        task.updatedAt(),
-        task.status(),
-        memberDetails,
-        task.groupId()
+    return new RequestDetailsDTO(
+      request.getId(),
+      request.getDescription(),
+      request.getRequestType(),
+      request.getRequestStatus(),
+      taskDetails
     );
   }
 
-  private void validateQuery(
-      GetRequestsDetailsByTaskIdQuery query
+  private TaskDetailsDTO mapToTaskDetailsDTO(
+    TaskResource task
   ) {
 
-    if (query == null) {
-      throw InvalidRequestException
-          .forNullGetRequestsByTaskIdQuery();
+    var memberDetails =
+      new TaskMemberDetailsDTO(
+        task.member().id(),
+        task.member().name(),
+        task.member().surname(),
+        task.member().urlImage()
+      );
+
+    return new TaskDetailsDTO(
+      task.id(),
+      task.title(),
+      task.description(),
+      task.dueDate(),
+      task.createdAt(),
+      task.updatedAt(),
+      task.status(),
+      memberDetails,
+      task.groupId()
+    );
+  }
+
+  private TaskResource getTaskOrThrow(
+    Long taskId
+  ) {
+
+    var task =
+      tasksQueryPort.getTaskDetailsById(
+        taskId
+      );
+
+    if (task == null) {
+      throw TaskNotFoundException.forId(
+        taskId
+      );
     }
 
+    return task;
+  }
+
+  private UserOnlyResource getUserOrThrow(
+    Long userId
+  ) {
+
+    var user =
+      iamQueryPort.getUserOnlyById(
+        userId
+      );
+
+    if (user == null) {
+      throw UserNotFoundException.forId(
+        userId
+      );
+    }
+
+    return user;
+  }
+
+  private void validateMember(
+    UserOnlyResource user
+  ) {
+
+    if (user.memberId() == null) {
+
+      throw InvalidRequestException
+        .forUserIsNotMember(
+          user.id()
+        );
+    }
+  }
+
+  private void validateLeader(
+    UserOnlyResource user
+  ) {
+
+    if (user.leaderId() == null) {
+
+      throw InvalidRequestException
+        .forUserIsNotLeader(
+          user.id()
+        );
+    }
+  }
+
+  private void validateUserId(
+    Long userId
+  ) {
+
     if (
-        query.taskId() == null ||
-            query.taskId() <= 0
+      userId == null ||
+        userId <= 0
     ) {
 
       throw InvalidRequestException
-          .forInvalidTaskId(
-              query.taskId()
-          );
+        .forInvalidUserId(
+          userId
+        );
     }
   }
 
   private void validateQuery(
-      GetRequestDetailsByIdQuery query
+    GetRequestsDetailsByTaskIdQuery query
   ) {
 
     if (query == null) {
+
       throw InvalidRequestException
-          .forNullGetRequestByIdQuery();
+        .forNullGetRequestsByTaskIdQuery();
     }
 
     if (
-        query.taskId() == null ||
-            query.taskId() <= 0
+      query.taskId() == null ||
+        query.taskId() <= 0
     ) {
 
       throw InvalidRequestException
-          .forInvalidTaskId(
-              query.taskId()
-          );
+        .forInvalidTaskId(
+          query.taskId()
+        );
+    }
+  }
+
+  private void validateQuery(
+    GetRequestDetailsByIdQuery query
+  ) {
+
+    if (query == null) {
+
+      throw InvalidRequestException
+        .forNullGetRequestByIdQuery();
     }
 
     if (
-        query.requestId() == null ||
-            query.requestId() <= 0
+      query.taskId() == null ||
+        query.taskId() <= 0
     ) {
 
       throw InvalidRequestException
-          .forInvalidRequestId(
-              query.requestId()
-          );
+        .forInvalidTaskId(
+          query.taskId()
+        );
+    }
+
+    if (
+      query.requestId() == null ||
+        query.requestId() <= 0
+    ) {
+
+      throw InvalidRequestException
+        .forInvalidRequestId(
+          query.requestId()
+        );
     }
   }
 
@@ -371,20 +394,14 @@ public class RequestDetailsQueryService {
   ) {
 
     if (query == null) {
+
       throw InvalidRequestException
         .forNullGetMyRequestsAsMemberQuery();
     }
 
-    if (
-      query.userId() == null ||
-        query.userId() <= 0
-    ) {
-
-      throw InvalidRequestException
-        .forInvalidUserId(
-          query.userId()
-        );
-    }
+    validateUserId(
+      query.userId()
+    );
   }
 
   private void validateQuery(
@@ -392,19 +409,13 @@ public class RequestDetailsQueryService {
   ) {
 
     if (query == null) {
+
       throw InvalidRequestException
         .forNullGetRequestsOfMyGroupAsLeaderQuery();
     }
 
-    if (
-      query.userId() == null ||
-        query.userId() <= 0
-    ) {
-
-      throw InvalidRequestException
-        .forInvalidUserId(
-          query.userId()
-        );
-    }
+    validateUserId(
+      query.userId()
+    );
   }
 }
