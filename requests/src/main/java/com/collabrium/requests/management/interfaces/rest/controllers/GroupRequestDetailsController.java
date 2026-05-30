@@ -2,6 +2,7 @@ package com.collabrium.requests.management.interfaces.rest.controllers;
 
 import com.collabrium.requests.management.application.internal.queryservices.RequestDetailsQueryService;
 import com.collabrium.requests.management.domain.model.queries.GetMyRequestsAsMemberQuery;
+import com.collabrium.requests.management.domain.model.queries.GetRequestsOfMyGroupAsLeaderQuery;
 import com.collabrium.requests.management.interfaces.rest.resources.RequestDetailsResource;
 import com.collabrium.requests.management.interfaces.rest.transform.RequestDetailsResourceFromDTOAssembler;
 import com.collabrium.requests.shared.infrastructure.security.AuthenticatedUser;
@@ -53,5 +54,27 @@ public class GroupRequestDetailsController {
       .toList();
 
     return ResponseEntity.ok(requestsResources);
+  }
+
+  @GetMapping("/leader/group/requests")
+  @Operation(
+    summary = "Get all requests from a group",
+    description = "Get all requests from a group"
+  )
+  public ResponseEntity<List<RequestDetailsResource>> getAllRequestsFromGroup(
+    @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getRequestsOfMyGroupAsLeaderQuery = new GetRequestsOfMyGroupAsLeaderQuery(user.userId());
+
+    var requests = requestDetailsQueryService.handle(getRequestsOfMyGroupAsLeaderQuery);
+
+    var requestsResources = requests
+      .stream()
+      .map(RequestDetailsResourceFromDTOAssembler::toResourceFromDTO)
+      .toList();
+
+    return ResponseEntity.ok(requestsResources);
+
   }
 }

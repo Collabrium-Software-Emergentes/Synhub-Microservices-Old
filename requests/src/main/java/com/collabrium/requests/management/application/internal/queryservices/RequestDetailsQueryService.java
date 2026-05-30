@@ -12,6 +12,7 @@ import com.collabrium.requests.management.domain.exceptions.UserNotFoundExceptio
 import com.collabrium.requests.management.domain.model.queries.GetMyRequestsAsMemberQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestDetailsByIdQuery;
 import com.collabrium.requests.management.domain.model.queries.GetRequestsDetailsByTaskIdQuery;
+import com.collabrium.requests.management.domain.model.queries.GetRequestsOfMyGroupAsLeaderQuery;
 import com.collabrium.requests.management.domain.model.valueobjects.TaskId;
 import com.collabrium.requests.management.infrastructure.persistence.jpa.repositories.RequestRepository;
 import com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource;
@@ -205,6 +206,88 @@ public class RequestDetailsQueryService {
       .toList();
   }
 
+  public List<RequestDetailsDTO> handle(
+    GetRequestsOfMyGroupAsLeaderQuery query
+  ) {
+
+    validateQuery(query);
+
+    var user =
+      iamQueryPort.getUserOnlyById(
+        query.userId()
+      );
+
+    if (user == null) {
+      throw UserNotFoundException.forId(
+        query.userId()
+      );
+    }
+
+    if (user.leaderId() == null) {
+      throw InvalidRequestException
+        .forUserIsNotLeader(
+          query.userId()
+        );
+    }
+
+    var group =
+      groupsQueryPort.getGroupOnlyByLeaderId(
+        user.leaderId()
+      );
+
+    if (group == null) {
+      throw InvalidRequestException
+        .forGroupNotFoundForLeader(
+          user.leaderId()
+        );
+    }
+
+    var tasks =
+      tasksQueryPort.getTasksDetailsByGroupId(
+        group.id()
+      );
+
+    if (
+      tasks == null ||
+        tasks.isEmpty()
+    ) {
+      return List.of();
+    }
+
+    var taskMap =
+      tasks.stream()
+        .collect(
+          Collectors.toMap(
+            TaskResource::id,
+            this::mapToTaskDetailsDTO
+          )
+        );
+
+    var taskIds =
+      tasks.stream()
+        .map(TaskResource::id)
+        .toList();
+
+    var requests =
+      requestRepository.findAllByTaskIdValueIn(
+        taskIds
+      );
+
+    return requests.stream()
+      .map(request ->
+        new RequestDetailsDTO(
+          request.getId(),
+          request.getDescription(),
+          request.getRequestType(),
+          request.getRequestStatus(),
+          taskMap.get(
+            request.getTaskId().value()
+          )
+        )
+      )
+      .toList();
+  }
+
   private TaskDetailsDTO mapToTaskDetailsDTO(
       TaskResource task
   ) {
@@ -290,6 +373,27 @@ public class RequestDetailsQueryService {
     if (query == null) {
       throw InvalidRequestException
         .forNullGetMyRequestsAsMemberQuery();
+    }
+
+    if (
+      query.userId() == null ||
+        query.userId() <= 0
+    ) {
+
+      throw InvalidRequestException
+        .forInvalidUserId(
+          query.userId()
+        );
+    }
+  }
+
+  private void validateQuery(
+    GetRequestsOfMyGroupAsLeaderQuery query
+  ) {
+
+    if (query == null) {
+      throw InvalidRequestException
+        .forNullGetRequestsOfMyGroupAsLeaderQuery();
     }
 
     if (

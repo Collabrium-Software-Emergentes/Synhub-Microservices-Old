@@ -185,4 +185,32 @@ public class InvalidRequestException extends RuntimeException {
       "Get my requests as member query cannot be null"
     );
   }
+
+  public static InvalidRequestException forUserIsNotLeader(
+    Long userId
+  ) {
+
+    return new InvalidRequestException(
+      "User with id " +
+        userId +
+        " is not a leader"
+    );
+  }
+
+  public static InvalidRequestException forGroupNotFoundForLeader(
+    Long leaderId
+  ) {
+
+    return new InvalidRequestException(
+      "No group found for leader with id " +
+        leaderId
+    );
+  }
+
+  public static InvalidRequestException forNullGetRequestsOfMyGroupAsLeaderQuery() {
+
+    return new InvalidRequestException(
+      "Get requests of my group as leader query cannot be null"
+    );
+  }
 }
