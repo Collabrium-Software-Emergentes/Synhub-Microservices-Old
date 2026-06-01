@@ -2,8 +2,11 @@ package com.collabrium.metrics.management.interfaces.rest.controllers;
 
 import com.collabrium.metrics.management.application.internal.queryservices.MetricsQueryService;
 import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
+import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
 import com.collabrium.metrics.management.interfaces.rest.resources.AvgCompletionTimeResource;
+import com.collabrium.metrics.management.interfaces.rest.resources.RescheduledTasksResource;
 import com.collabrium.metrics.management.interfaces.rest.transform.AvgCompletionTimeResourceFromDTOAssembler;
+import com.collabrium.metrics.management.interfaces.rest.transform.RescheduledTasksResourceFromDTOAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +51,29 @@ public class MetricsController {
 
     var resource = AvgCompletionTimeResourceFromDTOAssembler
         .toResourceFromDTO(avgCompletionTime.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/member/{memberId}/tasks/rescheduled")
+  @Operation(
+      summary = "Get rescheduled tasks for member",
+      description = "Returns the count of rescheduled vs non-rescheduled tasks for the given member."
+  )
+  public ResponseEntity<RescheduledTasksResource> getRescheduledTasksForMember(
+      @PathVariable Long memberId
+  ) {
+
+    var getRescheduledTasksFromMemberQuery = new GetRescheduledTasksForMemberQuery(memberId);
+
+    var rescheduledTasks = metricsQueryService.handle(getRescheduledTasksFromMemberQuery);
+
+    if (rescheduledTasks.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = RescheduledTasksResourceFromDTOAssembler
+        .toResourceFromDTO(rescheduledTasks.get());
 
     return ResponseEntity.ok(resource);
   }

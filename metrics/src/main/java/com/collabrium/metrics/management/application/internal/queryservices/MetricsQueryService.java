@@ -1,11 +1,14 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
 import com.collabrium.metrics.management.application.internal.dto.AvgCompletionTimeDTO;
+import com.collabrium.metrics.management.application.internal.dto.RescheduledTasksDTO;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
+import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
 import com.collabrium.metrics.shared.infrastructure.clients.tasks.resources.TaskOnlyResource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,6 +63,35 @@ public class MetricsQueryService {
             "AVG_COMPLETION_TIME_MEMBER",
             averageDays,
             Map.of("completedTasks", completedTasks.size())
+        )
+    );
+  }
+
+  public Optional<RescheduledTasksDTO> handle(
+      GetRescheduledTasksForMemberQuery query
+  ) {
+
+    var tasks =
+        tasksQueryPort.getTasksByMemberId(
+            query.memberId()
+        );
+
+    long totalRescheduledTimes =
+        tasks.stream()
+            .mapToLong(TaskOnlyResource::timesRearranged)
+            .sum();
+
+    return Optional.of(
+        new RescheduledTasksDTO(
+            "RESCHEDULED_TASKS_MEMBER",
+            totalRescheduledTimes,
+            Map.of(
+                "total", tasks.size(),
+                "rescheduled", (int) totalRescheduledTimes
+            ),
+            totalRescheduledTimes > 0
+                ? List.of(query.memberId())
+                : List.of()
         )
     );
   }
