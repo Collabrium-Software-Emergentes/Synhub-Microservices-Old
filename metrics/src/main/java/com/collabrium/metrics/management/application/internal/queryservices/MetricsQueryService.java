@@ -1,20 +1,19 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
-import com.collabrium.metrics.management.application.internal.dto.AvgCompletionTimeDTO;
-import com.collabrium.metrics.management.application.internal.dto.MemberTaskInfoDTO;
-import com.collabrium.metrics.management.application.internal.dto.RescheduledTasksDTO;
-import com.collabrium.metrics.management.application.internal.dto.TaskDistributionDTO;
+import com.collabrium.metrics.management.application.internal.dto.*;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
 import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
 import com.collabrium.metrics.management.domain.model.queries.GetTaskDistributionForMemberQuery;
+import com.collabrium.metrics.management.domain.model.queries.GetTaskOverviewForMemberQuery;
 import com.collabrium.metrics.shared.infrastructure.clients.tasks.resources.TaskOnlyResource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MetricsQueryService {
@@ -145,6 +144,43 @@ public class MetricsQueryService {
     return Optional.of(
         new TaskDistributionDTO(
             "TASK_DISTRIBUTION_MEMBER",
+            tasks.size(),
+            details
+        )
+    );
+  }
+
+  public Optional<TaskOverviewDTO> handle(
+      GetTaskOverviewForMemberQuery query
+  ) {
+
+    var tasks =
+        tasksQueryPort.getTasksByMemberId(
+            query.memberId()
+        );
+
+    var overview =
+        tasks.stream()
+            .collect(
+                Collectors.groupingBy(
+                    TaskOnlyResource::status,
+                    Collectors.counting()
+                )
+            );
+
+    var details =
+        overview.entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> entry.getValue().intValue()
+                )
+            );
+
+    return Optional.of(
+        new TaskOverviewDTO(
+            "TASK_OVERVIEW_MEMBER",
             tasks.size(),
             details
         )

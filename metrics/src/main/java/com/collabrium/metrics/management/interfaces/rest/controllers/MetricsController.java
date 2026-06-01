@@ -4,12 +4,15 @@ import com.collabrium.metrics.management.application.internal.queryservices.Metr
 import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
 import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
 import com.collabrium.metrics.management.domain.model.queries.GetTaskDistributionForMemberQuery;
+import com.collabrium.metrics.management.domain.model.queries.GetTaskOverviewForMemberQuery;
 import com.collabrium.metrics.management.interfaces.rest.resources.AvgCompletionTimeResource;
 import com.collabrium.metrics.management.interfaces.rest.resources.RescheduledTasksResource;
 import com.collabrium.metrics.management.interfaces.rest.resources.TaskDistributionResource;
+import com.collabrium.metrics.management.interfaces.rest.resources.TaskOverviewResource;
 import com.collabrium.metrics.management.interfaces.rest.transform.AvgCompletionTimeResourceFromDTOAssembler;
 import com.collabrium.metrics.management.interfaces.rest.transform.RescheduledTasksResourceFromDTOAssembler;
 import com.collabrium.metrics.management.interfaces.rest.transform.TaskDistributionResourceFromDTOAssembler;
+import com.collabrium.metrics.management.interfaces.rest.transform.TaskOverviewResourceFromDTOAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +104,29 @@ public class MetricsController {
 
     var resource = TaskDistributionResourceFromDTOAssembler
         .toResourceFromDTO(taskDistribution.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/member/{memberId}/tasks/overview")
+  @Operation(
+      summary = "Get task overview for member",
+      description = "Returns a summary of task statuses for the given member."
+  )
+  public ResponseEntity<TaskOverviewResource> getTaskOverviewForMember(
+      @PathVariable Long memberId
+  ) {
+
+    var getTaskOverviewForMemberQuery = new GetTaskOverviewForMemberQuery(memberId);
+
+    var taskOverview = metricsQueryService.handle(getTaskOverviewForMemberQuery);
+
+    if (taskOverview.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = TaskOverviewResourceFromDTOAssembler
+        .toResourceFromDTO(taskOverview.get());
 
     return ResponseEntity.ok(resource);
   }
