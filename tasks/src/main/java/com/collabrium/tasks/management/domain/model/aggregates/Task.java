@@ -131,7 +131,7 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
   private void updateRearrangementMetrics(TaskStatus newStatus) {
 
     if (this.status == TaskStatus.IN_PROGRESS &&
-        newStatus == TaskStatus.COMPLETED) {
+        isFinishedStatus(newStatus)) {
 
       OffsetDateTime now =
           OffsetDateTime.now(ZoneOffset.UTC);
@@ -157,15 +157,20 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
     }
 
     else if (
-        (this.status == TaskStatus.COMPLETED ||
-            this.status == TaskStatus.ON_HOLD ||
-            this.status == TaskStatus.EXPIRED)
+        (isFinishedStatus(this.status)
+            || this.status == TaskStatus.ON_HOLD
+            || this.status == TaskStatus.EXPIRED)
             &&
             newStatus == TaskStatus.IN_PROGRESS
     ) {
 
       this.timesRearranged++;
     }
+  }
+
+  private boolean isFinishedStatus(TaskStatus status) {
+    return status == TaskStatus.COMPLETED
+        || status == TaskStatus.DONE;
   }
 
   public void updateTask(UpdateTaskCommand command) {

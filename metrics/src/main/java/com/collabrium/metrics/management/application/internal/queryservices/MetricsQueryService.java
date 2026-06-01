@@ -1,10 +1,14 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
 import com.collabrium.metrics.management.application.internal.dto.AvgCompletionTimeDTO;
+import com.collabrium.metrics.management.application.internal.dto.MemberTaskInfoDTO;
 import com.collabrium.metrics.management.application.internal.dto.RescheduledTasksDTO;
+import com.collabrium.metrics.management.application.internal.dto.TaskDistributionDTO;
+import com.collabrium.metrics.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
 import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
+import com.collabrium.metrics.management.domain.model.queries.GetTaskDistributionForMemberQuery;
 import com.collabrium.metrics.shared.infrastructure.clients.tasks.resources.TaskOnlyResource;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +22,15 @@ public class MetricsQueryService {
   private static final String TASK_STATUS = "DONE";
 
   private final TasksQueryPort tasksQueryPort;
+  private final IamQueryPort iamQueryPort;
 
   public MetricsQueryService(
-      TasksQueryPort tasksQueryPort
+      TasksQueryPort tasksQueryPort,
+      IamQueryPort iamQueryPort
   ) {
 
     this.tasksQueryPort = tasksQueryPort;
+    this.iamQueryPort = iamQueryPort;
   }
 
   public Optional<AvgCompletionTimeDTO> handle(
@@ -92,6 +99,54 @@ public class MetricsQueryService {
             totalRescheduledTimes > 0
                 ? List.of(query.memberId())
                 : List.of()
+        )
+    );
+  }
+
+  public Optional<TaskDistributionDTO> handle(
+      GetTaskDistributionForMemberQuery query
+  ) {
+
+    var tasks =
+        tasksQueryPort.getTasksByMemberId(
+            query.memberId()
+        );
+
+    var member =
+        iamQueryPort.getUserOnlyByMemberId(
+            query.memberId()
+        );
+
+    String memberName;
+
+    if (member == null) {
+
+      memberName = "Unknown Member";
+
+    } else {
+
+      memberName =
+          String.format(
+              "%s %s",
+              member.name(),
+              member.surname()
+          ).trim();
+    }
+
+    var details =
+        Map.of(
+            query.memberId().toString(),
+            new MemberTaskInfoDTO(
+                memberName,
+                tasks.size()
+            )
+        );
+
+    return Optional.of(
+        new TaskDistributionDTO(
+            "TASK_DISTRIBUTION_MEMBER",
+            tasks.size(),
+            details
         )
     );
   }

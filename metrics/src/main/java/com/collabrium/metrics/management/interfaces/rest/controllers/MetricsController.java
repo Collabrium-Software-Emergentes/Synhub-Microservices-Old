@@ -3,10 +3,13 @@ package com.collabrium.metrics.management.interfaces.rest.controllers;
 import com.collabrium.metrics.management.application.internal.queryservices.MetricsQueryService;
 import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
 import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
+import com.collabrium.metrics.management.domain.model.queries.GetTaskDistributionForMemberQuery;
 import com.collabrium.metrics.management.interfaces.rest.resources.AvgCompletionTimeResource;
 import com.collabrium.metrics.management.interfaces.rest.resources.RescheduledTasksResource;
+import com.collabrium.metrics.management.interfaces.rest.resources.TaskDistributionResource;
 import com.collabrium.metrics.management.interfaces.rest.transform.AvgCompletionTimeResourceFromDTOAssembler;
 import com.collabrium.metrics.management.interfaces.rest.transform.RescheduledTasksResourceFromDTOAssembler;
+import com.collabrium.metrics.management.interfaces.rest.transform.TaskDistributionResourceFromDTOAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +77,30 @@ public class MetricsController {
 
     var resource = RescheduledTasksResourceFromDTOAssembler
         .toResourceFromDTO(rescheduledTasks.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/member/{memberId}/tasks/distribution")
+  @Operation(
+      summary = "Get task distribution for member",
+      description = "Returns the number of tasks assigned to the given member.",
+      tags = {"Metrics"}
+  )
+  public ResponseEntity<TaskDistributionResource> getTaskDistributionForMember(
+      @PathVariable Long memberId
+  ) {
+
+    var getTaskDistributionForMemberQuery = new GetTaskDistributionForMemberQuery(memberId);
+
+    var taskDistribution = metricsQueryService.handle(getTaskDistributionForMemberQuery);
+
+    if (taskDistribution.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = TaskDistributionResourceFromDTOAssembler
+        .toResourceFromDTO(taskDistribution.get());
 
     return ResponseEntity.ok(resource);
   }
