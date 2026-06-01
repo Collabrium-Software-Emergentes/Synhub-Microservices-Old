@@ -8,6 +8,8 @@ public record TaskDetailsResource(
     String createdAt,
     String updatedAt,
     String status,
+    Integer timesRearranged,
+    Long timePassed,
     Long memberId,
     Long groupId
 ) {

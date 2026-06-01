@@ -2,6 +2,7 @@ package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.domain.model.commands.DeleteTaskCommand;
 import com.collabrium.tasks.management.domain.model.queries.GetTaskByIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetTasksByMemberIdQuery;
 import com.collabrium.tasks.management.domain.services.TaskCommandService;
 import com.collabrium.tasks.management.domain.services.TaskQueryService;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskDetailsResource;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/tasks")
@@ -62,5 +65,36 @@ public class TaskController {
     this.taskCommandService.handle(deleteTaskCommand);
 
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping(
+      params = "memberId"
+  )
+  @Operation(
+      summary = "Get tasks by member id",
+      description = "Get all tasks assigned to a member"
+  )
+
+  public ResponseEntity<List<TaskDetailsResource>> getTasksByMemberId(
+      @RequestParam Long memberId
+  ) {
+
+    var query =
+        new GetTasksByMemberIdQuery(
+            memberId
+        );
+
+    var tasks =
+        taskQueryService.handle(query);
+
+    var resources =
+        tasks.stream()
+            .map(
+                TaskDetailsResourceFromEntityAssembler
+                    ::toResourceFromEntity
+            )
+            .toList();
+
+    return ResponseEntity.ok(resources);
   }
 }
