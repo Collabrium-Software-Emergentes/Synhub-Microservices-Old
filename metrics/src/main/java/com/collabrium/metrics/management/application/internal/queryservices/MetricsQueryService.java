@@ -252,6 +252,52 @@ public class MetricsQueryService {
     );
   }
 
+  public Optional<RescheduledTasksDTO> handle(
+      GetRescheduledTasksOfMyGroupQuery query
+  ) {
+
+    var tasks =
+        getGroupTasksByLeaderUser(
+            query.userId()
+        );
+
+    long totalRescheduledTimes =
+        tasks.stream()
+            .mapToLong(
+                TaskOnlyResource::timesRearranged
+            )
+            .sum();
+
+    var details =
+        Map.of(
+            "total",
+            tasks.size(),
+            "rescheduled",
+            (int) totalRescheduledTimes
+        );
+
+    var rescheduledMemberIds =
+        tasks.stream()
+            .filter(task ->
+                task.timesRearranged() > 0
+                    && task.memberId() != null
+            )
+            .map(
+                TaskOnlyResource::memberId
+            )
+            .distinct()
+            .toList();
+
+    return Optional.of(
+        new RescheduledTasksDTO(
+            RESCHEDULED_TASKS_MEMBER,
+            totalRescheduledTimes,
+            details,
+            rescheduledMemberIds
+        )
+    );
+  }
+
   private List<TaskOnlyResource> getMemberTasks(
     Long memberId
   ) {

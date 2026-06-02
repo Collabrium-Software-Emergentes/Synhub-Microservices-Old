@@ -206,6 +206,18 @@ public class MetricsController {
       @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
-    return ResponseEntity.ok().build();
+    var getRescheduledTasksOfMyGroupQuery =
+        new GetRescheduledTasksOfMyGroupQuery(user.userId());
+
+    var rescheduledTasks = metricsQueryService.handle(getRescheduledTasksOfMyGroupQuery);
+
+    if (rescheduledTasks.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = RescheduledTasksResourceFromDTOAssembler
+        .toResourceFromDTO(rescheduledTasks.get());
+
+    return ResponseEntity.ok(resource);
   }
 }
