@@ -1,5 +1,6 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
+import com.collabrium.metrics.management.application.internal.assemblers.TaskOverviewDetailsAssembler;
 import com.collabrium.metrics.management.application.internal.dto.*;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.IamQueryPort;
@@ -153,24 +154,10 @@ public class MetricsQueryService {
 
     var tasks = getMemberTasks(query.memberId());
 
-    var overview =
-        tasks.stream()
-            .collect(
-                Collectors.groupingBy(
-                    TaskOnlyResource::status,
-                    Collectors.counting()
-                )
-            );
-
     var details =
-        overview.entrySet()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> entry.getValue().intValue()
-                )
-            );
+      TaskOverviewDetailsAssembler.fromTasks(
+        tasks
+      );
 
     return Optional.of(
         new TaskOverviewDTO(
@@ -230,24 +217,10 @@ public class MetricsQueryService {
         group.id()
       );
 
-    var overview =
-      tasks.stream()
-        .collect(
-          Collectors.groupingBy(
-            TaskOnlyResource::status,
-            Collectors.counting()
-          )
-        );
-
     var details =
-      overview.entrySet()
-        .stream()
-        .collect(
-          Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> entry.getValue().intValue()
-          )
-        );
+      TaskOverviewDetailsAssembler.fromTasks(
+        tasks
+      );
 
     return Optional.of(
       new TaskOverviewDTO(
