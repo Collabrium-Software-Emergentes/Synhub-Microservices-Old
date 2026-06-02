@@ -1,10 +1,14 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
+import com.collabrium.metrics.management.application.internal.assemblers.TaskDistributionDetailsAssembler;
 import com.collabrium.metrics.management.application.internal.assemblers.TaskOverviewDetailsAssembler;
 import com.collabrium.metrics.management.application.internal.dto.*;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.TasksQueryPort;
+import com.collabrium.metrics.management.domain.exceptions.GroupNotFoundException;
+import com.collabrium.metrics.management.domain.exceptions.UserIsNotLeaderException;
+import com.collabrium.metrics.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.metrics.management.domain.model.queries.*;
 import com.collabrium.metrics.shared.infrastructure.clients.tasks.resources.TaskOnlyResource;
 import org.springframework.stereotype.Service;
@@ -13,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class MetricsQueryService {
@@ -43,8 +46,14 @@ public class MetricsQueryService {
   private static final String TASK_OVERVIEW_MEMBER =
     "TASK_OVERVIEW_MEMBER";
 
+  private static final String TASK_OVERVIEW =
+    "TASK_OVERVIEW";
+
   private static final String UNKNOWN_MEMBER =
     "Unknown Member";
+
+  private static final String TASK_DISTRIBUTION =
+    "TASK_DISTRIBUTION";
 
   private final TasksQueryPort tasksQueryPort;
   private final IamQueryPort iamQueryPort;
@@ -77,10 +86,9 @@ public class MetricsQueryService {
     }
 
     double averageMilliseconds =
-        completedTasks.stream()
-            .mapToLong(TaskOnlyResource::timePassed)
-            .average()
-            .orElse(0);
+        calculateAverageTimePassed(
+            completedTasks
+        );
 
     double averageDays =
       averageMilliseconds /
@@ -183,12 +191,11 @@ public class MetricsQueryService {
       );
 
     Long averageTimePassed =
-      Math.round(
-        completedTasks.stream()
-          .mapToLong(TaskOnlyResource::timePassed)
-          .average()
-          .orElse(0)
-      );
+        Math.round(
+            calculateAverageTimePassed(
+                completedTasks
+            )
+        );
 
     return Optional.of(
       new TaskTimePassedDTO(
@@ -202,20 +209,10 @@ public class MetricsQueryService {
     GetTasksOverviewOfMyGroupQuery query
   ) {
 
-    var user =
-      iamQueryPort.getUserOnlyById(
-        query.userId()
-      );
-
-    var group =
-      groupsQueryPort.getGroupByLeaderId(
-        user.leaderId()
-      );
-
     var tasks =
-      tasksQueryPort.getSimpleTasksByGroupId(
-        group.id()
-      );
+        getGroupTasksByLeaderUser(
+            query.userId()
+        );
 
     var details =
       TaskOverviewDetailsAssembler.fromTasks(
@@ -224,7 +221,7 @@ public class MetricsQueryService {
 
     return Optional.of(
       new TaskOverviewDTO(
-        "TASK_OVERVIEW",
+        TASK_OVERVIEW,
         tasks.size(),
         details
       )
@@ -235,46 +232,20 @@ public class MetricsQueryService {
     GetTaskDistributionOfMyGroupQuery query
   ){
 
-    var user =
-      iamQueryPort.getUserOnlyById(
-        query.userId()
-      );
-
-    var group =
-      groupsQueryPort.getGroupByLeaderId(
-        user.leaderId()
-      );
-
     var tasks =
-      tasksQueryPort.getSimpleTasksByGroupId(
-        group.id()
-      );
-
-    var tasksByMemberId =
-      tasks.stream()
-        .filter(task -> task.memberId() != null)
-        .collect(
-          Collectors.groupingBy(
-            TaskOnlyResource::memberId
-          )
+        getGroupTasksByLeaderUser(
+            query.userId()
         );
 
-    Map<String, MemberTaskInfoDTO> details =
-      tasksByMemberId.entrySet()
-        .stream()
-        .collect(
-          Collectors.toMap(
-            entry -> entry.getKey().toString(),
-            entry -> new MemberTaskInfoDTO(
-              getMemberName(entry.getKey()),
-              entry.getValue().size()
-            )
-          )
+    var details =
+        TaskDistributionDetailsAssembler.fromTasks(
+            tasks,
+            this::getMemberName
         );
 
     return Optional.of(
       new TaskDistributionDTO(
-        "TASK_DISTRIBUTION",
+        TASK_DISTRIBUTION,
         tasks.size(),
         details
       )
@@ -321,5 +292,52 @@ public class MetricsQueryService {
         )
       )
       .toList();
+  }
+
+  private List<TaskOnlyResource> getGroupTasksByLeaderUser(
+      Long userId
+  ) {
+
+    var user =
+        iamQueryPort.getUserOnlyById(
+            userId
+        );
+
+    if (user == null) {
+      throw UserNotFoundException.forId(
+          userId
+      );
+    }
+
+    if (user.leaderId() == null) {
+      throw UserIsNotLeaderException.forUser(
+          userId
+      );
+    }
+
+    var group =
+        groupsQueryPort.getGroupByLeaderId(
+            user.leaderId()
+        );
+
+    if (group == null) {
+      throw GroupNotFoundException.forLeader(
+          user.leaderId()
+      );
+    }
+
+    return tasksQueryPort.getSimpleTasksByGroupId(
+        group.id()
+    );
+  }
+
+  private double calculateAverageTimePassed(
+      List<TaskOnlyResource> tasks
+  ) {
+
+    return tasks.stream()
+        .mapToLong(TaskOnlyResource::timePassed)
+        .average()
+        .orElse(0);
   }
 }

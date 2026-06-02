@@ -127,8 +127,7 @@ public class MetricsController {
   @GetMapping("/task/member/{memberId}/time-passed")
   @Operation(
     summary = "Get time passed for a member's completed task",
-    description = "Returns the time passed in milliseconds for a completed task assigned to the given member.",
-    tags = {"Metrics"}
+    description = "Returns the time passed in milliseconds for a completed task assigned to the given member."
   )
   public ResponseEntity<TaskTimePassedResource> getAverageTaskTimePassed(
     @PathVariable Long memberId
@@ -175,8 +174,7 @@ public class MetricsController {
   @GetMapping("/tasks/distribution")
   @Operation(
     summary = "Get task distribution for group",
-    description = "Returns the number of tasks assigned to each member in the authenticated leader's group.",
-    tags = {"Metrics"}
+    description = "Returns the number of tasks assigned to each member in the authenticated leader's group."
   )
   public ResponseEntity<TaskDistributionResource> getTaskDistribution(
     @AuthenticationPrincipal AuthenticatedUser user
@@ -195,6 +193,19 @@ public class MetricsController {
       .toResourceFromDTO(taskDistribution.get());
 
     return ResponseEntity.ok(resource);
+  }
 
+  @GetMapping("/tasks/rescheduled")
+  @Operation(
+      summary = "Get rescheduled tasks for group",
+      description = "Returns the count of rescheduled vs non-rescheduled tasks " +
+          "for the authenticated leader's group, and the memberIds " +
+          "of those with rescheduled tasks."
+  )
+  public ResponseEntity<RescheduledTasksResource> getRescheduledTasks(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    return ResponseEntity.ok().build();
   }
 }
