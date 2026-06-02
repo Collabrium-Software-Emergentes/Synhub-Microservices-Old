@@ -1,5 +1,7 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
+import com.collabrium.metrics.management.application.internal.assemblers.RescheduledMembersAssembler;
+import com.collabrium.metrics.management.application.internal.assemblers.RescheduledTasksDetailsAssembler;
 import com.collabrium.metrics.management.application.internal.assemblers.TaskDistributionDetailsAssembler;
 import com.collabrium.metrics.management.application.internal.assemblers.TaskOverviewDetailsAssembler;
 import com.collabrium.metrics.management.application.internal.dto.*;
@@ -113,17 +115,17 @@ public class MetricsQueryService {
     var tasks = getMemberTasks(query.memberId());
 
     long totalRescheduledTimes =
-        tasks.stream()
-            .mapToLong(TaskOnlyResource::timesRearranged)
-            .sum();
+        calculateTotalRescheduledTimes(
+            tasks
+        );
 
     return Optional.of(
         new RescheduledTasksDTO(
             RESCHEDULED_TASKS_MEMBER,
             totalRescheduledTimes,
-            Map.of(
-                "total", tasks.size(),
-                "rescheduled", (int) totalRescheduledTimes
+            RescheduledTasksDetailsAssembler.fromTasks(
+                tasks,
+                totalRescheduledTimes
             ),
             totalRescheduledTimes > 0
                 ? List.of(query.memberId())
@@ -262,38 +264,69 @@ public class MetricsQueryService {
         );
 
     long totalRescheduledTimes =
-        tasks.stream()
-            .mapToLong(
-                TaskOnlyResource::timesRearranged
-            )
-            .sum();
-
-    var details =
-        Map.of(
-            "total",
-            tasks.size(),
-            "rescheduled",
-            (int) totalRescheduledTimes
+        calculateTotalRescheduledTimes(
+            tasks
         );
-
-    var rescheduledMemberIds =
-        tasks.stream()
-            .filter(task ->
-                task.timesRearranged() > 0
-                    && task.memberId() != null
-            )
-            .map(
-                TaskOnlyResource::memberId
-            )
-            .distinct()
-            .toList();
 
     return Optional.of(
         new RescheduledTasksDTO(
             RESCHEDULED_TASKS_MEMBER,
             totalRescheduledTimes,
-            details,
-            rescheduledMemberIds
+            RescheduledTasksDetailsAssembler.fromTasks(
+                tasks,
+                totalRescheduledTimes
+            ),
+            RescheduledMembersAssembler.fromTasks(
+                tasks
+            )
+        )
+    );
+  }
+
+  public Optional<AvgCompletionTimeDTO> handle(
+      GetAvgCompletionTimeOfMyGroupQuery query
+  ) {
+
+    var tasks =
+        getGroupTasksByLeaderUser(
+            query.userId()
+        );
+
+    var completedTasks =
+        getCompletedTasks(
+            tasks
+        );
+
+    if (completedTasks.isEmpty()) {
+      return Optional.of(
+          new AvgCompletionTimeDTO(
+              AVG_COMPLETION_TIME_MEMBER,
+              0,
+              Map.of(
+                  "completedTasks",
+                  0
+              )
+          )
+      );
+    }
+
+    double averageMilliseconds =
+        calculateAverageTimePassed(
+            completedTasks
+        );
+
+    double averageDays =
+        averageMilliseconds /
+            MILLISECONDS_PER_DAY;
+
+    return Optional.of(
+        new AvgCompletionTimeDTO(
+            AVG_COMPLETION_TIME_MEMBER,
+            averageDays,
+            Map.of(
+                "completedTasks",
+                completedTasks.size()
+            )
         )
     );
   }
@@ -385,5 +418,16 @@ public class MetricsQueryService {
         .mapToLong(TaskOnlyResource::timePassed)
         .average()
         .orElse(0);
+  }
+
+  private long calculateTotalRescheduledTimes(
+      List<TaskOnlyResource> tasks
+  ) {
+
+    return tasks.stream()
+        .mapToLong(
+            TaskOnlyResource::timesRearranged
+        )
+        .sum();
   }
 }

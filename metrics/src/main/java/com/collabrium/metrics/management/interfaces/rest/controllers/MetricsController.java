@@ -220,4 +220,27 @@ public class MetricsController {
 
     return ResponseEntity.ok(resource);
   }
+
+  @GetMapping("/tasks/avg-completion-time")
+  @Operation(
+      summary = "Get average completion time for group",
+      description = "Returns the average time (in days) it " +
+          "takes to complete tasks in the authenticated leader's group."
+  )
+  public ResponseEntity<AvgCompletionTimeResource> getAvgCompletionTime(
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getAvgCompletionTimeOfMyGroupQuery = new GetAvgCompletionTimeOfMyGroupQuery(user.userId());
+
+    var avgCompletionTime = metricsQueryService.handle(getAvgCompletionTimeOfMyGroupQuery);
+
+    if (avgCompletionTime.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = AvgCompletionTimeResourceFromDTOAssembler.toResourceFromDTO(avgCompletionTime.get());
+
+    return ResponseEntity.ok(resource);
+  }
 }
