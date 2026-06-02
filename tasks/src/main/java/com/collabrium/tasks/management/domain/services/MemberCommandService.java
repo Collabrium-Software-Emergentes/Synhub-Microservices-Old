@@ -13,8 +13,6 @@ public interface MemberCommandService {
 
   Optional<Member> handle(RemoveMemberFromGroupCommand command);
 
-  void handle(DeleteMembersByGroupIdCommand command);
-
   void handle(LeaveGroupCommand command);
 
   void handle(DeleteGroupDataCommand command);

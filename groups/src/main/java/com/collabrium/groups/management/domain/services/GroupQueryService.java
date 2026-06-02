@@ -13,7 +13,5 @@ public interface GroupQueryService {
 
   Optional<Group> handle(GetGroupByCodeQuery query);
 
-  Optional<Group> handle(GetGroupByMemberIdQuery query);
-
   Optional<Group> handle(GetGroupByUserIdQuery query);
 }

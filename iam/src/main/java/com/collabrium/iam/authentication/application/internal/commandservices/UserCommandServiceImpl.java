@@ -4,8 +4,6 @@ import com.collabrium.iam.authentication.application.internal.outboundservices.h
 import com.collabrium.iam.authentication.application.internal.outboundservices.messaging.IamEventPublisher;
 import com.collabrium.iam.authentication.application.internal.outboundservices.tokens.TokenService;
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
-import com.collabrium.iam.authentication.domain.model.commands.CreateUserLeaderCommand;
-import com.collabrium.iam.authentication.domain.model.commands.CreateUserMemberCommand;
 import com.collabrium.iam.authentication.domain.model.commands.UpdateUserLeaderIdCommand;
 import com.collabrium.iam.authentication.domain.model.commands.UpdateUserMemberIdCommand;
 import com.collabrium.iam.authentication.domain.model.commands.SignInCommand;
@@ -128,16 +126,6 @@ public class UserCommandServiceImpl implements UserCommandService {
     publishDomainEvents(savedUser);
 
     return Optional.of(savedUser);
-  }
-
-  @Override
-  public Optional<User> handle(CreateUserLeaderCommand command) {
-    return Optional.empty();
-  }
-
-  @Override
-  public Optional<User> handle(CreateUserMemberCommand command) {
-    return Optional.empty();
   }
 
   @Override

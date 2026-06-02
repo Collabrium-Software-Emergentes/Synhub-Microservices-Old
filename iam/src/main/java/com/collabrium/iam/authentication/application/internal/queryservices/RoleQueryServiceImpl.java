@@ -2,13 +2,11 @@ package com.collabrium.iam.authentication.application.internal.queryservices;
 
 import com.collabrium.iam.authentication.domain.model.entities.Role;
 import com.collabrium.iam.authentication.domain.model.queries.GetAllRolesQuery;
-import com.collabrium.iam.authentication.domain.model.queries.GetRoleByNameQuery;
 import com.collabrium.iam.authentication.domain.services.RoleQueryService;
 import com.collabrium.iam.authentication.infrastructure.persistence.jpa.repositories.RoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * RoleQueryServiceImpl class
@@ -35,15 +33,5 @@ public class RoleQueryServiceImpl implements RoleQueryService {
   @Override
   public List<Role> handle(GetAllRolesQuery query) {
     return roleRepository.findAll();
-  }
-
-  /**
-   * Handle the get role by name query
-   * @param query the get role-by-name query
-   * @return Optional<Role> the role
-   */
-  @Override
-  public Optional<Role> handle(GetRoleByNameQuery query) {
-    return roleRepository.findByName(query.name());
   }
 }

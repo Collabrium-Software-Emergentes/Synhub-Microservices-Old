@@ -213,7 +213,10 @@ public class TaskDetailsController {
     return ResponseEntity.ok(resource);
   }
 
-  @GetMapping("/tasks")
+  @GetMapping(
+      value = "/tasks",
+      params = "groupId"
+  )
   @Operation(
       summary = "Get all tasks by groupId",
       description = "Get all tasks by groupId"

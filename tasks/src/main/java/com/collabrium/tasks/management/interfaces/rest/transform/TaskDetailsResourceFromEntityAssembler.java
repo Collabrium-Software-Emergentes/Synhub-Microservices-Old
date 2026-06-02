@@ -20,6 +20,8 @@ public class TaskDetailsResourceFromEntityAssembler {
         entity.getCreatedAt().toString(),
         entity.getUpdatedAt().toString(),
         entity.getStatus().toString(),
+        entity.getTimesRearranged(),
+        entity.getTimePassed(),
         entity.getMember().getId(),
         entity.getGroupId().value()
     );

@@ -2,13 +2,11 @@ package com.collabrium.iam.authentication.application.internal.queryservices;
 
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
 import com.collabrium.iam.authentication.domain.model.queries.*;
-import com.collabrium.iam.authentication.domain.model.valueobjects.LeaderId;
 import com.collabrium.iam.authentication.domain.model.valueobjects.MemberId;
 import com.collabrium.iam.authentication.domain.services.UserQueryService;
 import com.collabrium.iam.authentication.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -31,17 +29,6 @@ public class UserQueryServiceImpl implements UserQueryService {
   }
 
   /**
-   * This method is used to handle {@link GetAllUsersQuery} query.
-   * @param query {@link GetAllUsersQuery} instance.
-   * @return {@link List} of {@link User} instances.
-   * @see GetAllUsersQuery
-   */
-  @Override
-  public List<User> handle(GetAllUsersQuery query) {
-    return userRepository.findAll();
-  }
-
-  /**
    * This method is used to handle {@link GetUserByIdQuery} query.
    * @param query {@link GetUserByIdQuery} instance.
    * @return {@link Optional} of {@link User} instance.
@@ -50,17 +37,6 @@ public class UserQueryServiceImpl implements UserQueryService {
   @Override
   public Optional<User> handle(GetUserOnlyByIdQuery query) {
     return userRepository.findById(query.userId());
-  }
-
-  /**
-   * This method is used to handle {@link GetUserByUsernameQuery} query.
-   * @param query {@link GetUserByUsernameQuery} instance.
-   * @return {@link Optional} of {@link User} instance.
-   * @see GetUserByUsernameQuery
-   */
-  @Override
-  public Optional<User> handle(GetUserByUsernameQuery query) {
-    return userRepository.findByUsername(query.username());
   }
 
   /**
@@ -75,19 +51,5 @@ public class UserQueryServiceImpl implements UserQueryService {
     MemberId memberId = new MemberId(query.memberId());
 
     return userRepository.findByMemberId(memberId);
-  }
-
-  /**
-   * This method is used to handle {@link GetUserByLeaderIdQuery} query.
-   * @param query {@link GetUserByLeaderIdQuery} instance.
-   * @return {@link Optional} of {@link User} instance.
-   * @see GetUserByLeaderIdQuery
-   */
-  @Override
-  public Optional<User> handle(GetUserByLeaderIdQuery query) {
-
-    LeaderId leaderId = new LeaderId(query.leaderId());
-
-    return userRepository.findByLeaderId(leaderId);
   }
 }

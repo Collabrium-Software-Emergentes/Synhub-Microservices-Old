@@ -34,8 +34,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     LOGGER.error("Authentication error", authException);
 
-    String code = "AUTH-001";
-    String message = "Unauthorized";
+    String code;
+    String message;
     List<String> details;
 
     Throwable cause = authException.getCause();

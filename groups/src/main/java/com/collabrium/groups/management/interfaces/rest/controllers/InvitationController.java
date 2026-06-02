@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/invitations")
+@RequestMapping("/api/v1")
 @Tag(name = "Invitations", description = "Invitation Management Endpoints")
 public class InvitationController {
 
@@ -24,7 +24,7 @@ public class InvitationController {
     this.invitationCommandService = invitationCommandService;
   }
 
-  @DeleteMapping("/member")
+  @DeleteMapping("/invitations/member")
   @Operation(summary = "Cancel an invitation", description = "Cancel an existing invitation by a member")
   public ResponseEntity<Void> cancelInvitation(
       @AuthenticationPrincipal AuthenticatedUser user
@@ -37,7 +37,7 @@ public class InvitationController {
     return ResponseEntity.noContent().build();
   }
 
-  @PatchMapping("/{invitationId}")
+  @PatchMapping("/group/invitations/{invitationId}")
   @Operation(summary = "Accept or decline an invitation", description = "Accept or decline an invitation for a leader")
   public ResponseEntity<Void> processInvitation(
       @PathVariable Long invitationId,
