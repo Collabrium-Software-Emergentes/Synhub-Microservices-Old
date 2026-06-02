@@ -1,18 +1,9 @@
 package com.collabrium.metrics.management.interfaces.rest.controllers;
 
 import com.collabrium.metrics.management.application.internal.queryservices.MetricsQueryService;
-import com.collabrium.metrics.management.domain.model.queries.GetAvgCompletionTimeForMemberQuery;
-import com.collabrium.metrics.management.domain.model.queries.GetRescheduledTasksForMemberQuery;
-import com.collabrium.metrics.management.domain.model.queries.GetTaskDistributionForMemberQuery;
-import com.collabrium.metrics.management.domain.model.queries.GetTaskOverviewForMemberQuery;
-import com.collabrium.metrics.management.interfaces.rest.resources.AvgCompletionTimeResource;
-import com.collabrium.metrics.management.interfaces.rest.resources.RescheduledTasksResource;
-import com.collabrium.metrics.management.interfaces.rest.resources.TaskDistributionResource;
-import com.collabrium.metrics.management.interfaces.rest.resources.TaskOverviewResource;
-import com.collabrium.metrics.management.interfaces.rest.transform.AvgCompletionTimeResourceFromDTOAssembler;
-import com.collabrium.metrics.management.interfaces.rest.transform.RescheduledTasksResourceFromDTOAssembler;
-import com.collabrium.metrics.management.interfaces.rest.transform.TaskDistributionResourceFromDTOAssembler;
-import com.collabrium.metrics.management.interfaces.rest.transform.TaskOverviewResourceFromDTOAssembler;
+import com.collabrium.metrics.management.domain.model.queries.*;
+import com.collabrium.metrics.management.interfaces.rest.resources.*;
+import com.collabrium.metrics.management.interfaces.rest.transform.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -127,6 +118,29 @@ public class MetricsController {
 
     var resource = TaskOverviewResourceFromDTOAssembler
         .toResourceFromDTO(taskOverview.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/task/member/{memberId}/time-passed")
+  @Operation(
+    summary = "Get time passed for a member's completed task",
+    description = "Returns the time passed in milliseconds for a completed task assigned to the given member.",
+    tags = {"Metrics"}
+  )
+  public ResponseEntity<TaskTimePassedResource> getAverageTaskTimePassed(
+    @PathVariable Long memberId
+  ) {
+
+    var getTaskTimePassedQuery = new GetTaskTimePassedQuery(memberId);
+
+    var taskTimePassed = metricsQueryService.handle(getTaskTimePassedQuery);
+
+    if (taskTimePassed.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = TaskTimePassedResourceFromDTOAssembler.toResourceFromDTO(taskTimePassed.get());
 
     return ResponseEntity.ok(resource);
   }
