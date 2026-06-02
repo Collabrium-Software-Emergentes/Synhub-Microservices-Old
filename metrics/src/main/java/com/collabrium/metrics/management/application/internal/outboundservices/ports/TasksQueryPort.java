@@ -7,4 +7,6 @@ import java.util.List;
 public interface TasksQueryPort {
 
   List<TaskOnlyResource> getTasksByMemberId(Long memberId);
+
+  List<TaskOnlyResource> getSimpleTasksByGroupId(Long groupId);
 }

@@ -26,4 +26,12 @@ public class TasksQueryAdapter implements TasksQueryPort {
 
     return client.getTasksByMemberId(memberId);
   }
+
+  @Override
+  public List<TaskOnlyResource> getSimpleTasksByGroupId(
+    Long groupId
+  ) {
+
+    return client.getSimpleTasksByGroupId(groupId);
+  }
 }

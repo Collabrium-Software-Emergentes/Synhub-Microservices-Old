@@ -2,6 +2,7 @@ package com.collabrium.tasks.management.interfaces.rest.controllers;
 
 import com.collabrium.tasks.management.domain.model.commands.DeleteTaskCommand;
 import com.collabrium.tasks.management.domain.model.queries.GetTaskByIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetTasksByGroupIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetTasksByMemberIdQuery;
 import com.collabrium.tasks.management.domain.services.TaskCommandService;
 import com.collabrium.tasks.management.domain.services.TaskQueryService;
@@ -96,5 +97,26 @@ public class TaskController {
             .toList();
 
     return ResponseEntity.ok(resources);
+  }
+
+  @GetMapping("/simple")
+  @Operation(
+    summary = "Get simple tasks by groupId",
+    description = "Returns basic task information (without extra details) filtered by groupId"
+  )
+  public ResponseEntity<List<TaskDetailsResource>> getSimpleTasksByGroupId(
+    @RequestParam Long groupId
+  ) {
+
+    var getTasksByGroupIdQuery = new GetTasksByGroupIdQuery(groupId);
+
+    var tasks = taskQueryService.handle(getTasksByGroupIdQuery);
+
+    var resources = tasks.stream()
+        .map(TaskDetailsResourceFromEntityAssembler::toResourceFromEntity)
+        .toList();
+
+    return ResponseEntity.ok(resources);
+
   }
 }

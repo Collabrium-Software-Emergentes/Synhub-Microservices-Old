@@ -4,5 +4,7 @@ import com.collabrium.metrics.shared.infrastructure.clients.iam.resources.UserOn
 
 public interface IamQueryPort {
 
+  UserOnlyResource getUserOnlyById(Long userId);
+
   UserOnlyResource getUserOnlyByMemberId(Long id);
 }

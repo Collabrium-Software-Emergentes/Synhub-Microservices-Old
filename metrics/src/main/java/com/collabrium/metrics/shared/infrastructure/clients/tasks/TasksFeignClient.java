@@ -14,4 +14,9 @@ public interface TasksFeignClient {
   List<TaskOnlyResource> getTasksByMemberId(
       @RequestParam Long memberId
   );
+
+  @GetMapping("/api/v1/tasks/simple")
+  List<TaskOnlyResource> getSimpleTasksByGroupId(
+    @RequestParam Long groupId
+  );
 }

@@ -1,6 +1,7 @@
 package com.collabrium.metrics.management.application.internal.queryservices;
 
 import com.collabrium.metrics.management.application.internal.dto.*;
+import com.collabrium.metrics.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.metrics.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.metrics.management.domain.model.queries.*;
@@ -46,14 +47,17 @@ public class MetricsQueryService {
 
   private final TasksQueryPort tasksQueryPort;
   private final IamQueryPort iamQueryPort;
+  private final GroupsQueryPort groupsQueryPort;
 
   public MetricsQueryService(
-      TasksQueryPort tasksQueryPort,
-      IamQueryPort iamQueryPort
+    TasksQueryPort tasksQueryPort,
+    IamQueryPort iamQueryPort,
+    GroupsQueryPort groupsQueryPort
   ) {
 
     this.tasksQueryPort = tasksQueryPort;
     this.iamQueryPort = iamQueryPort;
+    this.groupsQueryPort = groupsQueryPort;
   }
 
   public Optional<AvgCompletionTimeDTO> handle(
@@ -203,6 +207,53 @@ public class MetricsQueryService {
       new TaskTimePassedDTO(
         query.memberId(),
         averageTimePassed
+      )
+    );
+  }
+
+  public Optional<TaskOverviewDTO> handle(
+    GetTasksOverviewOfMyGroupQuery query
+  ) {
+
+    var user =
+      iamQueryPort.getUserOnlyById(
+        query.userId()
+      );
+
+    var group =
+      groupsQueryPort.getGroupByLeaderId(
+        user.leaderId()
+      );
+
+    var tasks =
+      tasksQueryPort.getSimpleTasksByGroupId(
+        group.id()
+      );
+
+    var overview =
+      tasks.stream()
+        .collect(
+          Collectors.groupingBy(
+            TaskOnlyResource::status,
+            Collectors.counting()
+          )
+        );
+
+    var details =
+      overview.entrySet()
+        .stream()
+        .collect(
+          Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> entry.getValue().intValue()
+          )
+        );
+
+    return Optional.of(
+      new TaskOverviewDTO(
+        "TASK_OVERVIEW",
+        tasks.size(),
+        details
       )
     );
   }

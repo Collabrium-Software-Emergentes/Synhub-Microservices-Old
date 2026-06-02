@@ -4,9 +4,11 @@ import com.collabrium.metrics.management.application.internal.queryservices.Metr
 import com.collabrium.metrics.management.domain.model.queries.*;
 import com.collabrium.metrics.management.interfaces.rest.resources.*;
 import com.collabrium.metrics.management.interfaces.rest.transform.*;
+import com.collabrium.metrics.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -140,7 +142,31 @@ public class MetricsController {
       return ResponseEntity.badRequest().build();
     }
 
-    var resource = TaskTimePassedResourceFromDTOAssembler.toResourceFromDTO(taskTimePassed.get());
+    var resource = TaskTimePassedResourceFromDTOAssembler
+      .toResourceFromDTO(taskTimePassed.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/tasks/overview")
+  @Operation(
+    summary = "Get task overview for group",
+    description = "Returns a summary of task statuses for the authenticated leader's group."
+  )
+  public ResponseEntity<TaskOverviewResource> getTaskOverview(
+    @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getTasksOverviewOfMyGroupQuery = new GetTasksOverviewOfMyGroupQuery(user.userId());
+
+    var taskOverview = metricsQueryService.handle(getTasksOverviewOfMyGroupQuery);
+
+    if (taskOverview.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = TaskOverviewResourceFromDTOAssembler
+      .toResourceFromDTO(taskOverview.get());
 
     return ResponseEntity.ok(resource);
   }

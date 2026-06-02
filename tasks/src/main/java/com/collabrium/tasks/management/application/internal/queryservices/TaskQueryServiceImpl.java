@@ -2,6 +2,7 @@ package com.collabrium.tasks.management.application.internal.queryservices;
 
 import com.collabrium.tasks.management.domain.model.aggregates.Task;
 import com.collabrium.tasks.management.domain.model.queries.GetTaskByIdQuery;
+import com.collabrium.tasks.management.domain.model.queries.GetTasksByGroupIdQuery;
 import com.collabrium.tasks.management.domain.model.queries.GetTasksByMemberIdQuery;
 import com.collabrium.tasks.management.domain.services.TaskQueryService;
 import com.collabrium.tasks.management.infrastructure.persistence.jpa.repositories.TaskRepository;
@@ -41,5 +42,17 @@ public class TaskQueryServiceImpl implements TaskQueryService {
     return taskRepository.findByMember_Id(
         query.memberId()
     );
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Task> handle(
+    GetTasksByGroupIdQuery query
+  ) {
+
+    return taskRepository
+      .findByGroupId_Value(
+        query.groupId()
+      );
   }
 }
