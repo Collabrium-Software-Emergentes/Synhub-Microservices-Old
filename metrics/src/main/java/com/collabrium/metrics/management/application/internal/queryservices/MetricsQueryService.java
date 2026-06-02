@@ -231,6 +231,56 @@ public class MetricsQueryService {
     );
   }
 
+  public Optional<TaskDistributionDTO> handle(
+    GetTaskDistributionOfMyGroupQuery query
+  ){
+
+    var user =
+      iamQueryPort.getUserOnlyById(
+        query.userId()
+      );
+
+    var group =
+      groupsQueryPort.getGroupByLeaderId(
+        user.leaderId()
+      );
+
+    var tasks =
+      tasksQueryPort.getSimpleTasksByGroupId(
+        group.id()
+      );
+
+    var tasksByMemberId =
+      tasks.stream()
+        .filter(task -> task.memberId() != null)
+        .collect(
+          Collectors.groupingBy(
+            TaskOnlyResource::memberId
+          )
+        );
+
+    Map<String, MemberTaskInfoDTO> details =
+      tasksByMemberId.entrySet()
+        .stream()
+        .collect(
+          Collectors.toMap(
+            entry -> entry.getKey().toString(),
+            entry -> new MemberTaskInfoDTO(
+              getMemberName(entry.getKey()),
+              entry.getValue().size()
+            )
+          )
+        );
+
+    return Optional.of(
+      new TaskDistributionDTO(
+        "TASK_DISTRIBUTION",
+        tasks.size(),
+        details
+      )
+    );
+  }
+
   private List<TaskOnlyResource> getMemberTasks(
     Long memberId
   ) {

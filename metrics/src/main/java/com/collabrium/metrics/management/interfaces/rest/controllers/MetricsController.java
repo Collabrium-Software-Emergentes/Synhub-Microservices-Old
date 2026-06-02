@@ -157,7 +157,8 @@ public class MetricsController {
     @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
-    var getTasksOverviewOfMyGroupQuery = new GetTasksOverviewOfMyGroupQuery(user.userId());
+    var getTasksOverviewOfMyGroupQuery =
+      new GetTasksOverviewOfMyGroupQuery(user.userId());
 
     var taskOverview = metricsQueryService.handle(getTasksOverviewOfMyGroupQuery);
 
@@ -169,5 +170,31 @@ public class MetricsController {
       .toResourceFromDTO(taskOverview.get());
 
     return ResponseEntity.ok(resource);
+  }
+
+  @GetMapping("/tasks/distribution")
+  @Operation(
+    summary = "Get task distribution for group",
+    description = "Returns the number of tasks assigned to each member in the authenticated leader's group.",
+    tags = {"Metrics"}
+  )
+  public ResponseEntity<TaskDistributionResource> getTaskDistribution(
+    @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var getTaskDistributionOfMyGroupQuery =
+      new GetTaskDistributionOfMyGroupQuery(user.userId());
+
+    var taskDistribution = metricsQueryService.handle(getTaskDistributionOfMyGroupQuery);
+
+    if (taskDistribution.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = TaskDistributionResourceFromDTOAssembler
+      .toResourceFromDTO(taskDistribution.get());
+
+    return ResponseEntity.ok(resource);
+
   }
 }
