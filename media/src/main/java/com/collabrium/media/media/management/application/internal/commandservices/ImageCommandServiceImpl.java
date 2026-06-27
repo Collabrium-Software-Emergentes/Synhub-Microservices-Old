@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.collabrium.media.media.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.media.media.management.domain.model.commands.DeleteGroupImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UpdateGroupImageCommand;
 import com.collabrium.media.media.management.domain.model.commands.UploadGroupImageCommand;
 import com.collabrium.media.media.management.domain.model.responses.ImageUploadResponse;
 import com.collabrium.media.media.management.domain.services.ImageCommandService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ImageCommandServiceImpl implements ImageCommandService {
@@ -28,7 +30,7 @@ public class ImageCommandServiceImpl implements ImageCommandService {
   }
 
   @Override
-  public Optional<ImageUploadResponse> handle(UploadGroupImageCommand command) {
+  public Optional<ImageUploadResponse> handle(UpdateGroupImageCommand command) {
 
     var group = groupsQueryPort.getGroupById(command.groupId());
 
@@ -43,6 +45,35 @@ public class ImageCommandServiceImpl implements ImageCommandService {
               command.file().getBytes(),
               ObjectUtils.asMap(
                   "folder", "synhub/groups",
+                  "resource_type", "image",
+                  "overwrite", true
+              )
+          );
+
+      var imageResponse = mapResponse(result);
+
+      return Optional.of(imageResponse);
+
+    } catch (Exception e) {
+
+      throw new RuntimeException(
+          "Error uploading image: " + e.getMessage(),
+          e
+      );
+    }
+  }
+
+  @Override
+  public Optional<ImageUploadResponse> handle(UploadGroupImageCommand command) {
+
+    try {
+
+      Map<String, Object> result =
+          cloudinary.uploader().upload(
+              command.file().getBytes(),
+              ObjectUtils.asMap(
+                  "folder", "synhub/groups",
+                  "public_id", UUID.randomUUID().toString(),
                   "resource_type", "image",
                   "overwrite", false
               )
