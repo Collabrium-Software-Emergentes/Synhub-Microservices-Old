@@ -2,6 +2,7 @@ package com.collabrium.groups.management.application.internal.commandservices;
 
 import com.collabrium.groups.management.application.internal.outboundservices.messaging.GroupsEventPublisher;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
+import com.collabrium.groups.management.application.internal.outboundservices.ports.MediaServicePort;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.groups.management.domain.exceptions.*;
 import com.collabrium.groups.management.domain.model.aggregates.Group;
@@ -30,13 +31,15 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   private final LeaderRepository leaderRepository;
   private final TasksQueryPort tasksQueryPort;
   private final GroupsEventPublisher groupsEventPublisher;
+  private final MediaServicePort mediaServicePort;
 
   public GroupCommandServiceImpl(
       GroupRepository groupRepository,
       IamQueryPort iamQueryPort,
       LeaderRepository leaderRepository,
       TasksQueryPort tasksQueryPort,
-      GroupsEventPublisher groupsEventPublisher
+      GroupsEventPublisher groupsEventPublisher,
+      MediaServicePort mediaServicePort
   ) {
 
     this.groupRepository = groupRepository;
@@ -44,6 +47,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     this.leaderRepository = leaderRepository;
     this.tasksQueryPort = tasksQueryPort;
     this.groupsEventPublisher = groupsEventPublisher;
+    this.mediaServicePort = mediaServicePort;
   }
 
   /**
@@ -82,10 +86,13 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     GroupCode groupCode =
         generateUniqueGroupCode();
 
+    var imageResponse = mediaServicePort.uploadImage(command.file());
+
     var group = new Group(
         command.name(),
         command.description(),
-        command.imgUrl(),
+        imageResponse.imageUrl(),
+        imageResponse.publicId(),
         leader,
         groupCode
     );

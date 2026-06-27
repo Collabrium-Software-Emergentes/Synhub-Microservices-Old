@@ -38,11 +38,44 @@ public class Group extends AuditableAbstractAggregateRoot<Group> {
   @Column(name = "member_count", nullable = false)
   private Integer memberCount;
 
-  public Group(String name, String description, String imgUrl, Leader leader, GroupCode code) {
+  @Column(name = "public_id")
+  private String publicId;
+
+  public Group(
+      String name,
+      String description,
+      String imgUrl,
+      Leader leader,
+      GroupCode code
+  ) {
+
     validateGroupCreation(name, description, leader, code);
     this.name = name;
     this.description = description;
     this.imgUrl = imgUrl != null && !imgUrl.isBlank() ? new ImgUrl(imgUrl) : null;
+    this.leader = leader;
+    this.memberCount = 0;
+    this.code = code;
+    this.publicId = null;
+  }
+
+  public Group(
+      String name,
+      String description,
+      String imgUrl,
+      String publicId,
+      Leader leader,
+      GroupCode code
+  ) {
+    validateGroupCreation(name, description, leader, code);
+
+    this.name = name;
+    this.description = description;
+    this.imgUrl =
+        imgUrl != null && !imgUrl.isBlank()
+            ? new ImgUrl(imgUrl)
+            : null;
+    this.publicId = publicId;
     this.leader = leader;
     this.memberCount = 0;
     this.code = code;
