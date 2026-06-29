@@ -95,16 +95,10 @@ public class ImageCommandServiceImpl implements ImageCommandService {
   @Override
   public void handle(DeleteGroupImageCommand command) {
 
-    var group = groupsQueryPort.getGroupById(command.groupId());
-
-    if (group == null) {
-      throw new RuntimeException("Group not found");
-    }
-
     try {
 
       cloudinary.uploader().destroy(
-          group.publicId(),
+          command.publicId(),
           ObjectUtils.emptyMap()
       );
 
