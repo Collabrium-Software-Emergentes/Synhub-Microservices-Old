@@ -2,6 +2,7 @@ package com.collabrium.media.media.shared.infrastructure.clients.groups.resource
 
 public record GroupOnlyResource(
     Long id,
-    String name
+    String name,
+    String publicId
 ) {
 }
