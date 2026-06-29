@@ -104,7 +104,7 @@ public class ImageCommandServiceImpl implements ImageCommandService {
     try {
 
       cloudinary.uploader().destroy(
-          command.publicId(),
+          group.publicId(),
           ObjectUtils.emptyMap()
       );
 
