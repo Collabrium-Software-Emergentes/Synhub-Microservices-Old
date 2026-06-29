@@ -42,11 +42,13 @@ public class RabbitMQConfiguration {
     return new TopicExchange(IAM_EXCHANGE);
   }
 
-  @Bean TopicExchange groupsExchange() {
+  @Bean
+  public TopicExchange groupsExchange() {
     return new TopicExchange(GROUPS_EXCHANGE);
   }
 
-  @Bean TopicExchange tasksExchange() {
+  @Bean
+  public TopicExchange tasksExchange() {
     return new TopicExchange(TASKS_EXCHANGE);
   }
 
