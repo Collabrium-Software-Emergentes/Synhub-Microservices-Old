@@ -1,6 +1,6 @@
 package com.collabrium.media.media.management.domain.model.events;
 
-public record GroupImageDeleted(
+public record GroupDeletedEvent(
     Long groupId
 ) {
 }
