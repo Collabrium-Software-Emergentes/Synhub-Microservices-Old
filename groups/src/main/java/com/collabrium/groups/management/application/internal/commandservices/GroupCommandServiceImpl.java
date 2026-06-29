@@ -7,6 +7,7 @@ import com.collabrium.groups.management.application.internal.outboundservices.po
 import com.collabrium.groups.management.domain.exceptions.*;
 import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.commands.*;
+import com.collabrium.groups.management.domain.model.events.GroupCreatedEvent;
 import com.collabrium.groups.management.domain.model.events.GroupDeletedEvent;
 import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
 import com.collabrium.groups.management.domain.model.valueobjects.GroupCode;
@@ -22,6 +23,12 @@ import java.util.Optional;
  * Service implementation for handling group-related commands.
  * Provides business logic for creating, updating, deleting groups,
  * and managing group membership operations.
+ *
+ * <p>This service orchestrates the entire group management lifecycle,
+ * ensuring data consistency and proper event publishing across bounded contexts.</p>
+ *
+ * @author Collabrium Team
+ * @version 1.0
  */
 @Service
 public class GroupCommandServiceImpl implements GroupCommandService {
@@ -33,6 +40,16 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   private final GroupsEventPublisher groupsEventPublisher;
   private final MediaServicePort mediaServicePort;
 
+  /**
+   * Constructs a new GroupCommandServiceImpl with the required dependencies.
+   *
+   * @param groupRepository the repository for group persistence operations
+   * @param iamQueryPort the port for querying user information from IAM service
+   * @param leaderRepository the repository for leader persistence operations
+   * @param tasksQueryPort the port for querying task-related information
+   * @param groupsEventPublisher the publisher for domain events
+   * @param mediaServicePort the port for media service operations (image upload/update)
+   */
   public GroupCommandServiceImpl(
       GroupRepository groupRepository,
       IamQueryPort iamQueryPort,
@@ -51,41 +68,42 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   }
 
   /**
-   * Creates a new group for a user.
+   * Creates a new group for a user with leader privileges.
    *
-   * <p>This method validates that the user exists, has a leader profile,
-   * does not already own a group, generates a unique group code,
-   * and persists the new group entity.</p>
+   * <p><b>Business Rules:</b></p>
+   * <ul>
+   *   <li>The user must exist in the system</li>
+   *   <li>The user must have a valid leader profile</li>
+   *   <li>A leader can only own a single group</li>
+   *   <li>The group code must be globally unique</li>
+   *   <li>The group image is uploaded to the media service</li>
+   * </ul>
    *
-   * @param command the create group command containing group name, description,
-   *                image URL, and user ID
-   * @return an Optional containing the created Group or empty if creation fails
-   * @throws UserNotFoundException if the user does not exist
-   * @throws InvalidLeaderException if the user is not a leader
+   * <p><b>Event Published:</b> {@link GroupCreatedEvent} after successful group creation</p>
+   *
+   * @param command the create a group command containing group details and user ID
+   * @return an {@link Optional} containing the created {@link Group} if successful,
+   *         or empty if creation fails
+   * @throws UserNotFoundException if the user does not exist in the system
+   * @throws InvalidLeaderException if the user does not have a leader profile
    * @throws GroupAlreadyExistsException if the leader already owns a group
+   * @throws LeaderNotFoundException if the leader profile exists but is not found in the repository
    */
   @Override
   @Transactional
   public Optional<Group> handle(CreateGroupCommand command) {
 
-    Long leaderId =
-        getExistingLeaderId(command.userId());
+    var leaderContext = getExistingLeader(command.userId());
 
     var leader =
-        leaderRepository
-            .findById(leaderId)
+        leaderRepository.findById(leaderContext.leaderId())
             .orElseThrow(() ->
-                new LeaderNotFoundException(
-                    leaderId
-                )
+                new LeaderNotFoundException(leaderContext.leaderId())
             );
 
-    validateLeaderDoesNotOwnGroup(
-        leaderId
-    );
+    validateLeaderDoesNotOwnGroup(leaderContext.leaderId());
 
-    GroupCode groupCode =
-        generateUniqueGroupCode();
+    GroupCode groupCode = generateUniqueGroupCode();
 
     var imageResponse = mediaServicePort.uploadGroupImage(command.file());
 
@@ -98,8 +116,17 @@ public class GroupCommandServiceImpl implements GroupCommandService {
         groupCode
     );
 
-    var savedGroup =
-        groupRepository.save(group);
+    var savedGroup = groupRepository.save(group);
+
+    var groupCreatedEvent = new GroupCreatedEvent(
+        savedGroup.getName(),
+        savedGroup.getDescription(),
+        savedGroup.getImgUrl().toString(),
+        savedGroup.getCode().toString(),
+        leaderContext.email
+    );
+
+    groupsEventPublisher.publishGroupCreated(groupCreatedEvent);
 
     return Optional.of(savedGroup);
   }
@@ -107,25 +134,30 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   /**
    * Updates an existing group's information.
    *
-   * <p>This method validates that the user is a leader who owns a group,
-   * then updates the group with the information provided in the command.</p>
+   * <p><b>Business Rules:</b></p>
+   * <ul>
+   *   <li>The user must exist and be a valid leader</li>
+   *   <li>The leader must own a group</li>
+   *   <li>If a new image is provided, it will replace the existing one</li>
+   *   <li>Only the group owner can update the group information</li>
+   * </ul>
+   *
+   * <p><b>Note:</b> The group image is updated through the media service,
+   * which handles the upload and returns the new image URL and public ID.</p>
    *
    * @param command the update group command containing new group information
-   *                and user ID
-   * @return an Optional containing the updated Group
-   * @throws UserNotFoundException if the user does not exist
-   * @throws InvalidLeaderException if the user is not a leader
+   * @return an {@link Optional} containing the updated {@link Group}
+   * @throws UserNotFoundException if the user does not exist in the system
+   * @throws InvalidLeaderException if the user does not have a leader profile
    * @throws GroupNotFoundException if the leader does not own any group
    */
   @Override
   @Transactional
   public Optional<Group> handle(UpdateGroupCommand command) {
 
-    Long leaderId =
-        getExistingLeaderId(command.userId());
+    var leaderContext = getExistingLeader(command.userId());
 
-    var group =
-        getLeaderGroup(leaderId);
+    var group = getLeaderGroup(leaderContext.leaderId());
 
     group.updateInformation(command);
 
@@ -154,24 +186,31 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   /**
    * Deletes a group owned by a leader.
    *
-   * <p>This method validates that the user is a leader who owns a group,
-   * removes the group from the repository, and publishes a
-   * {@link GroupDeletedEvent} to notify other services.</p>
+   * <p><b>Business Rules:</b></p>
+   * <ul>
+   *   <li>The user must exist and be a valid leader</li>
+   *   <li>The leader must own a group</li>
+   *   <li>Only the group owner can delete the group</li>
+   * </ul>
+   *
+   * <p><b>Event Published:</b> {@link GroupDeletedEvent} to notify other services
+   * about the group deletion, allowing them to clean up associated resources.</p>
+   *
+   * <p><b>Note:</b> This operation is transactional and will roll back
+   * if any error occurs during the process.</p>
    *
    * @param command the delete group command containing the user ID
-   * @throws UserNotFoundException if the user does not exist
-   * @throws InvalidLeaderException if the user is not a leader
+   * @throws UserNotFoundException if the user does not exist in the system
+   * @throws InvalidLeaderException if the user does not have a leader profile
    * @throws GroupNotFoundException if the leader does not own any group
    */
   @Override
   @Transactional
   public void handle(DeleteGroupCommand command) {
 
-    Long leaderId =
-        getExistingLeaderId(command.userId());
+    var leaderContext = getExistingLeader(command.userId());
 
-    var group =
-        getLeaderGroup(leaderId);
+    var group = getLeaderGroup(leaderContext.leaderId());
 
     groupRepository.delete(group);
 
@@ -186,27 +225,31 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   /**
    * Removes a member from the group owned by the authenticated leader.
    *
-   * <p>This method validates that the leader exists and owns a group,
-   * that the member exists and belongs to the group, then decreases
-   * the group's member count, and publishes a {@link RemoveMemberEvent}.</p>
+   * <p><b>Business Rules:</b></p>
+   * <ul>
+   *   <li>The leader must exist and own a group</li>
+   *   <li>The member must exist in the system</li>
+   *   <li>The member must belong to the leader's group</li>
+   *   <li>The group's member count is decreased by one</li>
+   * </ul>
    *
-   * @param command the remove member command containing leader's user ID
-   *                and the member ID to remove
-   * @throws UserNotFoundException if the user does not exist
+   * <p><b>Event Published:</b> {@link RemoveMemberEvent} to notify the task service
+   * about the member removal, allowing it to update task assignments.</p>
+   *
+   * @param command the remove member command containing leader's user ID and member ID
+   * @throws UserNotFoundException if the leader user does not exist
    * @throws InvalidLeaderException if the user is not a leader
    * @throws GroupNotFoundException if the leader does not own any group
-   * @throws MemberNotFoundException if the member does not exist
-   * @throws InvalidGroupException if the member does not belong to the group
+   * @throws MemberNotFoundException if the member does not exist in the system
+   * @throws InvalidGroupException if the member does not belong to the leader's group
    */
   @Override
   @Transactional
   public void handle(RemoveMemberFromMyGroupCommand command) {
 
-    Long leaderId =
-        getExistingLeaderId(command.userId());
+    var leaderContext = getExistingLeader(command.userId());
 
-    var group =
-        getLeaderGroup(leaderId);
+    var group = getLeaderGroup(leaderContext.leaderId());
 
     var member =
         tasksQueryPort.getMemberOnlyById(
@@ -232,10 +275,18 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   }
 
   /**
-   * Handles a member leaving a group.
+   * Handles a member voluntarily leaving a group.
    *
-   * <p>This method finds the group by ID and decreases its member count.
-   * No validation is performed on the member as this is handled at the controller level.</p>
+   * <p><b>Business Rules:</b></p>
+   * <ul>
+   *   <li>The group must exist in the system</li>
+   *   <li>The member count is decreased by one</li>
+   * </ul>
+   *
+   * <p><b>Note:</b> Unlike {@link #handle(RemoveMemberFromMyGroupCommand)},
+   * this method does not validate the member's existence as this is handled
+   * at the controller level. This is a self-service operation where the member
+   * initiates the leave action.</p>
    *
    * @param command the leave group command containing the group ID
    * @throws GroupNotFoundException if the group does not exist
@@ -257,42 +308,45 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   }
 
   /**
-   * Retrieves an existing leader ID from a user ID.
+   * Retrieves an existing leader's context from a user ID.
    *
-   * <p>This method validates that the user exists and has an associated
-   * leader profile.</p>
+   * <p>This method performs two validations:</p>
+   * <ol>
+   *   <li>Verifies that the user exists in the IAM service</li>
+   *   <li>Verifies that the user has an associated leader profile</li>
+   * </ol>
    *
    * @param userId the user ID to look up
-   * @return the associated leader ID
-   * @throws UserNotFoundException if the user does not exist
+   * @return a {@link LeaderContext} containing the leader ID and email
+   * @throws UserNotFoundException if the user does not exist in the system
    * @throws InvalidLeaderException if the user does not have a leader profile
    */
-  private Long getExistingLeaderId(
-      Long userId
-  ) {
+  private LeaderContext getExistingLeader(Long userId) {
 
-    var user =
-        iamQueryPort.getUserOnlyById(userId);
+    var user = iamQueryPort.getUserOnlyById(userId);
 
     if (user == null) {
-      throw UserNotFoundException.forId(
-          userId
-      );
+      throw UserNotFoundException.forId(userId);
     }
 
     if (user.leaderId() == null) {
-      throw InvalidLeaderException
-          .forUserIsNotLeader(userId);
+      throw InvalidLeaderException.forUserIsNotLeader(userId);
     }
 
-    return user.leaderId();
+    return new LeaderContext(
+        user.leaderId(),
+        user.email()
+    );
   }
 
   /**
    * Retrieves the group owned by a specific leader.
    *
+   * <p>This method assumes the leader exists and is valid.
+   * It performs a direct lookup of the group associated with the leader ID.</p>
+   *
    * @param leaderId the leader ID whose group to retrieve
-   * @return the Group owned by the leader
+   * @return the {@link Group} owned by the leader
    * @throws GroupNotFoundException if no group is found for the leader
    */
   private Group getLeaderGroup(
@@ -310,6 +364,9 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
   /**
    * Validates that a leader does not already own a group.
+   *
+   * <p>This method is primarily used during group creation to enforce
+   * the business rule that a leader can only own one group.</p>
    *
    * @param leaderId the leader ID to validate
    * @throws GroupAlreadyExistsException if the leader already owns a group
@@ -333,9 +390,15 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   /**
    * Generates a unique group of code that does not already exist in the repository.
    *
-   * <p>This method continuously generates random group codes until a unique one is found.</p>
+   * <p>This method uses a do-while loop to continuously generate random
+   * group codes until a unique one is found. The uniqueness is guaranteed
+   * by checking against the existing codes in the repository.</p>
    *
-   * @return a unique GroupCode value object
+   * <p><b>Performance Note:</b> The probability of collision is extremely low
+   * due to the random nature of the code generation, making this approach
+   * efficient in practice.</p>
+   *
+   * @return a unique {@link GroupCode} value object
    */
   private GroupCode generateUniqueGroupCode() {
 
@@ -355,10 +418,14 @@ public class GroupCommandServiceImpl implements GroupCommandService {
   /**
    * Validates that a member belongs to a specific group.
    *
+   * <p>This method performs a business rule validation to ensure
+   * that a member is correctly associated with a group before
+   * performing operations like member removal.</p>
+   *
    * @param memberGroupId the group ID associated with the member
-   * @param groupId the expected group ID
-   * @param memberId the member ID (used for an exception message)
-   * @throws InvalidGroupException if the member's group ID does not match the expected group ID
+   * @param groupId the expected group ID that the member should belong to
+   * @param memberId the member ID (used for constructing an exception message)
+   * @throws InvalidGroupException if the member's group ID is null or doesn't match
    */
   private void validateMemberBelongsToGroup(
       Long memberGroupId,
@@ -378,4 +445,18 @@ public class GroupCommandServiceImpl implements GroupCommandService {
           );
     }
   }
+
+  /**
+   * Internal record representing the leader context.
+   *
+   * <p>This record aggregates the leader ID and email for use within
+   * the service methods, reducing the need for multiple service calls.</p>
+   *
+   * @param leaderId the unique identifier of the leader
+   * @param email the email address of the leader
+   */
+  private record LeaderContext(
+      Long leaderId,
+      String email
+  ) {}
 }
