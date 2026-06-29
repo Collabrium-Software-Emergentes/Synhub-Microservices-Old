@@ -13,7 +13,8 @@ public class DeleteGroupImageCommandFromEventAssembler {
   ) {
 
     return new DeleteGroupImageCommand(
-        event.groupId()
+        event.groupId(),
+        event.publicId()
     );
   }
 }
