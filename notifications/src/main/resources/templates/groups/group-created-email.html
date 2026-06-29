@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupo Creado</title>
+</head>
+
+<body style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+             background-color:#f4f7f6;
+             margin:0;
+             padding:0;
+             -webkit-font-smoothing:antialiased;">
+
+<div style="padding:20px 0;">
+
+    <table role="presentation"
+           style="width:100%;
+                  max-width:700px;
+                  margin:0 auto;
+                  background-color:#ffffff;
+                  border-radius:8px;
+                  overflow:hidden;
+                  border-collapse:collapse;
+                  border:none;">
+
+        <!-- HEADER / BANNER -->
+        <tr>
+            <td style="text-align:center; padding:0;">
+
+                <img th:src="${groupImage}"
+                     alt="Imagen del grupo"
+                     style="width:100%;
+                            max-height:220px;
+                            object-fit:cover;
+                            display:block;">
+
+            </td>
+        </tr>
+
+        <!-- TITLE -->
+        <tr>
+            <td style="padding:30px 30px 10px 30px;
+                       text-align:center;">
+
+                <h1 style="margin:0;
+                           color:#2c3e50;
+                           font-size:26px;">
+                    ¡Tu grupo está listo!
+                </h1>
+
+                <p style="margin:10px 0 0 0;
+                          color:#555555;
+                          font-size:16px;">
+                    <strong th:text="${groupName}">Nombre del grupo</strong> ya está activo
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- DESCRIPTION -->
+        <tr>
+            <td style="padding:10px 30px 20px 30px;
+                       text-align:center;
+                       color:#666666;
+                       font-size:14px;
+                       line-height:1.5;">
+
+                <p style="margin:0;">
+                    <span th:text="${groupDescription}">
+                        Descripción del grupo
+                    </span>
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- GROUP CODE CARD -->
+        <tr>
+            <td style="padding:20px 30px;">
+
+                <div style="background-color:#e8f4fd;
+                            border-radius:12px;
+                            padding:20px;
+                            text-align:center;
+                            border:1px solid #d0e8ff;">
+
+                    <p style="margin:0;
+                              font-size:13px;
+                              color:#2c3e50;">
+                        Comparte este código para que otros se unan
+                    </p>
+
+                    <p style="margin:10px 0 0 0;
+                              font-size:28px;
+                              font-weight:bold;
+                              letter-spacing:3px;
+                              color:#1a4e85;
+                              font-family:monospace;">
+
+                        <span th:text="${groupCode}">
+                            ABC123
+                        </span>
+
+                    </p>
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- CTA BUTTON -->
+        <tr>
+            <td style="text-align:center; padding:10px 30px 30px 30px;">
+
+                <a th:href="${groupUrl}"
+                   style="display:inline-block;
+                          background-color:#4a90e2;
+                          color:#ffffff;
+                          padding:14px 28px;
+                          border-radius:8px;
+                          text-decoration:none;
+                          font-weight:bold;
+                          font-size:14px;">
+
+                    Ir al grupo
+
+                </a>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="background-color:#f9f9f9;
+                       color:#777777;
+                       padding:20px;
+                       text-align:center;
+                       font-size:12px;
+                       border-top:1px solid #eeeeee;">
+
+                <p style="margin:0 0 10px 0;">
+                    &copy; 2026 SynHub. Todos los derechos reservados.
+                </p>
+
+                <p style="margin:0;">
+                    Este es un mensaje automático de bienvenida a tu grupo.
+                </p>
+
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>
