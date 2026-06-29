@@ -1,0 +1,25 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    root: INFO
+    org.springframework.amqp: DEBUG
+    org.springframework.mail: DEBUG
+    com.example.notification: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env,configprops,beans,mappings,loggers,threaddump,heapdump
+
+  endpoint:
+    health:
+      show-details: always
+
+  info:
+    env:
+      enabled: true

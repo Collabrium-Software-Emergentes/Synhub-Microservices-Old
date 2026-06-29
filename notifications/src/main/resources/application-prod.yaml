@@ -1,0 +1,25 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    org.springframework.amqp: WARN
+    org.springframework.mail: WARN
+    com.example.notification: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+  endpoint:
+    health:
+      show-details: never
+
+  info:
+    env:
+      enabled: false
