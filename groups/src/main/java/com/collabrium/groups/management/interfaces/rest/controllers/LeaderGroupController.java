@@ -60,13 +60,15 @@ public class LeaderGroupController {
     return ResponseEntity.ok(groupResource);
   }
 
-  @PutMapping
+  @PutMapping(
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
   @Operation(
       summary = "Update a group",
       description = "Updates the authenticated leader group"
   )
   public ResponseEntity<GroupResource> updateGroup(
-      @RequestBody UpdateGroupResource updateGroupResource,
+      @ModelAttribute UpdateGroupResource updateGroupResource,
       @AuthenticationPrincipal AuthenticatedUser user
   ) {
 

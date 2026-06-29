@@ -19,7 +19,12 @@ public class MediaServiceAdapter implements MediaServicePort {
   }
 
   @Override
-  public ImageUploadResource uploadImage(MultipartFile file) {
-    return client.uploadMedia(file);
+  public ImageUploadResource uploadGroupImage(MultipartFile file) {
+    return client.uploadGroupImage(file);
+  }
+
+  @Override
+  public ImageUploadResource updateGroupImage(MultipartFile file, Long groupId) {
+    return client.updateGroupImage(groupId, file);
   }
 }

@@ -65,6 +65,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
    * @throws GroupAlreadyExistsException if the leader already owns a group
    */
   @Override
+  @Transactional
   public Optional<Group> handle(CreateGroupCommand command) {
 
     Long leaderId =
@@ -86,7 +87,7 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     GroupCode groupCode =
         generateUniqueGroupCode();
 
-    var imageResponse = mediaServicePort.uploadImage(command.file());
+    var imageResponse = mediaServicePort.uploadGroupImage(command.file());
 
     var group = new Group(
         command.name(),
@@ -127,6 +128,22 @@ public class GroupCommandServiceImpl implements GroupCommandService {
         getLeaderGroup(leaderId);
 
     group.updateInformation(command);
+
+    if (command.file() != null &&
+        !command.file().isEmpty()) {
+
+      var imageResponse =
+          mediaServicePort
+              .updateGroupImage(
+                  command.file(),
+                  group.getId()
+              );
+
+      group.updateImage(
+          imageResponse.imageUrl(),
+          imageResponse.publicId()
+      );
+    }
 
     var updatedGroup =
         groupRepository.save(group);

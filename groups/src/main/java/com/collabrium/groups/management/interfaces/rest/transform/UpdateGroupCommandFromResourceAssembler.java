@@ -17,7 +17,7 @@ public class UpdateGroupCommandFromResourceAssembler {
         userId,
         resource.name(),
         resource.description(),
-        resource.imgUrl()
+        resource.file()
     );
   }
 }

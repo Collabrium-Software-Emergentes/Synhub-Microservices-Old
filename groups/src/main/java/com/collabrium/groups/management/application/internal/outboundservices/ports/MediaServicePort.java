@@ -5,5 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface MediaServicePort {
 
-  ImageUploadResource uploadImage(MultipartFile file);
+  ImageUploadResource uploadGroupImage(MultipartFile file);
+
+  ImageUploadResource updateGroupImage(MultipartFile file, Long groupId);
 }
