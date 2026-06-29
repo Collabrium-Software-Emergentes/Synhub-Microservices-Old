@@ -40,26 +40,31 @@ public class ImageCommandServiceImpl implements ImageCommandService {
 
     try {
 
+      if (group.publicId() != null &&
+          !group.publicId().isBlank()) {
+
+        cloudinary.uploader().destroy(
+            group.publicId(),
+            ObjectUtils.asMap(
+                "resource_type", "image"
+            )
+        );
+      }
+
       Map<String, Object> result =
           cloudinary.uploader().upload(
               command.file().getBytes(),
               ObjectUtils.asMap(
                   "folder", "synhub/groups",
-                  "resource_type", "image",
-                  "overwrite", true
+                  "public_id", UUID.randomUUID().toString(),
+                  "resource_type", "image"
               )
           );
 
-      var imageResponse = mapResponse(result);
-
-      return Optional.of(imageResponse);
+      return Optional.of(mapResponse(result));
 
     } catch (Exception e) {
-
-      throw new RuntimeException(
-          "Error uploading image: " + e.getMessage(),
-          e
-      );
+      throw new RuntimeException(e);
     }
   }
 
