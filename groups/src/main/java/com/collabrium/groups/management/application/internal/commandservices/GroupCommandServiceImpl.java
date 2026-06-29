@@ -156,13 +156,13 @@ public class GroupCommandServiceImpl implements GroupCommandService {
     var group =
         getLeaderGroup(leaderId);
 
-    Long groupId =
-        group.getId();
-
     groupRepository.delete(group);
 
     groupsEventPublisher.publishGroupDeleted(
-        new GroupDeletedEvent(groupId)
+        new GroupDeletedEvent(
+            group.getId(),
+            group.getPublicId()
+        )
     );
   }
 
