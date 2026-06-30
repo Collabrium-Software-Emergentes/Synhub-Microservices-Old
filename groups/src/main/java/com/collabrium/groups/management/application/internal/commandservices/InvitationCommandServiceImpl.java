@@ -129,6 +129,7 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
             group.getId(),
             memberId.value(),
             group.getName(),
+            group.getDescription(),
             group.getImgUrl().toString(),
             group.getCode().toString(),
             userMember.email()

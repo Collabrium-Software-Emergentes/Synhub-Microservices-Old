@@ -4,6 +4,7 @@ public record InvitationAcceptedEvent(
     Long groupId,
     Long memberId,
     String groupName,
+    String groupDescription,
     String groupImgUrl,
     String groupCode,
     String memberEmail
