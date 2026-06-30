@@ -1,0 +1,40 @@
+package com.collabrium.notifications.management.infrastructure.email;
+
+import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+@Component
+public class EmailTemplateFactory {
+
+  private final TemplateEngine templateEngine;
+
+  public EmailTemplateFactory(
+      TemplateEngine templateEngine
+  ) {
+
+    this.templateEngine = templateEngine;
+  }
+
+  public String buildGroupCreatedEmailTemplate(
+      String groupName,
+      String groupDescription,
+      String groupImageUrl,
+      String code
+  ) {
+
+    String groupUrl = "synhub://group/" + code;
+
+    Context context = new Context();
+    context.setVariable("groupName", groupName);
+    context.setVariable("groupDescription", groupDescription);
+    context.setVariable("groupImage", groupImageUrl);
+    context.setVariable("groupCode", code);
+    context.setVariable("groupUrl", groupUrl);
+
+    return templateEngine.process(
+        "groups/group-created-email",
+        context
+    );
+  }
+}
