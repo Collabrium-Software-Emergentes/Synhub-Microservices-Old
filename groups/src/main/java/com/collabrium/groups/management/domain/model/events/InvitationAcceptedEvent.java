@@ -2,6 +2,10 @@ package com.collabrium.groups.management.domain.model.events;
 
 public record InvitationAcceptedEvent(
     Long groupId,
-    Long memberId
+    Long memberId,
+    String groupName,
+    String groupImgUrl,
+    String groupCode,
+    String memberEmail
 ) {
 }
