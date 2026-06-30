@@ -9,4 +9,11 @@ public interface SendEmailService {
       String groupImage,
       String code
   );
+
+  void sendInvitationAcceptedEmail(
+      String to,
+      String groupName,
+      String groupImage,
+      String code
+  );
 }

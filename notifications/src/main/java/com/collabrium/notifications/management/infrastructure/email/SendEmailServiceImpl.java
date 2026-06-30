@@ -71,4 +71,9 @@ public class SendEmailServiceImpl implements SendEmailService {
       );
     }
   }
+
+  @Override
+  public void sendInvitationAcceptedEmail(String to, String groupName, String groupImage, String code) {
+
+  }
 }
