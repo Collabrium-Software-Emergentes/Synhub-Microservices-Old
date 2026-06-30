@@ -13,6 +13,7 @@ public interface SendEmailService {
   void sendInvitationAcceptedEmail(
       String to,
       String groupName,
+      String groupDescription,
       String groupImage,
       String code
   );
