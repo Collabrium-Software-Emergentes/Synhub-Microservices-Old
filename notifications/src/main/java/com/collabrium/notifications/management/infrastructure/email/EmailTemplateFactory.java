@@ -26,6 +26,7 @@ public class EmailTemplateFactory {
     String groupUrl = "synhub://group/" + code;
 
     Context context = new Context();
+
     context.setVariable("groupName", groupName);
     context.setVariable("groupDescription", groupDescription);
     context.setVariable("groupImage", groupImageUrl);
@@ -34,6 +35,26 @@ public class EmailTemplateFactory {
 
     return templateEngine.process(
         "groups/group-created-email",
+        context
+    );
+  }
+
+  public String buildInvitationAcceptedEmailTemplate(
+      String groupName,
+      String groupDescription,
+      String groupImageUrl,
+      String code
+  ) {
+
+    Context context = new Context();
+
+    context.setVariable("groupName", groupName);
+    context.setVariable("groupDescription", groupDescription);
+    context.setVariable("groupImage", groupImageUrl);
+    context.setVariable("groupCode", code);
+
+    return templateEngine.process(
+        "groups/member-accepted-email",
         context
     );
   }

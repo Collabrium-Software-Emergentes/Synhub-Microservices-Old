@@ -1,8 +1,6 @@
-package com.collabrium.groups.management.domain.model.events;
+package com.collabrium.notifications.management.domain.model.events;
 
 public record InvitationAcceptedEvent(
-    Long groupId,
-    Long memberId,
     String groupName,
     String groupDescription,
     String groupImgUrl,

@@ -34,6 +34,7 @@ public class SendEmailServiceImpl implements SendEmailService {
       String groupImage,
       String code
   ) {
+
     try {
 
       MimeMessage message = mailSender.createMimeMessage();
@@ -67,6 +68,54 @@ public class SendEmailServiceImpl implements SendEmailService {
     } catch (MessagingException e) {
       throw new RuntimeException(
           "Error sending email",
+          e
+      );
+    }
+  }
+
+  @Override
+  public void sendInvitationAcceptedEmail(
+      String to,
+      String groupName,
+      String groupDescription,
+      String groupImage,
+      String code
+  ) {
+
+    try {
+
+      MimeMessage message = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              "UTF-8"
+          );
+
+      String html =
+          emailTemplateFactory
+              .buildInvitationAcceptedEmailTemplate(
+                  groupName,
+                  groupDescription,
+                  groupImage,
+                  code
+              );
+
+      helper.setFrom(from);
+      helper.setTo(to);
+      helper.setSubject(
+          "Welcome to " + groupName + "! 🎉"
+      );
+
+      helper.setText(html, true);
+
+      mailSender.send(message);
+
+    } catch (MessagingException e) {
+
+      throw new RuntimeException(
+          "Error sending invitation accepted email",
           e
       );
     }
