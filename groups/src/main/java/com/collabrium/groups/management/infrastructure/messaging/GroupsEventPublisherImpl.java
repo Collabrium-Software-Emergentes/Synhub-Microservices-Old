@@ -1,10 +1,7 @@
 package com.collabrium.groups.management.infrastructure.messaging;
 
 import com.collabrium.groups.management.application.internal.outboundservices.messaging.GroupsEventPublisher;
-import com.collabrium.groups.management.domain.model.events.GroupDeletedEvent;
-import com.collabrium.groups.management.domain.model.events.InvitationAcceptedEvent;
-import com.collabrium.groups.management.domain.model.events.LeaderCreatedEvent;
-import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
+import com.collabrium.groups.management.domain.model.events.*;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 
@@ -58,6 +55,16 @@ public class GroupsEventPublisherImpl implements GroupsEventPublisher {
     rabbitTemplate.convertAndSend(
         GROUPS_EXCHANGE,
         GROUP_DELETED_KEY,
+        event
+    );
+  }
+
+  @Override
+  public void publishGroupCreated(GroupCreatedEvent event) {
+
+    rabbitTemplate.convertAndSend(
+        GROUPS_EXCHANGE,
+        GROUP_CREATED_KEY,
         event
     );
   }
