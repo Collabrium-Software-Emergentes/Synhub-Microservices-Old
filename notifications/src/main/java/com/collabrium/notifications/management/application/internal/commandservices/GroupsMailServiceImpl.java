@@ -33,5 +33,12 @@ public class GroupsMailServiceImpl implements GroupsMailService {
   @Override
   public void handle(SendInvitationAcceptedEmailCommand command) {
 
+    sendEmailService.sendInvitationAcceptedEmail(
+        command.memberEmail(),
+        command.groupName(),
+        command.groupDescription(),
+        command.groupImgUrl(),
+        command.groupCode()
+    );
   }
 }
