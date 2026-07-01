@@ -28,6 +28,7 @@ public class RabbitMQConfiguration {
   public static final String MEMBER_REMOVED_FROM_GROUP_KEY = "member.removed.from.group";
   public static final String GROUP_DELETED_KEY = "group.deleted";
   public static final String GROUP_CREATED_KEY = "group.created";
+  public static final String INVITATION_CREATED_KEY = "invitation.created";
 
   // =========================
   // QUEUES
