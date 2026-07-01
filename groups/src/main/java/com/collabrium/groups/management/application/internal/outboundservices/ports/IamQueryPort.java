@@ -7,4 +7,6 @@ public interface IamQueryPort {
   UserOnlyResource getUserOnlyById(Long id);
   
   UserOnlyResource getUserByMemberId(Long memberId);
+
+  UserOnlyResource getUserByLeaderId(Long leaderId);
 }
