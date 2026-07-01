@@ -26,4 +26,12 @@ public interface SendEmailService {
       String memberImgUrl,
       String memberEmail
   );
+
+  void sendRemoveMemberFromGroupEmail(
+      String to,
+      String groupName,
+      String groupImageUrl,
+      String groupCode,
+      String leaderEmail
+  );
 }
