@@ -269,8 +269,17 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
     group.decreaseMemberCount();
 
+    var memberUserInfo = iamQueryPort.getUserByMemberId(command.memberId());
+
     groupsEventPublisher.publishMemberRemovedFromGroup(
-        new RemoveMemberEvent(command.memberId())
+        new RemoveMemberEvent(
+            command.memberId(),
+            memberUserInfo.email(),
+            group.getName(),
+            group.getImgUrl().toString(),
+            group.getCode().toString(),
+            leaderContext.email
+        )
     );
   }
 
