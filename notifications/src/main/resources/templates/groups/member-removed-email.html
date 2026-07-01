@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Membership Update</title>
+</head>
+
+<body style="
+        font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+        background-color:#f4f7f6;
+        margin:0;
+        padding:0;
+        -webkit-font-smoothing:antialiased;">
+
+<div style="padding:20px 0;">
+
+    <table role="presentation"
+           style="
+                width:100%;
+                max-width:700px;
+                margin:0 auto;
+                background-color:#ffffff;
+                border-radius:8px;
+                overflow:hidden;
+                border-collapse:collapse;">
+
+        <!-- IMAGE -->
+        <tr>
+            <td style="padding:0; text-align:center;">
+
+                <img th:src="${groupImage}"
+                     alt="Group image"
+                     style="
+                            width:100%;
+                            max-height:220px;
+                            object-fit:cover;
+                            display:block;">
+
+            </td>
+        </tr>
+
+        <!-- TITLE -->
+        <tr>
+            <td style="
+                    padding:35px 30px 10px 30px;
+                    text-align:center;">
+
+                <h1 style="
+                        margin:0;
+                        color:#2c3e50;
+                        font-size:28px;">
+
+                    Membership Update
+
+                </h1>
+
+                <p style="
+                        margin:15px 0 0 0;
+                        color:#555555;
+                        font-size:18px;">
+
+                    You are no longer a member of
+
+                    <strong
+                            th:text="${groupName}"
+                            style="color:#1a4e85;">
+
+                        Group Name
+
+                    </strong>
+
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- MESSAGE -->
+        <tr>
+            <td style="
+                    padding:10px 40px 25px 40px;
+                    text-align:center;
+                    color:#666666;
+                    font-size:15px;
+                    line-height:1.7;">
+
+                <p style="margin:0 0 15px 0;">
+
+                    We would like to inform you that your
+                    membership in this group has been removed.
+
+                </p>
+
+                <p style="margin:0;">
+
+                    You no longer have access to the group's
+                    activities, members, and shared resources.
+
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- GROUP IDENTIFIER -->
+        <tr>
+            <td style="padding:10px 30px 30px 30px;">
+
+                <div style="
+                        background-color:#f8f9fb;
+                        border-radius:12px;
+                        padding:25px;
+                        text-align:center;
+                        border:1px solid #eceff3;">
+
+                    <p style="
+                            margin:0;
+                            color:#2c3e50;
+                            font-size:14px;
+                            font-weight:600;">
+
+                        Former Group Identifier
+
+                    </p>
+
+                    <p style="
+                            margin:15px 0;
+                            font-size:32px;
+                            font-weight:bold;
+                            letter-spacing:4px;
+                            color:#c0392b;
+                            font-family:monospace;">
+
+                        <span th:text="${groupCode}">
+                            ABC123
+                        </span>
+
+                    </p>
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- CONTACT -->
+        <tr>
+            <td style="
+                    padding:0 40px 35px 40px;
+                    text-align:center;">
+
+                <div style="
+                        background-color:#fff8e7;
+                        border:1px solid #f0d98a;
+                        border-radius:10px;
+                        padding:20px;">
+
+                    <p style="
+                            margin:0;
+                            color:#555555;
+                            font-size:14px;">
+
+                        If you believe this action was made
+                        in error, please contact the group
+                        administrator:
+
+                    </p>
+
+                    <p style="
+                            margin:10px 0 0 0;
+                            color:#1a4e85;
+                            font-size:15px;
+                            font-weight:bold;">
+
+                        <span th:text="${leaderEmail}">
+                            leader@email.com
+                        </span>
+
+                    </p>
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="
+                    background-color:#f9f9f9;
+                    color:#777777;
+                    padding:20px;
+                    text-align:center;
+                    font-size:12px;
+                    border-top:1px solid #eeeeee;">
+
+                <p style="margin:0 0 10px 0;">
+                    &copy; 2026 SynHub. All rights reserved.
+                </p>
+
+                <p style="margin:0;">
+                    This is an automated membership notification.
+                </p>
+
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>

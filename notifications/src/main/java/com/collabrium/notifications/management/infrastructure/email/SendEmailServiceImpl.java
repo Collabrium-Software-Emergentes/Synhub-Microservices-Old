@@ -155,7 +155,7 @@ public class SendEmailServiceImpl implements SendEmailService {
       helper.setFrom(from);
       helper.setTo(to);
       helper.setSubject(
-          "New membership request from @" + memberUsername
+          "New member request from @" + memberUsername
       );
 
       helper.setText(html, true);
@@ -166,6 +166,57 @@ public class SendEmailServiceImpl implements SendEmailService {
 
       throw new RuntimeException(
           "Error sending invitation created email",
+          e
+      );
+    }
+  }
+
+  @Override
+  public void sendRemoveMemberFromGroupEmail(
+      String to,
+      String groupName,
+      String groupImageUrl,
+      String groupCode,
+      String leaderEmail
+  ) {
+
+    try {
+
+      MimeMessage message = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              "UTF-8"
+          );
+
+      String html =
+          emailTemplateFactory
+              .buildRemoveMemberFromGroupEmailTemplate(
+                  groupName,
+                  groupImageUrl,
+                  groupCode,
+                  leaderEmail
+              );
+
+      helper.setFrom(from);
+      helper.setTo(to);
+      helper.setSubject(
+          "Member status update for " + groupName
+      );
+
+      helper.setText(
+          html,
+          true
+      );
+
+      mailSender.send(message);
+
+    } catch (MessagingException e) {
+
+      throw new RuntimeException(
+          "Error sending member removal email",
           e
       );
     }

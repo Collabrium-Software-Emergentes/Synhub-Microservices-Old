@@ -80,4 +80,24 @@ public class EmailTemplateFactory {
         context
     );
   }
+
+  public String buildRemoveMemberFromGroupEmailTemplate(
+      String groupName,
+      String groupImageUrl,
+      String groupCode,
+      String leaderEmail
+  ) {
+
+    Context context = new Context();
+
+    context.setVariable("groupName", groupName);
+    context.setVariable("groupImage", groupImageUrl);
+    context.setVariable("groupCode", groupCode);
+    context.setVariable("leaderEmail", leaderEmail);
+
+    return templateEngine.process(
+        "groups/member-removed-email",
+        context
+    );
+  }
 }

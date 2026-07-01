@@ -3,10 +3,12 @@ package com.collabrium.notifications.management.interfaces.messaging.listeners;
 import com.collabrium.notifications.management.domain.model.events.GroupCreatedEvent;
 import com.collabrium.notifications.management.domain.model.events.InvitationAcceptedEvent;
 import com.collabrium.notifications.management.domain.model.events.InvitationCreatedEvent;
+import com.collabrium.notifications.management.domain.model.events.RemoveMemberEvent;
 import com.collabrium.notifications.management.domain.services.GroupsMailService;
 import com.collabrium.notifications.management.interfaces.messaging.transform.SendGroupCreatedEmailCommandFromEventAssembler;
 import com.collabrium.notifications.management.interfaces.messaging.transform.SendInvitationAcceptedEmailCommandFromEventAssembler;
 import com.collabrium.notifications.management.interfaces.messaging.transform.SendInvitationCreatedEmailCommandFromEventAssembler;
+import com.collabrium.notifications.management.interfaces.messaging.transform.SendRemoveMemberEmailCommandFromEventAssembler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -49,5 +51,14 @@ public class GroupsEventsListeners {
         SendInvitationCreatedEmailCommandFromEventAssembler.toCommandFromEvent(event);
 
     groupsMailService.handle(sendInvitationCreatedEmailCommand);
+  }
+
+  @RabbitListener(queues = MEMBER_REMOVED_FROM_GROUP_QUEUE)
+  public void handle(RemoveMemberEvent event) {
+
+    var sendRemoveMemberEmailCommand =
+        SendRemoveMemberEmailCommandFromEventAssembler.toCommandFromEvent(event);
+
+    groupsMailService.handle(sendRemoveMemberEmailCommand);
   }
 }

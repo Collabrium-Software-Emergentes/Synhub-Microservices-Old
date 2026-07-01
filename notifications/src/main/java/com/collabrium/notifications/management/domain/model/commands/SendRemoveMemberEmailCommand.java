@@ -1,7 +1,6 @@
-package com.collabrium.groups.management.domain.model.events;
+package com.collabrium.notifications.management.domain.model.commands;
 
-public record RemoveMemberEvent(
-    Long memberId,
+public record SendRemoveMemberEmailCommand(
     String memberEmail,
     String groupName,
     String groupImageUrl,
