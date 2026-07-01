@@ -3,6 +3,7 @@ package com.collabrium.notifications.management.application.internal.commandserv
 import com.collabrium.notifications.management.application.internal.outboundservices.email.SendEmailService;
 import com.collabrium.notifications.management.domain.model.commands.SendGroupCreatedEmailCommand;
 import com.collabrium.notifications.management.domain.model.commands.SendInvitationAcceptedEmailCommand;
+import com.collabrium.notifications.management.domain.model.commands.SendInvitationCreatedEmailCommand;
 import com.collabrium.notifications.management.domain.services.GroupsMailService;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,19 @@ public class GroupsMailServiceImpl implements GroupsMailService {
         command.groupDescription(),
         command.groupImgUrl(),
         command.groupCode()
+    );
+  }
+
+  @Override
+  public void handle(SendInvitationCreatedEmailCommand command) {
+
+    sendEmailService.sendInvitationCreatedEmail(
+        command.leaderEmail(),
+        command.memberUsername(),
+        command.memberName(),
+        command.memberSurname(),
+        command.memberImgUrl(),
+        command.memberEmail()
     );
   }
 }
