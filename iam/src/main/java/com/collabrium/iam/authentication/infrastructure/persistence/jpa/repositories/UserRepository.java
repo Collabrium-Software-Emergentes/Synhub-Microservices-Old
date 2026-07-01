@@ -1,6 +1,7 @@
 package com.collabrium.iam.authentication.infrastructure.persistence.jpa.repositories;
 
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
+import com.collabrium.iam.authentication.domain.model.valueobjects.LeaderId;
 import com.collabrium.iam.authentication.domain.model.valueobjects.MemberId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,6 +34,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
    * @return The user object.
    */
   Optional<User> findByMemberId(MemberId memberId);
+
+  Optional<User> findByLeaderId(LeaderId leaderId);
 
   @Query("""
       SELECT u
