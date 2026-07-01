@@ -68,4 +68,14 @@ public class GroupsEventPublisherImpl implements GroupsEventPublisher {
         event
     );
   }
+
+  @Override
+  public void publishInvitationCreated(InvitationCreatedEvent event) {
+
+    rabbitTemplate.convertAndSend(
+        GROUPS_EXCHANGE,
+        INVITATION_CREATED_KEY,
+        event
+    );
+  }
 }

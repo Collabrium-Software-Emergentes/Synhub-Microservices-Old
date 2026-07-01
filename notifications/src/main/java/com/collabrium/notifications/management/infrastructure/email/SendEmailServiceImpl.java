@@ -120,4 +120,54 @@ public class SendEmailServiceImpl implements SendEmailService {
       );
     }
   }
+
+  @Override
+  public void sendInvitationCreatedEmail(
+      String to,
+      String memberUsername,
+      String memberName,
+      String memberSurname,
+      String memberImgUrl,
+      String memberEmail
+  ) {
+
+    try {
+
+      MimeMessage message = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              "UTF-8"
+          );
+
+      String html =
+          emailTemplateFactory
+              .buildInvitationCreatedEmailTemplate(
+                  memberUsername,
+                  memberName,
+                  memberSurname,
+                  memberImgUrl,
+                  memberEmail
+              );
+
+      helper.setFrom(from);
+      helper.setTo(to);
+      helper.setSubject(
+          "New membership request from @" + memberUsername
+      );
+
+      helper.setText(html, true);
+
+      mailSender.send(message);
+
+    } catch (MessagingException e) {
+
+      throw new RuntimeException(
+          "Error sending invitation created email",
+          e
+      );
+    }
+  }
 }

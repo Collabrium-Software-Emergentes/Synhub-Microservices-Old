@@ -13,4 +13,6 @@ public interface GroupsEventPublisher {
   void publishGroupDeleted(GroupDeletedEvent event);
 
   void publishGroupCreated(GroupCreatedEvent event);
+
+  void publishInvitationCreated(InvitationCreatedEvent event);
 }

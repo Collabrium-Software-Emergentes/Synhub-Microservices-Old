@@ -21,12 +21,14 @@ public class RabbitMQConfig {
   // =========================
   public static final String GROUP_CREATED_KEY = "group.created";
   public static final String INVITATION_ACCEPTED_KEY = "invitation.accepted";
+  public static final String INVITATION_CREATED_KEY = "invitation.created";
 
   // =========================
   // QUEUES
   // =========================
   public static final String GROUP_CREATED_QUEUE = "groups.group.created.queue";
   public static final String INVITATION_ACCEPTED_QUEUE = "groups.invitation.accepted.queue";
+  public static final String INVITATION_CREATED_QUEUE = "groups.invitation.created.queue";
 
   // =========================
   // EXCHANGE BEANS
@@ -47,6 +49,10 @@ public class RabbitMQConfig {
   @Bean
   public Queue invitationAcceptedQueue() {
     return new Queue(INVITATION_ACCEPTED_QUEUE);
+  }
+
+  @Bean Queue invitationCreatedQueue() {
+    return new Queue(INVITATION_CREATED_QUEUE);
   }
 
   // =========================
@@ -72,6 +78,17 @@ public class RabbitMQConfig {
         .bind(invitationAcceptedQueue)
         .to(groupsExchange)
         .with(INVITATION_ACCEPTED_KEY);
+  }
+
+  @Bean
+  public Binding invitationCreatedBinding(
+      Queue invitationCreatedQueue,
+      TopicExchange groupsExchange
+  ) {
+    return BindingBuilder
+        .bind(invitationCreatedQueue)
+        .to(groupsExchange)
+        .with(INVITATION_CREATED_KEY);
   }
 
   @Bean

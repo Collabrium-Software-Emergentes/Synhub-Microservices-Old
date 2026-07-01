@@ -26,4 +26,9 @@ public class IamQueryAdapter implements IamQueryPort {
   public UserOnlyResource getUserByMemberId(Long memberId) {
     return client.getUserOnlyByMemberId(memberId);
   }
+
+  @Override
+  public UserOnlyResource getUserByLeaderId(Long leaderId) {
+    return client.getUserOnlyByLeaderId(leaderId);
+  }
 }

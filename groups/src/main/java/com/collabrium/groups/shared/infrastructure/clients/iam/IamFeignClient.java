@@ -18,4 +18,9 @@ public interface IamFeignClient {
   UserOnlyResource getUserOnlyByMemberId(
       @RequestParam Long memberId
   );
+
+  @GetMapping(value = "/api/v1/users/leaders/{leaderId}")
+  UserOnlyResource getUserOnlyByLeaderId(
+      @PathVariable Long leaderId
+  );
 }

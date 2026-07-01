@@ -58,4 +58,26 @@ public class EmailTemplateFactory {
         context
     );
   }
+
+  public String buildInvitationCreatedEmailTemplate(
+      String memberUsername,
+      String memberName,
+      String memberSurname,
+      String memberImgUrl,
+      String memberEmail
+  ) {
+
+    Context context = new Context();
+
+    context.setVariable("memberUsername", memberUsername);
+    context.setVariable("memberName", memberName);
+    context.setVariable("memberSurname", memberSurname);
+    context.setVariable("memberImage", memberImgUrl);
+    context.setVariable("memberEmail", memberEmail);
+
+    return templateEngine.process(
+        "groups/invitation-created-email",
+        context
+    );
+  }
 }

@@ -17,4 +17,13 @@ public interface SendEmailService {
       String groupImage,
       String code
   );
+
+  void sendInvitationCreatedEmail(
+      String to,
+      String memberUsername,
+      String memberName,
+      String memberSurname,
+      String memberImgUrl,
+      String memberEmail
+  );
 }
