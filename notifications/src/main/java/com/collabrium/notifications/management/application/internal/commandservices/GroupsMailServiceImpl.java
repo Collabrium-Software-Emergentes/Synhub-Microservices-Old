@@ -4,6 +4,7 @@ import com.collabrium.notifications.management.application.internal.outboundserv
 import com.collabrium.notifications.management.domain.model.commands.SendGroupCreatedEmailCommand;
 import com.collabrium.notifications.management.domain.model.commands.SendInvitationAcceptedEmailCommand;
 import com.collabrium.notifications.management.domain.model.commands.SendInvitationCreatedEmailCommand;
+import com.collabrium.notifications.management.domain.model.commands.SendRemoveMemberEmailCommand;
 import com.collabrium.notifications.management.domain.services.GroupsMailService;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +54,18 @@ public class GroupsMailServiceImpl implements GroupsMailService {
         command.memberSurname(),
         command.memberImgUrl(),
         command.memberEmail()
+    );
+  }
+
+  @Override
+  public void handle(SendRemoveMemberEmailCommand command) {
+
+    sendEmailService.sendRemoveMemberFromGroupEmail(
+        command.memberEmail(),
+        command.groupName(),
+        command.groupImageUrl(),
+        command.groupCode(),
+        command.leaderEmail()
     );
   }
 }
