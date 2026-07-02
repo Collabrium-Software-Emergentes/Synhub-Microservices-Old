@@ -39,7 +39,6 @@ public interface SendEmailService {
       String to,
       String groupName,
       String groupDescription,
-      String groupImageUrl,
       String groupCode,
       String leaderEmail
   );

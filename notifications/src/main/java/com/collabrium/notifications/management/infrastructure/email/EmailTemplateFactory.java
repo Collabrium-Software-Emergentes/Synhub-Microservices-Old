@@ -104,7 +104,6 @@ public class EmailTemplateFactory {
   public String buildGroupDeletedEmailTemplate(
       String groupName,
       String groupDescription,
-      String groupImageUrl,
       String groupCode,
       String leaderEmail
   ) {
@@ -113,7 +112,6 @@ public class EmailTemplateFactory {
 
     context.setVariable("groupName", groupName);
     context.setVariable("groupDescription", groupDescription);
-    context.setVariable("groupImage", groupImageUrl);
     context.setVariable("groupCode", groupCode);
     context.setVariable("leaderEmail", leaderEmail);
 

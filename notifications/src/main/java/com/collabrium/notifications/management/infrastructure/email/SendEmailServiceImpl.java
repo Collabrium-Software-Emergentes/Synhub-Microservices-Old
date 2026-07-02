@@ -227,7 +227,6 @@ public class SendEmailServiceImpl implements SendEmailService {
       String to,
       String groupName,
       String groupDescription,
-      String groupImageUrl,
       String groupCode,
       String leaderEmail
   ) {
@@ -248,7 +247,6 @@ public class SendEmailServiceImpl implements SendEmailService {
               .buildGroupDeletedEmailTemplate(
                   groupName,
                   groupDescription,
-                  groupImageUrl,
                   groupCode,
                   leaderEmail
               );

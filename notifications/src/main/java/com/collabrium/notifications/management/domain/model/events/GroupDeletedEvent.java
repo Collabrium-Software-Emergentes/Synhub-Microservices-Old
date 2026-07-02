@@ -7,7 +7,6 @@ import java.util.List;
 public record GroupDeletedEvent(
     String groupName,
     String groupDescription,
-    String groupImageUrl,
     String groupCode,
     String leaderEmail,
     List<GroupMemberInfo> members
