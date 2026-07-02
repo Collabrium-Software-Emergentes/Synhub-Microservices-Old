@@ -9,7 +9,6 @@ public record GroupDeletedEvent(
     String publicId,
     String groupName,
     String groupDescription,
-    String groupImageUrl,
     String groupCode,
     String leaderEmail,
     List<GroupMemberInfo> members

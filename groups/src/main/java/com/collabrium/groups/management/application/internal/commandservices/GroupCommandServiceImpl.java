@@ -231,7 +231,6 @@ public class GroupCommandServiceImpl implements GroupCommandService {
             group.getPublicId(),
             group.getName(),
             group.getDescription(),
-            group.getImgUrl().toString(),
             group.getCode().toString(),
             leaderContext.email,
             usersMembers
