@@ -69,12 +69,15 @@ public class GroupsMailServiceImpl implements GroupsMailService {
   @Override
   public void handle(SendGroupDeletedEmailCommand command) {
 
-    sendEmailService.sendGroupDeletedEmail(
-        command.memberEmail(),
-        command.groupName(),
-        command.groupDescription(),
-        command.groupCode(),
-        command.leaderEmail()
-    );
+    for (String email : command.membersEmails()) {
+
+      sendEmailService.sendGroupDeletedEmail(
+          email,
+          command.groupName(),
+          command.groupDescription(),
+          command.groupCode(),
+          command.leaderEmail()
+      );
+    }
   }
 }
