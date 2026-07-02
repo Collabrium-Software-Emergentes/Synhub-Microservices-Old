@@ -100,4 +100,24 @@ public class EmailTemplateFactory {
         context
     );
   }
+
+  public String buildGroupDeletedEmailTemplate(
+      String groupName,
+      String groupDescription,
+      String groupCode,
+      String leaderEmail
+  ) {
+
+    Context context = new Context();
+
+    context.setVariable("groupName", groupName);
+    context.setVariable("groupDescription", groupDescription);
+    context.setVariable("groupCode", groupCode);
+    context.setVariable("leaderEmail", leaderEmail);
+
+    return templateEngine.process(
+        "groups/group-deleted-email",
+        context
+    );
+  }
 }

@@ -34,4 +34,12 @@ public interface SendEmailService {
       String groupCode,
       String leaderEmail
   );
+
+  void sendGroupDeletedEmail(
+      String to,
+      String groupName,
+      String groupDescription,
+      String groupCode,
+      String leaderEmail
+  );
 }
