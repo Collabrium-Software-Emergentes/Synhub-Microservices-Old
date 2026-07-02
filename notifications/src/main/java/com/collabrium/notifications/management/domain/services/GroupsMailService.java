@@ -1,9 +1,6 @@
 package com.collabrium.notifications.management.domain.services;
 
-import com.collabrium.notifications.management.domain.model.commands.SendGroupCreatedEmailCommand;
-import com.collabrium.notifications.management.domain.model.commands.SendInvitationAcceptedEmailCommand;
-import com.collabrium.notifications.management.domain.model.commands.SendInvitationCreatedEmailCommand;
-import com.collabrium.notifications.management.domain.model.commands.SendRemoveMemberEmailCommand;
+import com.collabrium.notifications.management.domain.model.commands.*;
 
 public interface GroupsMailService {
 
@@ -14,4 +11,6 @@ public interface GroupsMailService {
   void handle(SendInvitationCreatedEmailCommand command);
 
   void handle(SendRemoveMemberEmailCommand command);
+
+  void handle(SendGroupDeletedEmailCommand command);
 }
