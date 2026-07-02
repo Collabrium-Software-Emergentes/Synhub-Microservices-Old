@@ -221,4 +221,57 @@ public class SendEmailServiceImpl implements SendEmailService {
       );
     }
   }
+
+  @Override
+  public void sendGroupDeletedEmail(
+      String to,
+      String groupName,
+      String groupDescription,
+      String groupImageUrl,
+      String groupCode,
+      String leaderEmail
+  ) {
+
+    try {
+
+      MimeMessage message = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              "UTF-8"
+          );
+
+      String html =
+          emailTemplateFactory
+              .buildGroupDeletedEmailTemplate(
+                  groupName,
+                  groupDescription,
+                  groupImageUrl,
+                  groupCode,
+                  leaderEmail
+              );
+
+      helper.setFrom(from);
+      helper.setTo(to);
+      helper.setSubject(
+          "The group \"" + groupName + "\" has been deleted"
+      );
+
+      helper.setText(
+          html,
+          true
+      );
+
+      mailSender.send(message);
+
+    } catch (MessagingException e) {
+
+      throw new RuntimeException(
+          "Error sending group deleted email",
+          e
+      );
+    }
+  }
 }
