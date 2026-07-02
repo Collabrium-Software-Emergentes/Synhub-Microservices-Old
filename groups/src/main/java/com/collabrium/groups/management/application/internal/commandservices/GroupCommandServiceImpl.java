@@ -9,6 +9,7 @@ import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.commands.*;
 import com.collabrium.groups.management.domain.model.events.GroupCreatedEvent;
 import com.collabrium.groups.management.domain.model.events.GroupDeletedEvent;
+import com.collabrium.groups.management.domain.model.events.GroupMemberInfo;
 import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
 import com.collabrium.groups.management.domain.model.valueobjects.GroupCode;
 import com.collabrium.groups.management.domain.services.GroupCommandService;
@@ -214,10 +215,26 @@ public class GroupCommandServiceImpl implements GroupCommandService {
 
     groupRepository.delete(group);
 
+    var usersMembers =
+        tasksQueryPort
+            .getMembersByGroupId(group.getId())
+                .stream()
+                    .map(member -> new GroupMemberInfo(
+                        member.id(),
+                        member.email()
+                    ))
+                        .toList();
+
     groupsEventPublisher.publishGroupDeleted(
         new GroupDeletedEvent(
             group.getId(),
-            group.getPublicId()
+            group.getPublicId(),
+            group.getName(),
+            group.getDescription(),
+            group.getImgUrl().toString(),
+            group.getCode().toString(),
+            leaderContext.email,
+            usersMembers
         )
     );
   }

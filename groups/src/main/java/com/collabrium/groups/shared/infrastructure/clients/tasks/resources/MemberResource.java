@@ -5,6 +5,7 @@ public record MemberResource(
     String username,
     String name,
     String surname,
-    String imgUrl
+    String imgUrl,
+    String email
 ) {
 }
