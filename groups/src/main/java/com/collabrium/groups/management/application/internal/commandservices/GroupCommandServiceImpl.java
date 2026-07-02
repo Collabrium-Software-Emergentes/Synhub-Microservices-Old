@@ -9,7 +9,7 @@ import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.commands.*;
 import com.collabrium.groups.management.domain.model.events.GroupCreatedEvent;
 import com.collabrium.groups.management.domain.model.events.GroupDeletedEvent;
-import com.collabrium.groups.management.domain.model.events.GroupMemberInfo;
+import com.collabrium.groups.management.domain.model.events.resources.GroupMemberInfo;
 import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
 import com.collabrium.groups.management.domain.model.valueobjects.GroupCode;
 import com.collabrium.groups.management.domain.services.GroupCommandService;
