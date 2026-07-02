@@ -1,4 +1,4 @@
-package com.collabrium.groups.management.domain.model.events;
+package com.collabrium.groups.management.domain.model.events.resources;
 
 public record GroupMemberInfo(
     Long memberId,
