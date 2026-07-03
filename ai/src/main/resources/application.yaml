@@ -1,3 +1,106 @@
+server:
+  port: ${PORT:8086}
+  shutdown: graceful
+
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+
+    max-connections: 10000
+    accept-count: 100
+    connection-timeout: 20000
+
 spring:
   application:
-    name: ai
+    name: ai-service
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  ai:
+    openai:
+      base-url: ${OPENAI_BASE_URL:http://127.0.0.1:1234}
+      api-key: ${OPENAI_API_KEY:test}
+
+      chat:
+        options:
+          model: ${OPENAI_MODEL:qwen3-4b-instruct-2507}
+          temperature: ${OPENAI_TEMPERATURE:0.2}
+          max-tokens: ${OPENAI_MAX_TOKENS:1000}
+          top-p: ${OPENAI_TOP_P:0.9}
+          frequency-penalty: ${OPENAI_FREQUENCY_PENALTY:0.0}
+          presence-penalty: ${OPENAI_PRESENCE_PENALTY:0.0}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH:true}
+
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    instance-id: ${spring.application.name}:${server.port}
+
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics,prometheus
+
+  endpoint:
+    health:
+      show-details: always
+
+  info:
+    env:
+      enabled: true
+
+  simple:
+    metrics:
+      export:
+        enabled: true
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: @project.version@
+    java-version: ${java.version}
+
+documentation:
+  application:
+    description: @project.description@
+    version: @project.version@
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+  packages-to-scan: com.example.ai
+  paths-to-match: /api/**
+
+logging:
+  level:
+    com.example.ai: ${LOG_LEVEL:INFO}
+    org.springframework.cloud.openfeign: ${FEIGN_LOG_LEVEL:INFO}
+
+authorization:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: ${JWT_ISSUER}
+    audience: ${JWT_AUDIENCE}
