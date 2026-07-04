@@ -1,4 +1,4 @@
-package com.collabrium.groups.shared.infrastructure.security;
+package com.collabrium.ai.shared.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

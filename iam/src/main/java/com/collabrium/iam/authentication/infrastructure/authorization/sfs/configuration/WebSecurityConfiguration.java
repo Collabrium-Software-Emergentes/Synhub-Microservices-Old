@@ -133,7 +133,9 @@ public class WebSecurityConfiguration {
                     "/swagger-ui/**",
                     "/swagger-resources/**",
                     "/webjars/**",
-                    "/actuator/**")
+                    "/actuator/**",
+                    "/"
+                )
                 .permitAll()
                 .anyRequest()
                 .authenticated());
