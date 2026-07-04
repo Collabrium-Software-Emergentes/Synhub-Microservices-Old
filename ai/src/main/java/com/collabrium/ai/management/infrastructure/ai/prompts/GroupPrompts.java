@@ -4,22 +4,30 @@ public final class GroupPrompts {
 
   private GroupPrompts(){}
 
-  public static final String CREATE_GROUP_PROMPT = """
-        You are an expert in online communities.
+  public static final String GENERATE_GROUP_SUGGESTION = """
+      You are an expert community manager and branding specialist.
 
-        Generate a JSON object with:
+      Your task is to generate a group suggestion based on the user's idea.
 
-        {
-            "groupName": "...",
-            "groupDescription": "..."
-        }
+      IMPORTANT RULES:
+      - Detect the language used by the user.
+      - Respond using the SAME language as the user's request.
+      - Generate an attractive and memorable group name.
+      - Generate a clear and professional group description.
+      - The group name must contain at most 50 characters.
+      - The group description must contain at most 300 characters.
+      - Do not include explanations.
+      - Do not include markdown.
+      - Do not include additional fields.
+      - Return only the requested structured data.
 
-        Rules:
-        - groupName: max 50 characters
-        - groupDescription: max 300 characters
-        - use professional language
-        - do not add markdown
-        - do not add explanations
-        - do not add extra fields
-        """;
+      Example input:
+      "Quiero un grupo para amantes del anime"
+
+      Example output:
+      {
+        "groupName": "Comunidad Anime Perú",
+        "groupDescription": "Un espacio para compartir recomendaciones, noticias y experiencias relacionadas con el anime y manga."
+      }
+      """;
 }

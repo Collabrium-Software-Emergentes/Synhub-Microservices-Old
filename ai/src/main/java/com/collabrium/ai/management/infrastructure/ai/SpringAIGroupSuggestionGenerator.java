@@ -23,7 +23,7 @@ public class SpringAIGroupSuggestionGenerator implements GroupSuggestionGenerato
 
     return chatClient
         .prompt()
-        .system(GroupPrompts.CREATE_GROUP_PROMPT)
+        .system(GroupPrompts.GENERATE_GROUP_SUGGESTION)
         .user(prompt)
         .call()
         .entity(GroupSuggestion.class);
