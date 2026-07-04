@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:8086}
+  port: ${PORT:8088}
   shutdown: graceful
 
   error:
@@ -11,7 +11,6 @@ server:
     threads:
       max: 200
       min-spare: 10
-
     max-connections: 10000
     accept-count: 100
     connection-timeout: 20000
@@ -41,14 +40,12 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
-
     register-with-eureka: ${EUREKA_REGISTER:true}
     fetch-registry: ${EUREKA_FETCH:true}
 
   instance:
     prefer-ip-address: ${EUREKA_PREFER_IP:true}
     instance-id: ${spring.application.name}:${server.port}
-
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
 
@@ -85,18 +82,16 @@ documentation:
 
 springdoc:
   swagger-ui:
+    enabled: true
     path: /swagger-ui.html
 
   api-docs:
     enabled: true
     path: /v3/api-docs
 
-  packages-to-scan: com.example.ai
-  paths-to-match: /api/**
-
 logging:
   level:
-    com.example.ai: ${LOG_LEVEL:INFO}
+    com.collabrium.ai: ${LOG_LEVEL:INFO}
     org.springframework.cloud.openfeign: ${FEIGN_LOG_LEVEL:INFO}
 
 authorization:
