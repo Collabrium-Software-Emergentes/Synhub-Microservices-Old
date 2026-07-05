@@ -5,6 +5,8 @@ import com.collabrium.media.media.management.domain.model.commands.UploadGroupIm
 import com.collabrium.media.media.management.domain.services.ImageCommandService;
 import com.collabrium.media.media.management.interfaces.rest.resources.ImageUploadResource;
 import com.collabrium.media.media.management.interfaces.rest.transform.ImageUploadResourceFromResponseAssembler;
+import com.collabrium.media.media.management.domain.model.commands.UpdateTaskImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UploadTaskImageCommand;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -8,6 +8,10 @@ import com.collabrium.media.media.management.domain.model.commands.UpdateGroupIm
 import com.collabrium.media.media.management.domain.model.commands.UploadGroupImageCommand;
 import com.collabrium.media.media.management.domain.model.responses.ImageUploadResponse;
 import com.collabrium.media.media.management.domain.services.ImageCommandService;
+import com.collabrium.media.media.management.application.internal.outboundservices.ports.TasksQueryPort;
+import com.collabrium.media.media.management.domain.model.commands.UploadTaskImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UpdateTaskImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.DeleteTaskImageCommand;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
