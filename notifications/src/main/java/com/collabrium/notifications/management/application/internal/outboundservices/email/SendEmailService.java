@@ -42,4 +42,15 @@ public interface SendEmailService {
       String groupCode,
       String leaderEmail
   );
+
+  void sendRequestCreatedEmail(
+      String to,
+      String memberUsername,
+      String memberName,
+      String memberSurname,
+      String taskTitle,
+      String requestDescription,
+      String requestType,
+      String imageUrl
+  );
 }
