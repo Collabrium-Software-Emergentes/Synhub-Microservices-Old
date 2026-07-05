@@ -19,15 +19,18 @@ public class ImageCommandServiceImpl implements ImageCommandService {
 
   private final Cloudinary cloudinary;
   private final GroupsQueryPort groupsQueryPort;
+  private final TasksQueryPort tasksQueryPort;
 
   public ImageCommandServiceImpl(
-      Cloudinary cloudinary,
-      GroupsQueryPort groupsQueryPort
+          Cloudinary cloudinary,
+          GroupsQueryPort groupsQueryPort,
+          TasksQueryPort tasksQueryPort
   ) {
-
     this.cloudinary = cloudinary;
     this.groupsQueryPort = groupsQueryPort;
+    this.tasksQueryPort = tasksQueryPort;
   }
+
 
   @Override
   public Optional<ImageUploadResponse> handle(UpdateGroupImageCommand command) {
@@ -116,6 +119,73 @@ public class ImageCommandServiceImpl implements ImageCommandService {
     }
 
   }
+
+  @Override
+  public Optional<ImageUploadResponse> handle(UpdateTaskImageCommand command) {
+
+    var task = tasksQueryPort.getTaskById(command.taskId());
+
+    if (task == null) {
+      throw new RuntimeException("Task not found");
+    }
+
+    try {
+
+      if (task.publicId() != null && !task.publicId().isBlank()) {
+        cloudinary.uploader().destroy(
+                task.publicId(),
+                ObjectUtils.asMap("resource_type", "image")
+        );
+      }
+
+      Map<String, Object> result = cloudinary.uploader().upload(
+              command.file().getBytes(),
+              ObjectUtils.asMap(
+                      "folder", "synhub/tasks",
+                      "public_id", UUID.randomUUID().toString(),
+                      "resource_type", "image"
+              )
+      );
+
+      return Optional.of(mapResponse(result));
+
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public Optional<ImageUploadResponse> handle(UploadTaskImageCommand command) {
+
+    try {
+
+      Map<String, Object> result = cloudinary.uploader().upload(
+              command.file().getBytes(),
+              ObjectUtils.asMap(
+                      "folder", "synhub/tasks",
+                      "public_id", UUID.randomUUID().toString(),
+                      "resource_type", "image",
+                      "overwrite", false
+              )
+      );
+
+      return Optional.of(mapResponse(result));
+
+    } catch (Exception e) {
+      throw new RuntimeException("Error uploading image: " + e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public void handle(DeleteTaskImageCommand command) {
+
+    try {
+      cloudinary.uploader().destroy(command.publicId(), ObjectUtils.emptyMap());
+    } catch (Exception e) {
+      throw new RuntimeException("Error deleting image: " + e.getMessage(), e);
+    }
+  }
+
 
   private ImageUploadResponse mapResponse(Map<String, Object> result) {
     return new ImageUploadResponse(

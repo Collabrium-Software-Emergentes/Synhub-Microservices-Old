@@ -9,9 +9,18 @@ import java.util.Optional;
 
 public interface ImageCommandService {
 
+  // Groups
   Optional<ImageUploadResponse> handle(UpdateGroupImageCommand command);
 
   Optional<ImageUploadResponse> handle(UploadGroupImageCommand command);
 
   void handle(DeleteGroupImageCommand command);
+
+
+  // Tasks
+  Optional<ImageUploadResponse> handle(UpdateTaskImageCommand command);
+
+  Optional<ImageUploadResponse> handle(UploadTaskImageCommand command);
+
+  void handle(DeleteTaskImageCommand command);
 }

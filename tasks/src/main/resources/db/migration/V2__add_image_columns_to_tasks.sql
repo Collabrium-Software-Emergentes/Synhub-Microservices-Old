@@ -1,0 +1,1 @@
+ALTER TABLE tasks ADD COLUMN public_id VARCHAR(255);

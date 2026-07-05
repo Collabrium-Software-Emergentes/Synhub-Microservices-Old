@@ -4,6 +4,7 @@ import com.collabrium.tasks.management.application.internal.dto.TaskDetailsDTO;
 import com.collabrium.tasks.management.application.internal.mappers.TaskDetailsDTOAssembler;
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.tasks.management.application.internal.outboundservices.ports.IamQueryPort;
+import com.collabrium.tasks.management.application.internal.outboundservices.ports.MediaServicePort;
 import com.collabrium.tasks.management.domain.exceptions.InvalidTaskException;
 import com.collabrium.tasks.management.domain.exceptions.MemberNotFoundException;
 import com.collabrium.tasks.management.domain.exceptions.UserNotFoundException;
@@ -37,7 +38,7 @@ public class TaskDetailsCommandService {
   private final MemberRepository memberRepository;
   private final IamQueryPort iamQueryPort;
   private final GroupsQueryPort groupsQueryPort;
-
+  private final MediaServicePort mediaServicePort;
   /**
    * Constructs a new TaskDetailsCommandService with the required dependencies.
    *
@@ -47,14 +48,18 @@ public class TaskDetailsCommandService {
    * @param groupsQueryPort the port for querying Groups management service
    */
   public TaskDetailsCommandService(
-      TaskRepository taskRepository,
-      MemberRepository memberRepository,
-      IamQueryPort iamQueryPort, GroupsQueryPort groupsQueryPort) {
+          TaskRepository taskRepository,
+          MemberRepository memberRepository,
+          IamQueryPort iamQueryPort,
+          GroupsQueryPort groupsQueryPort,
+          MediaServicePort mediaServicePort
+  ) {
 
     this.taskRepository = taskRepository;
     this.memberRepository = memberRepository;
     this.iamQueryPort = iamQueryPort;
     this.groupsQueryPort = groupsQueryPort;
+    this.mediaServicePort = mediaServicePort;
   }
 
   /**
@@ -80,21 +85,21 @@ public class TaskDetailsCommandService {
   public Optional<TaskDetailsDTO> handle(CreateTaskCommand command) {
 
     var leaderUser =
-        getExistingUser(command.userId());
+            getExistingUser(command.userId());
 
     validateLeaderUser(leaderUser);
 
     var member =
-        getExistingMember(command.memberId());
+            getExistingMember(command.memberId());
 
     validateMemberGroup(member);
 
     var group =
-        validateGroupExists(member);
+            validateGroupExists(member);
 
     validateLeaderBelongsToGroup(
-        leaderUser,
-        group
+            leaderUser,
+            group
     );
 
     var task = new Task(command);
@@ -102,11 +107,25 @@ public class TaskDetailsCommandService {
     task.setMember(member);
     task.setGroupId(member.getGroupId());
 
+    if (command.file() != null &&
+            !command.file().isEmpty()) {
+
+      var imageResponse =
+              mediaServicePort.uploadTaskImage(
+                      command.file()
+              );
+
+      task.updateImage(
+              imageResponse.imageUrl(),
+              imageResponse.publicId()
+      );
+    }
+
     var savedTask =
-        taskRepository.save(task);
+            taskRepository.save(task);
 
     return Optional.of(
-        buildTaskDetailsDTO(savedTask)
+            buildTaskDetailsDTO(savedTask)
     );
   }
 
@@ -145,6 +164,8 @@ public class TaskDetailsCommandService {
     );
   }
 
+
+
   @Transactional
   public Optional<TaskDetailsDTO> handle(UpdateTaskCommand command) {
 
@@ -153,59 +174,74 @@ public class TaskDetailsCommandService {
     }
 
     var task =
-        getExistingTask(command.taskId());
+            getExistingTask(command.taskId());
 
     var taskGroupId =
-        getTaskGroupId(task);
+            getTaskGroupId(task);
 
     var user =
-        getExistingUser(command.userId());
+            getExistingUser(command.userId());
 
     validateUserBelongsToTaskGroup(
-        user,
-        taskGroupId
+            user,
+            taskGroupId
     );
 
     var newMember =
-        getExistingMember(command.memberId());
+            getExistingMember(command.memberId());
 
     validateMemberGroup(newMember);
 
     if (
-        !newMember.getGroupId()
-            .value()
-            .equals(taskGroupId)
+            !newMember.getGroupId()
+                    .value()
+                    .equals(taskGroupId)
     ) {
 
       throw InvalidTaskException
-          .forMemberNotBelongingToGroup(
-              newMember.getId(),
-              taskGroupId
-          );
+              .forMemberNotBelongingToGroup(
+                      newMember.getId(),
+                      taskGroupId
+              );
     }
 
     var currentMember =
-        task.getMember();
+            task.getMember();
 
     if (
-        currentMember == null ||
-            !currentMember.getId()
-                .equals(newMember.getId())
+            currentMember == null ||
+                    !currentMember.getId()
+                            .equals(newMember.getId())
     ) {
 
       task.setMember(newMember);
       task.setGroupId(
-          newMember.getGroupId()
+              newMember.getGroupId()
       );
     }
 
     task.updateTask(command);
 
+    if (command.file() != null &&
+            !command.file().isEmpty()) {
+
+      var imageResponse =
+              mediaServicePort.updateTaskImage(
+                      command.file(),
+                      task.getId()
+              );
+
+      task.updateImage(
+              imageResponse.imageUrl(),
+              imageResponse.publicId()
+      );
+    }
+
     var updatedTask =
-        taskRepository.save(task);
+            taskRepository.save(task);
 
     return Optional.of(
-        buildTaskDetailsDTO(updatedTask)
+            buildTaskDetailsDTO(updatedTask)
     );
   }
 

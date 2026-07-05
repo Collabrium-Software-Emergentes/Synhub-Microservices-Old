@@ -70,4 +70,47 @@ public class ImageController {
 
     return ResponseEntity.ok(resource);
   }
+
+  @PutMapping(
+          value = "/tasks/{taskId}",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> updateTaskImage(
+          @PathVariable Long taskId,
+          @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UpdateTaskImageCommand(taskId, file);
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @PostMapping(
+          value = "/tasks",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> uploadTaskImage(
+          @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UploadTaskImageCommand(file);
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
 }

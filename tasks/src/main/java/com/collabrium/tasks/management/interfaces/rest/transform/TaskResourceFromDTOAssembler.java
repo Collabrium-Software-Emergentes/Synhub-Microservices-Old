@@ -24,7 +24,8 @@ public class TaskResourceFromDTOAssembler {
         dto.timePassed(),
         TaskMemberResourceFromDTOAssembler
             .toResourceFromDTO(dto.member()),
-        dto.groupId()
+        dto.groupId(),
+        dto.imageUrl()
     );
   }
 }

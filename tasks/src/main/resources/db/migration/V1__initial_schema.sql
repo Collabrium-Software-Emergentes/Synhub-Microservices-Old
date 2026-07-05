@@ -25,6 +25,9 @@ CREATE TABLE tasks (
 
                        time_passed BIGINT NOT NULL DEFAULT 0,
 
+                       image_url TEXT NULL,
+                       public_id VARCHAR(255) NULL,
+
                        created_at TIMESTAMP NOT NULL DEFAULT now(),
                        updated_at TIMESTAMP NOT NULL DEFAULT now(),
 

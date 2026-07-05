@@ -11,6 +11,7 @@ public record TaskResource(
     Integer timesRearranged,
     Long timePassed,
     TaskMemberResource member,
-    Long groupId
+    Long groupId,
+    String imageUrl
 ) {
 }
