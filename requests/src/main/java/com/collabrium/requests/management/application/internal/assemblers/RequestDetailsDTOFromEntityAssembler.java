@@ -19,6 +19,7 @@ public class RequestDetailsDTOFromEntityAssembler {
       request.getDescription(),
       request.getRequestType(),
       request.getRequestStatus(),
+      request.getImageUrl(),
       taskDetails
     );
   }

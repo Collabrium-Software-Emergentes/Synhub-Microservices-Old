@@ -42,6 +42,9 @@ public class Request
   @Column(name = "request_status", nullable = false)
   private RequestStatus requestStatus;
 
+  @Column(name = "image_url")
+  private String imageUrl;
+
   @Embedded
   @Setter
   private TaskId taskId;
@@ -61,6 +64,8 @@ public class Request
 
     this.taskId =
         new TaskId(command.taskId());
+
+    this.imageUrl = command.imageUrl();
   }
 
   public String getRequestType() {

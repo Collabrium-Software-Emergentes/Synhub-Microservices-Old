@@ -5,6 +5,7 @@ public record RequestDetailsResource(
     String description,
     String requestType,
     String requestStatus,
+    String imageUrl,
     TaskResource task
 ) {
 }
