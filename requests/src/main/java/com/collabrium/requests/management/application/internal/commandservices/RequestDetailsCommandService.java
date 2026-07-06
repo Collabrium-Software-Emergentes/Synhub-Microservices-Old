@@ -3,6 +3,8 @@ package com.collabrium.requests.management.application.internal.commandservices;
 import com.collabrium.requests.management.application.internal.assemblers.RequestDetailsDTOFromEntityAssembler;
 import com.collabrium.requests.management.application.internal.assemblers.TaskDetailsDTOFromTaskResourceAssembler;
 import com.collabrium.requests.management.application.internal.dto.RequestDetailsDTO;
+import com.collabrium.requests.management.application.internal.outboundservices.messaging.RequestsEventPublisher;
+import com.collabrium.requests.management.application.internal.outboundservices.ports.GroupsQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.requests.management.application.internal.outboundservices.ports.TasksQueryPort;
 import com.collabrium.requests.management.domain.exceptions.InvalidRequestException;
@@ -10,8 +12,10 @@ import com.collabrium.requests.management.domain.exceptions.TaskNotFoundExceptio
 import com.collabrium.requests.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.requests.management.domain.model.aggregates.Request;
 import com.collabrium.requests.management.domain.model.commands.CreateRequestCommand;
+import com.collabrium.requests.management.domain.model.events.RequestCreatedEvent;
 import com.collabrium.requests.management.domain.model.valueobjects.RequestType;
 import com.collabrium.requests.management.infrastructure.persistence.jpa.repositories.RequestRepository;
+import com.collabrium.requests.shared.infrastructure.clients.tasks.resources.TaskResource;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -27,16 +31,22 @@ public class RequestDetailsCommandService {
   private final RequestRepository requestRepository;
   private final IamQueryPort iamQueryPort;
   private final TasksQueryPort tasksQueryPort;
+  private final GroupsQueryPort groupsQueryPort;
+  private final RequestsEventPublisher requestsEventPublisher;
 
   public RequestDetailsCommandService(
       RequestRepository requestRepository,
       IamQueryPort iamQueryPort,
-      TasksQueryPort tasksQueryPort
+      TasksQueryPort tasksQueryPort,
+      GroupsQueryPort groupsQueryPort,
+      RequestsEventPublisher requestsEventPublisher
   ) {
 
     this.requestRepository = requestRepository;
     this.iamQueryPort = iamQueryPort;
     this.tasksQueryPort = tasksQueryPort;
+    this.groupsQueryPort = groupsQueryPort;
+    this.requestsEventPublisher = requestsEventPublisher;
   }
 
   /**
@@ -130,7 +140,57 @@ public class RequestDetailsCommandService {
         taskDetails
       );
 
+    publishRequestCreatedEvent(
+        user, task, savedRequest
+    );
+
     return Optional.of(requestDetails);
+  }
+
+  private void publishRequestCreatedEvent(
+      com.collabrium.requests.shared.infrastructure.clients.iam.resources.UserOnlyResource member,
+      TaskResource task,
+      Request request
+  ) {
+
+    var leaderUser =
+        getLeaderEmailForGroup(task.groupId());
+
+    if (leaderUser == null) {
+      return;
+    }
+
+    var event = new RequestCreatedEvent(
+        leaderUser,
+        member.username(),
+        member.name(),
+        member.surname(),
+        task.title(),
+        request.getDescription(),
+        request.getRequestType(),
+        request.getImageUrl()
+    );
+
+    requestsEventPublisher.publishRequestCreated(event);
+  }
+
+  private String getLeaderEmailForGroup(Long groupId) {
+
+    var group =
+        groupsQueryPort.getGroupOnlyByGroupId(groupId);
+
+    if (group == null || group.leaderId() == null) {
+      return null;
+    }
+
+    var leader =
+        iamQueryPort.getUserOnlyById(group.leaderId());
+
+    if (leader == null) {
+      return null;
+    }
+
+    return leader.email();
   }
 
   /**

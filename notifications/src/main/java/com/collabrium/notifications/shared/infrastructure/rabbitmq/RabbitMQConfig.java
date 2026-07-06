@@ -15,6 +15,7 @@ public class RabbitMQConfig {
   // EXCHANGE
   // =========================
   public static final String GROUPS_EXCHANGE = "groups.exchange";
+  public static final String REQUESTS_EXCHANGE = "requests.exchange";
 
   // =========================
   // ROUTING KEYS
@@ -24,6 +25,7 @@ public class RabbitMQConfig {
   public static final String INVITATION_CREATED_KEY = "invitation.created";
   public static final String MEMBER_REMOVED_FROM_GROUP_KEY = "member.removed.from.group";
   public static final String GROUP_DELETED_KEY = "group.deleted";
+  public static final String REQUEST_CREATED_KEY = "request.created";
 
   // =========================
   // QUEUES
@@ -33,6 +35,7 @@ public class RabbitMQConfig {
   public static final String INVITATION_CREATED_QUEUE = "groups.invitation.created.queue";
   public static final String MEMBER_REMOVED_FROM_GROUP_QUEUE = "groups.member.removed.from.group.queue";
   public static final String GROUP_DELETED_QUEUE = "groups.group.deleted.queue";
+  public static final String REQUEST_CREATED_QUEUE = "requests.request.created.queue";
 
   // =========================
   // EXCHANGE BEANS
@@ -40,6 +43,11 @@ public class RabbitMQConfig {
   @Bean
   public TopicExchange groupsExchange() {
     return new TopicExchange(GROUPS_EXCHANGE);
+  }
+
+  @Bean
+  public TopicExchange requestsExchange() {
+    return new TopicExchange(REQUESTS_EXCHANGE);
   }
 
   // =========================
@@ -68,6 +76,11 @@ public class RabbitMQConfig {
   @Bean
   public Queue groupDeletedQueue() {
     return new Queue(GROUP_DELETED_QUEUE);
+  }
+
+  @Bean
+  public Queue requestCreatedQueue() {
+    return new Queue(REQUEST_CREATED_QUEUE);
   }
 
   // =========================
@@ -126,6 +139,17 @@ public class RabbitMQConfig {
         .bind(groupDeletedQueue)
         .to(groupsExchange)
         .with(GROUP_DELETED_KEY);
+  }
+
+  @Bean
+  public Binding requestCreatedBinding(
+      Queue requestCreatedQueue,
+      TopicExchange requestsExchange
+  ) {
+    return BindingBuilder
+        .bind(requestCreatedQueue)
+        .to(requestsExchange)
+        .with(REQUEST_CREATED_KEY);
   }
 
   @Bean

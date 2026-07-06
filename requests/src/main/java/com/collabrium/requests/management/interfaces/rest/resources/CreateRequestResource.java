@@ -2,6 +2,7 @@ package com.collabrium.requests.management.interfaces.rest.resources;
 
 public record CreateRequestResource(
     String description,
-    String requestType
+    String requestType,
+    String imageUrl
 ) {
 }

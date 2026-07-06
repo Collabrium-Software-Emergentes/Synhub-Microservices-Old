@@ -2,6 +2,7 @@ package com.collabrium.media.media.management.interfaces.rest.controllers;
 
 import com.collabrium.media.media.management.domain.model.commands.UpdateGroupImageCommand;
 import com.collabrium.media.media.management.domain.model.commands.UploadGroupImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UploadRequestImageCommand;
 import com.collabrium.media.media.management.domain.services.ImageCommandService;
 import com.collabrium.media.media.management.interfaces.rest.resources.ImageUploadResource;
 import com.collabrium.media.media.management.interfaces.rest.transform.ImageUploadResourceFromResponseAssembler;
@@ -112,6 +113,28 @@ public class ImageController {
 
     var resource = ImageUploadResourceFromResponseAssembler
             .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+  
+  @PostMapping(
+      value = "/requests",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> uploadRequestImage(
+      @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UploadRequestImageCommand(file);
+
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+        .toResourceFromResponse(response.get());
 
     return ResponseEntity.ok(resource);
   }
