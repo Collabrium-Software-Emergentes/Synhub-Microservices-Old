@@ -53,6 +53,13 @@ spring:
                 - Path=/media/**
               filters:
                 - StripPrefix=1
+                
+            - id: ai-service
+              uri: lb://ai-service
+              predicates:
+                - Path=/ai/**
+              filters:
+                - StripPrefix=1
 
 server:
   port: ${PORT:8080}
