@@ -48,6 +48,12 @@ public class User extends AuditableAbstractAggregateRoot<User> {
   @Column(nullable = false, length = 120)
   private String password;
 
+  @Column(nullable = false)
+  private boolean isActive;
+
+  @Column(nullable = false)
+  private boolean isVerified;
+
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
       name = "user_roles",
@@ -65,6 +71,8 @@ public class User extends AuditableAbstractAggregateRoot<User> {
 
   public User() {
     this.roles = new HashSet<>();
+    this.isActive = false;
+    this.isVerified = false;
   }
 
   public User(String username,
@@ -80,6 +88,8 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     this.imgUrl = imgUrl;
     this.email = email;
     this.password = password;
+    this.isActive = false;
+    this.isVerified = false;
   }
 
   public User(String username,
@@ -101,5 +111,10 @@ public class User extends AuditableAbstractAggregateRoot<User> {
   public void addRoles(List<Role> roles) {
     var validatedRoleSet = Role.validateRoleSet(roles);
     this.roles.addAll(validatedRoleSet);
+  }
+
+  public void markAsVerified() {
+    this.isVerified = true;
+    this.isActive = true;
   }
 }

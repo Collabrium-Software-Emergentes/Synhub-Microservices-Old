@@ -1,13 +1,26 @@
 package com.collabrium.iam.authentication.application.internal.commandservices;
 
 import com.collabrium.iam.authentication.application.internal.outboundservices.hashing.HashingService;
+import com.collabrium.iam.authentication.application.internal.outboundservices.email.EmailService;
 import com.collabrium.iam.authentication.application.internal.outboundservices.messaging.IamEventPublisher;
 import com.collabrium.iam.authentication.application.internal.outboundservices.tokens.TokenService;
+import com.collabrium.iam.authentication.domain.exceptions.DifferentPasswordException;
+import com.collabrium.iam.authentication.domain.exceptions.EmailAlreadyExistsException;
+import com.collabrium.iam.authentication.domain.exceptions.FileEmptyOrNullException;
+import com.collabrium.iam.authentication.domain.exceptions.ImageUploadException;
+import com.collabrium.iam.authentication.domain.exceptions.InvalidPasswordException;
+import com.collabrium.iam.authentication.domain.exceptions.InvalidTokenException;
+import com.collabrium.iam.authentication.domain.exceptions.RoleNotFoundException;
+import com.collabrium.iam.authentication.domain.exceptions.UserNotActiveException;
+import com.collabrium.iam.authentication.domain.exceptions.UserNotFoundException;
+import com.collabrium.iam.authentication.domain.exceptions.UserNotVerifiedException;
+import com.collabrium.iam.authentication.domain.exceptions.UsernameAlreadyExistsException;
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
 import com.collabrium.iam.authentication.domain.model.commands.UpdateUserLeaderIdCommand;
 import com.collabrium.iam.authentication.domain.model.commands.UpdateUserMemberIdCommand;
 import com.collabrium.iam.authentication.domain.model.commands.SignInCommand;
 import com.collabrium.iam.authentication.domain.model.commands.SignUpCommand;
+import com.collabrium.iam.authentication.domain.model.commands.VerifyUserCommand;
 import com.collabrium.iam.authentication.domain.model.events.UserLeaderCreatedEvent;
 import com.collabrium.iam.authentication.domain.model.events.UserMemberCreatedEvent;
 import com.collabrium.iam.authentication.domain.model.valueobjects.LeaderId;
@@ -20,6 +33,7 @@ import com.collabrium.iam.authentication.infrastructure.persistence.jpa.reposito
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -39,18 +53,21 @@ public class UserCommandServiceImpl implements UserCommandService {
   private final HashingService hashingService;
   private final TokenService tokenService;
   private final IamEventPublisher iamEventPublisher;
+  private final EmailService emailService;
 
   public UserCommandServiceImpl(RoleRepository roleRepository,
                                 UserRepository userRepository,
                                 HashingService hashingService,
                                 TokenService tokenService,
-                                IamEventPublisher iamEventPublisher
+                                IamEventPublisher iamEventPublisher,
+                                EmailService emailService
   ) {
     this.roleRepository = roleRepository;
     this.userRepository = userRepository;
     this.hashingService = hashingService;
     this.tokenService = tokenService;
     this.iamEventPublisher = iamEventPublisher;
+    this.emailService = emailService;
   }
 
   /**
@@ -68,10 +85,18 @@ public class UserCommandServiceImpl implements UserCommandService {
     var user = userRepository.findByUsernameWithRoles(command.username());
 
     if (user.isEmpty())
-      throw new RuntimeException("User not found");
+      throw new UserNotFoundException(command.username());
 
     if (!hashingService.matches(command.password(), user.get().getPassword()))
-      throw new RuntimeException("Invalid password");
+      throw new InvalidPasswordException();
+
+    if (!user.get().isVerified()) {
+      throw new UserNotVerifiedException(user.get().getUsername());
+    }
+
+    if (!user.get().isActive()) {
+      throw new UserNotActiveException(user.get().getUsername());
+    }
 
     UserDetailsImpl userDetails = UserDetailsImpl.build(user.get());
 
@@ -95,18 +120,19 @@ public class UserCommandServiceImpl implements UserCommandService {
    * @return the created user
    */
   @Override
+  @Transactional
   public Optional<User> handle(SignUpCommand command) {
 
     if (userRepository.existsByUsername(command.username()))
-      throw new RuntimeException("Username already exists");
+      throw new UsernameAlreadyExistsException(command.username());
 
     if(userRepository.existsByEmail(command.email()))
-      throw new RuntimeException("User with this email already exists");
+      throw new EmailAlreadyExistsException(command.email());
 
     var roles = command.roles().stream()
         .map(role ->
             roleRepository.findByName(role.getName())
-                .orElseThrow(() -> new RuntimeException("Role name not found")))
+                .orElseThrow(() -> new RoleNotFoundException(role.getName().name())))
         .toList();
 
     var user = new User(
@@ -120,12 +146,32 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     userRepository.save(user);
 
+    var token = tokenService.generateToken(user.getUsername());
+    var verificationLink = command.baseUrl() + "/verification/complete?token=" + token;
+    emailService.sendVerificationEmail(user.getEmail(), verificationLink);
+
     var savedUser = userRepository.findByUsernameWithRoles(command.username())
         .orElseThrow();
 
     publishDomainEvents(savedUser);
 
     return Optional.of(savedUser);
+  }
+
+  @Override
+  @Transactional
+  public Optional<User> handle(VerifyUserCommand command) {
+    if (!tokenService.validateToken(command.token())) {
+      throw new InvalidTokenException();
+    }
+
+    var username = tokenService.getUsernameFromToken(command.token());
+    var user = userRepository.findByUsernameWithRoles(username)
+        .orElseThrow(() -> new UserNotFoundException(username));
+
+    user.markAsVerified();
+    userRepository.save(user);
+    return Optional.of(user);
   }
 
   @Override
@@ -178,7 +224,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     var user = userRepository.findById(userId)
         .orElseThrow(() ->
-            new RuntimeException("User not found"));
+            new UserNotFoundException(userId));
 
     updater.accept(user);
 
