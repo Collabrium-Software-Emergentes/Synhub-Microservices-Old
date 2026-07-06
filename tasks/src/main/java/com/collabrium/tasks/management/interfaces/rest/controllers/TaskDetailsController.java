@@ -260,4 +260,25 @@ public class TaskDetailsController {
 
     return ResponseEntity.ok(taskResource);
   }
+
+  @PutMapping("/tasks/{taskId}/status/{status}")
+  @Operation(summary = "Update task status", description = "Update task status")
+  public ResponseEntity<TaskResource> updateTaskStatus(
+      @PathVariable Long taskId,
+      @PathVariable String status,
+      @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+
+    var updateTaskStatusCommand = new UpdateTaskStatusCommand(taskId, status, user.userId());
+
+    var task = taskDetailsCommandService.handle(updateTaskStatusCommand);
+
+    if (task.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var taskResource = TaskResourceFromDTOAssembler.toResourceFromDTO(task.get());
+
+    return ResponseEntity.ok(taskResource);
+  }
 }
