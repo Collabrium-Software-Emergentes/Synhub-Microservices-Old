@@ -60,6 +60,12 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
   @Column(nullable = false)
   private Long timePassed = 0L;
 
+  @Column(name = "public_id")
+  private String publicId;
+
+  @Column(name = "image_url", columnDefinition = "TEXT")
+  private String imageUrl;
+
   public Task(CreateTaskCommand command) {
 
     validateCreation(command);
@@ -110,6 +116,12 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
 
     this.status = newStatus;
   }
+
+  public void updateImage(String imageUrl, String publicId) {
+    this.imageUrl = imageUrl;
+    this.publicId = publicId;
+  }
+
 
   private void validateStatusUpdate(UpdateTaskStatusCommand command) {
 

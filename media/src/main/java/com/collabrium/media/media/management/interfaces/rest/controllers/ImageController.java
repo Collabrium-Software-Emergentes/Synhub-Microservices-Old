@@ -6,6 +6,8 @@ import com.collabrium.media.media.management.domain.model.commands.UploadRequest
 import com.collabrium.media.media.management.domain.services.ImageCommandService;
 import com.collabrium.media.media.management.interfaces.rest.resources.ImageUploadResource;
 import com.collabrium.media.media.management.interfaces.rest.transform.ImageUploadResourceFromResponseAssembler;
+import com.collabrium.media.media.management.domain.model.commands.UpdateTaskImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UploadTaskImageCommand;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,6 +74,49 @@ public class ImageController {
     return ResponseEntity.ok(resource);
   }
 
+  @PutMapping(
+          value = "/tasks/{taskId}",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> updateTaskImage(
+          @PathVariable Long taskId,
+          @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UpdateTaskImageCommand(taskId, file);
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @PostMapping(
+          value = "/tasks",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> uploadTaskImage(
+          @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UploadTaskImageCommand(file);
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+  
   @PostMapping(
       value = "/requests",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE

@@ -129,6 +129,15 @@ public class InvalidTaskException extends RuntimeException {
     );
   }
 
+  public static InvalidTaskException forMemberNotFound(
+          Long memberId
+  ) {
+
+    return new InvalidTaskException(
+            "Member with id " + memberId + " was not found"
+    );
+  }
+
   // =========================================================
   // GROUP
   // =========================================================

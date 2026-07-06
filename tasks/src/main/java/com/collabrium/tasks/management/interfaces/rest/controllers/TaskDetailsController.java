@@ -13,10 +13,13 @@ import com.collabrium.tasks.management.interfaces.rest.transform.UpdateTaskComma
 import com.collabrium.tasks.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -58,19 +61,27 @@ public class TaskDetailsController {
     return ResponseEntity.ok(taskResource);
   }
 
-  @PostMapping("/members/{memberId}/tasks")
+  @PostMapping(
+          value = "/members/{memberId}/tasks",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
   @Operation(
-      summary = "Create a new task",
-      description = "Creates a new task"
+          summary = "Create a new task",
+          description = "Creates a new task"
   )
   public ResponseEntity<TaskResource> createTask(
-      @PathVariable Long memberId,
-      @RequestBody CreateTaskResource resource,
-      @AuthenticationPrincipal AuthenticatedUser user
+          @PathVariable Long memberId,
+          @RequestParam String title,
+          @RequestParam String description,
+          @RequestParam OffsetDateTime dueDate,
+          @RequestParam(value = "file", required = false) MultipartFile file,
+          @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
+    var resource = new CreateTaskResource(title, description, dueDate);
+
     var createTaskCommand = CreateTaskCommandFromResourceAssembler
-        .toCommandFromResource(resource, memberId, user.userId());
+            .toCommandFromResource(resource, memberId, user.userId(), file);
 
     var taskDetails = taskDetailsCommandService.handle(createTaskCommand);
 
@@ -170,27 +181,6 @@ public class TaskDetailsController {
     return ResponseEntity.ok(resources);
   }
 
-  @PutMapping("/tasks/{taskId}/status/{status}")
-  @Operation(summary = "Update task status", description = "Update task status")
-  public ResponseEntity<TaskResource> updateTaskStatus(
-      @PathVariable Long taskId,
-      @PathVariable String status,
-      @AuthenticationPrincipal AuthenticatedUser user
-  ) {
-
-    var updateTaskStatusCommand = new UpdateTaskStatusCommand(taskId, status, user.userId());
-
-    var task = taskDetailsCommandService.handle(updateTaskStatusCommand);
-
-    if (task.isEmpty()) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    var taskResource = TaskResourceFromDTOAssembler.toResourceFromDTO(task.get());
-
-    return ResponseEntity.ok(taskResource);
-  }
-
   @GetMapping("/members/{memberId}/tasks/next")
   @Operation(
       summary = "Get the next task by member id",
@@ -237,19 +227,28 @@ public class TaskDetailsController {
     return ResponseEntity.ok(resources);
   }
 
-  @PutMapping("/tasks/{taskId}")
+  @PutMapping(
+          value = "/tasks/{taskId}",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
   @Operation(
-      summary = "Update task",
-      description = "Update task"
+          summary = "Update task",
+          description = "Update task"
   )
   public ResponseEntity<TaskResource> updateTask(
-      @PathVariable Long taskId,
-      @RequestBody UpdateTaskResource resource,
-      @AuthenticationPrincipal AuthenticatedUser user
+          @PathVariable Long taskId,
+          @RequestParam(required = false) String title,
+          @RequestParam(required = false) String description,
+          @RequestParam(required = false) OffsetDateTime dueDate,
+          @RequestParam(required = false) Long memberId,
+          @RequestParam(value = "file", required = false) MultipartFile file,
+          @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
+    var resource = new UpdateTaskResource(title, description, dueDate, memberId);
+
     var updateTaskCommand = UpdateTaskCommandFromResourceAssembler
-        .toCommandFromResource(resource, taskId, user.userId());
+            .toCommandFromResource(resource, taskId, user.userId(), file);
 
     var task = taskDetailsCommandService.handle(updateTaskCommand);
 

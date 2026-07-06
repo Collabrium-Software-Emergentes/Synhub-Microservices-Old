@@ -11,6 +11,7 @@ public record TaskDetailsDTO(
     Integer timesRearranged,
     Long timePassed,
     TaskMemberDTO member,
-    Long groupId
+    Long groupId,
+    String imageUrl
 ) {
 }

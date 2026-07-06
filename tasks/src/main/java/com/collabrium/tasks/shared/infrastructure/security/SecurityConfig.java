@@ -49,16 +49,17 @@ public class SecurityConfig {
             )
         )
 
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/actuator/**",
-                "/"
-            ).permitAll()
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**",
+                            "/actuator/**",
+                            "/api/v1/tasks/*/only",
+                            "/"
+                    ).permitAll()
 
-            .anyRequest().authenticated()
-        )
+                    .anyRequest().authenticated()
+            )
 
         .httpBasic(AbstractHttpConfigurer::disable)
 

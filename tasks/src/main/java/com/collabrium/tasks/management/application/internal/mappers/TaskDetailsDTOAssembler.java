@@ -40,7 +40,8 @@ public class TaskDetailsDTOAssembler {
         memberDTO,
         task.getGroupId() != null
             ? task.getGroupId().value()
-            : null
+            : null,
+        task.getImageUrl()
     );
   }
 }
