@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuenta creada</title>
+  <link rel="stylesheet" th:href="@{/css/verification.css}">
+</head>
+<body>
+<main class="verification-page">
+  <section class="verification-card success">
+    <div class="verification-icon">✓</div>
+    <h1>Cuenta creada</h1>
+    <p class="verification-text">
+      Bienvenido, <strong th:text="${username}">usuario</strong>.
+    </p>
+    <p class="verification-subtext">
+      Tu correo ya fue verificado correctamente.
+    </p>
+  </section>
+</main>
+</body>
+</html>

@@ -11,6 +11,7 @@ public record SignUpCommand(
     String imgUrl,
     String email,
     String password,
-    List<Role> roles
+    List<Role> roles,
+    String baseUrl
 ) {
 }
