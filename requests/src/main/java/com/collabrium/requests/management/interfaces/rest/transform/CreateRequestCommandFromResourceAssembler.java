@@ -17,6 +17,7 @@ public class CreateRequestCommandFromResourceAssembler {
     return new CreateRequestCommand(
         resource.description(),
         resource.requestType(),
+        resource.imageUrl(),
         taskId,
         userId
     );

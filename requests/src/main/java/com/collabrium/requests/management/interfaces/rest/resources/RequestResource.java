@@ -5,6 +5,7 @@ public record RequestResource(
     String description,
     String requestType,
     String requestStatus,
+    String imageUrl,
     Long taskId
 ) {
 }

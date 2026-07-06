@@ -47,6 +47,13 @@ spring:
               filters:
                 - StripPrefix=1
 
+            - id: media-service
+              uri: lb://media-service
+              predicates:
+                - Path=/media/**
+              filters:
+                - StripPrefix=1
+                
             - id: ai-service
               uri: lb://ai-service
               predicates:

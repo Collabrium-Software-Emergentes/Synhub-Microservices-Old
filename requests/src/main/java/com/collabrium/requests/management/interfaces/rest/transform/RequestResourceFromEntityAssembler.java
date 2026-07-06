@@ -17,6 +17,7 @@ public class RequestResourceFromEntityAssembler {
         entity.getDescription(),
         entity.getRequestType(),
         entity.getRequestStatus(),
+        entity.getImageUrl(),
         entity.getTaskId().value()
     );
   }

@@ -120,4 +120,30 @@ public class EmailTemplateFactory {
         context
     );
   }
+
+  public String buildRequestCreatedEmailTemplate(
+      String memberUsername,
+      String memberName,
+      String memberSurname,
+      String taskTitle,
+      String requestDescription,
+      String requestType,
+      String imageUrl
+  ) {
+
+    Context context = new Context();
+
+    context.setVariable("memberUsername", memberUsername);
+    context.setVariable("memberName", memberName);
+    context.setVariable("memberSurname", memberSurname);
+    context.setVariable("taskTitle", taskTitle);
+    context.setVariable("requestDescription", requestDescription);
+    context.setVariable("requestType", requestType);
+    context.setVariable("imageUrl", imageUrl);
+
+    return templateEngine.process(
+        "requests/request-created-email",
+        context
+    );
+  }
 }

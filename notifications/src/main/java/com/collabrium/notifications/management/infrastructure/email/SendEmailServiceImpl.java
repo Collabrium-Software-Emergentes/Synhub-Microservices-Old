@@ -272,4 +272,58 @@ public class SendEmailServiceImpl implements SendEmailService {
       );
     }
   }
+
+  @Override
+  public void sendRequestCreatedEmail(
+      String to,
+      String memberUsername,
+      String memberName,
+      String memberSurname,
+      String taskTitle,
+      String requestDescription,
+      String requestType,
+      String imageUrl
+  ) {
+
+    try {
+
+      MimeMessage message = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              "UTF-8"
+          );
+
+      String html =
+          emailTemplateFactory
+              .buildRequestCreatedEmailTemplate(
+                  memberUsername,
+                  memberName,
+                  memberSurname,
+                  taskTitle,
+                  requestDescription,
+                  requestType,
+                  imageUrl
+              );
+
+      helper.setFrom(from);
+      helper.setTo(to);
+      helper.setSubject(
+          "New request from @" + memberUsername + " on task: " + taskTitle
+      );
+
+      helper.setText(html, true);
+
+      mailSender.send(message);
+
+    } catch (MessagingException e) {
+
+      throw new RuntimeException(
+          "Error sending request created email",
+          e
+      );
+    }
+  }
 }
