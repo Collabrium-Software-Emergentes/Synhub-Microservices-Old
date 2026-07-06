@@ -2,6 +2,7 @@ package com.collabrium.iam.authentication.application.internal.queryservices;
 
 import com.collabrium.iam.authentication.domain.model.aggregates.User;
 import com.collabrium.iam.authentication.domain.model.queries.*;
+import com.collabrium.iam.authentication.domain.model.valueobjects.LeaderId;
 import com.collabrium.iam.authentication.domain.model.valueobjects.MemberId;
 import com.collabrium.iam.authentication.domain.services.UserQueryService;
 import com.collabrium.iam.authentication.infrastructure.persistence.jpa.repositories.UserRepository;
@@ -51,5 +52,13 @@ public class UserQueryServiceImpl implements UserQueryService {
     MemberId memberId = new MemberId(query.memberId());
 
     return userRepository.findByMemberId(memberId);
+  }
+
+  @Override
+  public Optional<User> handle(GetUserByLeaderIdQuery query) {
+
+    LeaderId leaderId = new LeaderId(query.leaderId());
+
+    return userRepository.findByLeaderId(leaderId);
   }
 }

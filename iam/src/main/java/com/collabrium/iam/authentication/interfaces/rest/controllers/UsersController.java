@@ -66,4 +66,26 @@ public class UsersController {
 
     return ResponseEntity.ok(userOnlyResource);
   }
+
+  @GetMapping("/leaders/{leaderId}")
+  @Operation(
+      summary = "Get user information by leader ID",
+      description = "Returns basic user information associated with the specified leader ID"
+  )
+  public ResponseEntity<UserOnlyResource> getUserOnlyByLeaderId(
+      @PathVariable Long leaderId
+  ) {
+
+    var getUserByLeaderIdQuery = new GetUserByLeaderIdQuery(leaderId);
+
+    var userOptional = userQueryService.handle(getUserByLeaderIdQuery);
+
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var userOnlyResource = UserOnlyResourceFromEntityAssembler.toResourceFromEntity(userOptional.get());
+
+    return ResponseEntity.ok(userOnlyResource);
+  }
 }

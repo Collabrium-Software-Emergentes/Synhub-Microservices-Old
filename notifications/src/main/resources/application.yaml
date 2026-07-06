@@ -1,0 +1,37 @@
+server:
+  port: ${PORT:8087}
+  shutdown: graceful
+
+spring:
+  application:
+    name: notification-service
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  rabbitmq:
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASSWORD}
+    virtual-host: ${RABBIT_VIRTUAL_HOST:/}
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Notification Service API
+    version: @project.version@
+
+documentation:
+  application:
+    description: @project.description@
+    version: @project.version@
+
+app:
+  mail:
+    from: ${MAIL_FROM}

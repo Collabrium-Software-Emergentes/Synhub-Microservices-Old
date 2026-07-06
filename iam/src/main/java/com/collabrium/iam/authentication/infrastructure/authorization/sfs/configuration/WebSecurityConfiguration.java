@@ -128,12 +128,16 @@ public class WebSecurityConfiguration {
             authorizeRequests
                 .requestMatchers(
                     "/api/v1/authentication/**",
+                    "/verification/**",
+                    "/css/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/swagger-resources/**",
                     "/webjars/**",
-                    "/actuator/**")
+                    "/actuator/**",
+                    "/"
+                )
                 .permitAll()
                 .anyRequest()
                 .authenticated());

@@ -12,7 +12,8 @@ public class SignUpCommandFromResourceAssembler {
   }
 
   public static SignUpCommand toCommandFromResource(
-      SignUpResource resource
+      SignUpResource resource,
+      String baseUrl
   ) {
 
     var roles = resource.roles() != null
@@ -26,7 +27,8 @@ public class SignUpCommandFromResourceAssembler {
         resource.imgUrl(),
         resource.email(),
         resource.password(),
-        roles
+        roles,
+        baseUrl
     );
   }
 }

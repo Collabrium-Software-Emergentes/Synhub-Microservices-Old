@@ -9,12 +9,16 @@ import com.collabrium.iam.authentication.interfaces.rest.transform.Authenticated
 import com.collabrium.iam.authentication.interfaces.rest.transform.SignInCommandFromResourceAssembler;
 import com.collabrium.iam.authentication.interfaces.rest.transform.SignUpCommandFromResourceAssembler;
 import com.collabrium.iam.authentication.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import com.collabrium.iam.authentication.domain.model.commands.VerifyUserCommand;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  *     <ul>
  *         <li>POST /api/v1/auth/sign-in</li>
  *         <li>POST /api/v1/auth/sign-up</li>
+ *         <li>GET /api/v1/authentication/verify?token=...</li>
  *     </ul>
  * </p>
  */
@@ -73,11 +78,12 @@ public class AuthenticationController {
    */
   @PostMapping("/sign-up")
   public ResponseEntity<UserResource> signUp(
-      @RequestBody SignUpResource signUpResource
+      @RequestBody SignUpResource signUpResource,
+      HttpServletRequest request
   ) {
 
     var signUpCommand = SignUpCommandFromResourceAssembler
-        .toCommandFromResource(signUpResource);
+        .toCommandFromResource(signUpResource, buildBaseUrl(request));
 
     var user = userCommandService.handle(signUpCommand);
 
@@ -91,5 +97,27 @@ public class AuthenticationController {
         .toResourceFromEntity(user.get());
 
     return new ResponseEntity<>(userResource, HttpStatus.CREATED);
+  }
+
+  @GetMapping("/verify")
+  public ResponseEntity<UserResource> verify(
+      @RequestParam String token
+  ) {
+    var verifiedUser = userCommandService.handle(new VerifyUserCommand(token));
+
+    if (verifiedUser.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    return ResponseEntity.ok(
+        UserResourceFromEntityAssembler.toResourceFromEntity(verifiedUser.get()));
+  }
+
+  private String buildBaseUrl(HttpServletRequest request) {
+    var baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+    if (request.getContextPath() != null && !request.getContextPath().isBlank()) {
+      baseUrl = baseUrl + request.getContextPath();
+    }
+    return baseUrl;
   }
 }

@@ -116,17 +116,23 @@ public class InvitationCommandServiceImpl implements InvitationCommandService {
 
     var group = invitation.getGroup();
 
-    var memberId =
-        invitation.getMemberId();
+    var memberId = invitation.getMemberId();
 
     group.increaseMemberCount();
 
     groupRepository.save(group);
 
+    var userMember = iamQueryPort.getUserByMemberId(memberId.value());
+
     groupsEventPublisher.publishInvitationAccepted(
         new InvitationAcceptedEvent(
             group.getId(),
-            memberId.value()
+            memberId.value(),
+            group.getName(),
+            group.getDescription(),
+            group.getImgUrl().toString(),
+            group.getCode().toString(),
+            userMember.email()
         )
     );
 

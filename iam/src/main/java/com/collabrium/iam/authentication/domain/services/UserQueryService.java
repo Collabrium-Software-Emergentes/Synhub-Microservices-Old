@@ -10,4 +10,6 @@ public interface UserQueryService {
   Optional<User> handle(GetUserOnlyByIdQuery query);
 
   Optional<User> handle(GetUserByMemberIdQuery query);
+
+  Optional<User> handle(GetUserByLeaderIdQuery query);
 }

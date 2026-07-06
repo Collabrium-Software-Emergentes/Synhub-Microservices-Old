@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Membership Request</title>
+</head>
+
+<body style="
+        font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+        background-color:#f4f7f6;
+        margin:0;
+        padding:0;">
+
+<div style="padding:20px 0;">
+
+    <table role="presentation"
+           style="
+                width:100%;
+                max-width:650px;
+                margin:0 auto;
+                background:#ffffff;
+                border-radius:8px;
+                overflow:hidden;
+                border-collapse:collapse;">
+
+        <!-- HEADER -->
+        <tr>
+            <td style="
+                    background:#4a90e2;
+                    padding:30px;
+                    text-align:center;">
+
+                <h1 style="
+                        margin:0;
+                        color:white;
+                        font-size:28px;">
+
+                    New Membership Request
+
+                </h1>
+
+            </td>
+        </tr>
+
+        <!-- MESSAGE -->
+        <tr>
+            <td style="
+                    padding:35px 40px 20px 40px;
+                    text-align:center;
+                    color:#555;
+                    line-height:1.7;">
+
+                <p style="margin:0;font-size:16px;">
+
+                    A new user has requested to join your group.
+
+                </p>
+
+                <p style="margin-top:10px;font-size:15px;">
+
+                    Review the member information below.
+
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- MEMBER CARD -->
+        <tr>
+            <td style="padding:10px 30px 35px 30px;">
+
+                <div style="
+                        background:#f8f9fb;
+                        border:1px solid #e5e7eb;
+                        border-radius:12px;
+                        padding:30px;
+                        text-align:center;">
+
+                    <img th:src="${memberImage}"
+                         alt="Member photo"
+                         style="
+                                width:100px;
+                                height:100px;
+                                border-radius:50%;
+                                object-fit:cover;
+                                margin-bottom:20px;">
+
+                    <h2 style="
+                            margin:0;
+                            color:#2c3e50;">
+
+                        <span th:text="${memberName}">
+                            John
+                        </span>
+
+                        <span th:text="${memberSurname}">
+                            Doe
+                        </span>
+
+                    </h2>
+
+                    <p style="
+                            margin:10px 0;
+                            color:#4a90e2;
+                            font-size:16px;">
+
+                        @<span th:text="${memberUsername}">
+                            johndoe
+                        </span>
+
+                    </p>
+
+                    <div style="
+                            margin-top:20px;
+                            padding:15px;
+                            background:#eef6ff;
+                            border-radius:8px;">
+
+                        <p style="
+                                margin:0;
+                                font-size:13px;
+                                color:#666;">
+
+                            Email address
+
+                        </p>
+
+                        <p style="
+                                margin:8px 0 0 0;
+                                font-size:16px;
+                                font-weight:bold;
+                                color:#1a4e85;">
+
+                            <span th:text="${memberEmail}">
+                                user@example.com
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="
+                    background:#f9f9f9;
+                    color:#777;
+                    padding:20px;
+                    text-align:center;
+                    font-size:12px;
+                    border-top:1px solid #eeeeee;">
+
+                <p style="margin:0 0 10px 0;">
+                    &copy; 2026 SynHub. All rights reserved.
+                </p>
+
+                <p style="margin:0;">
+                    This is an automated notification email.
+                </p>
+
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>

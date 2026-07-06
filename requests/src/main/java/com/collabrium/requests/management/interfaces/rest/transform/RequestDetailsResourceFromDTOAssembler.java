@@ -17,6 +17,7 @@ public class RequestDetailsResourceFromDTOAssembler {
         dto.description(),
         dto.requestType(),
         dto.requestStatus(),
+        dto.imageUrl(),
         TaskResourceFromDTOAssembler.toResourceFromDTO(dto.task())
     );
   }

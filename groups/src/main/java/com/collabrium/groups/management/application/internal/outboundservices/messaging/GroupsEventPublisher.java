@@ -1,9 +1,6 @@
 package com.collabrium.groups.management.application.internal.outboundservices.messaging;
 
-import com.collabrium.groups.management.domain.model.events.GroupDeletedEvent;
-import com.collabrium.groups.management.domain.model.events.InvitationAcceptedEvent;
-import com.collabrium.groups.management.domain.model.events.LeaderCreatedEvent;
-import com.collabrium.groups.management.domain.model.events.RemoveMemberEvent;
+import com.collabrium.groups.management.domain.model.events.*;
 
 public interface GroupsEventPublisher {
 
@@ -14,4 +11,8 @@ public interface GroupsEventPublisher {
   void publishMemberRemovedFromGroup(RemoveMemberEvent event);
 
   void publishGroupDeleted(GroupDeletedEvent event);
+
+  void publishGroupCreated(GroupCreatedEvent event);
+
+  void publishInvitationCreated(InvitationCreatedEvent event);
 }

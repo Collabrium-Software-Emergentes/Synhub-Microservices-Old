@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Task Request</title>
+</head>
+
+<body style="
+        font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+        background-color:#f4f7f6;
+        margin:0;
+        padding:0;">
+
+<div style="padding:20px 0;">
+
+    <table role="presentation"
+           style="
+                width:100%;
+                max-width:650px;
+                margin:0 auto;
+                background:#ffffff;
+                border-radius:8px;
+                overflow:hidden;
+                border-collapse:collapse;">
+
+        <!-- HEADER -->
+        <tr>
+            <td style="
+                    background:#4a90e2;
+                    padding:30px;
+                    text-align:center;">
+
+                <h1 style="
+                        margin:0;
+                        color:white;
+                        font-size:28px;">
+
+                    New Task Request
+
+                </h1>
+
+            </td>
+        </tr>
+
+        <!-- MESSAGE -->
+        <tr>
+            <td style="
+                    padding:35px 40px 20px 40px;
+                    text-align:center;
+                    color:#555;
+                    line-height:1.7;">
+
+                <p style="margin:0;font-size:16px;">
+
+                    A member has submitted a new request on one of your group's tasks.
+
+                </p>
+
+                <p style="margin-top:10px;font-size:15px;">
+
+                    Review the details below.
+
+                </p>
+
+            </td>
+        </tr>
+
+        <!-- MEMBER INFO -->
+        <tr>
+            <td style="padding:10px 30px 10px 30px;">
+
+                <div style="
+                        background:#f8f9fb;
+                        border:1px solid #e5e7eb;
+                        border-radius:12px;
+                        padding:25px;
+                        text-align:center;">
+
+                    <h2 style="
+                            margin:0;
+                            color:#2c3e50;">
+
+                        <span th:text="${memberName}">
+                            John
+                        </span>
+
+                        <span th:text="${memberSurname}">
+                            Doe
+                        </span>
+
+                    </h2>
+
+                    <p style="
+                            margin:10px 0 0 0;
+                            color:#4a90e2;
+                            font-size:16px;">
+
+                        @<span th:text="${memberUsername}">
+                            johndoe
+                        </span>
+
+                    </p>
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- REQUEST DETAILS -->
+        <tr>
+            <td style="padding:10px 30px 10px 30px;">
+
+                <div style="
+                        background:#f8f9fb;
+                        border:1px solid #e5e7eb;
+                        border-radius:12px;
+                        padding:25px;">
+
+                    <div style="
+                            margin-bottom:15px;
+                            padding:12px;
+                            background:#eef6ff;
+                            border-radius:8px;">
+
+                        <p style="
+                                margin:0;
+                                font-size:13px;
+                                color:#666;">
+
+                            Task
+
+                        </p>
+
+                        <p style="
+                                margin:8px 0 0 0;
+                                font-size:16px;
+                                font-weight:bold;
+                                color:#1a4e85;">
+
+                            <span th:text="${taskTitle}">
+                                Task title
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                    <div style="
+                            margin-bottom:15px;
+                            padding:12px;
+                            background:#eef6ff;
+                            border-radius:8px;">
+
+                        <p style="
+                                margin:0;
+                                font-size:13px;
+                                color:#666;">
+
+                            Request type
+
+                        </p>
+
+                        <p style="
+                                margin:8px 0 0 0;
+                                font-size:16px;
+                                font-weight:bold;
+                                color:#1a4e85;">
+
+                            <span th:text="${requestType}">
+                                SUBMISSION
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                    <div style="
+                            padding:12px;
+                            background:#eef6ff;
+                            border-radius:8px;">
+
+                        <p style="
+                                margin:0;
+                                font-size:13px;
+                                color:#666;">
+
+                            Description
+
+                        </p>
+
+                        <p style="
+                                margin:8px 0 0 0;
+                                font-size:15px;
+                                color:#333;
+                                line-height:1.5;">
+
+                            <span th:text="${requestDescription}">
+                                Request description goes here.
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- IMAGE PROOF (conditional) -->
+        <tr th:if="${imageUrl != null and !imageUrl.isEmpty()}">
+            <td style="padding:10px 30px 25px 30px;">
+
+                <div style="
+                        background:#f8f9fb;
+                        border:1px solid #e5e7eb;
+                        border-radius:12px;
+                        padding:25px;
+                        text-align:center;">
+
+                    <p style="
+                            margin:0 0 15px 0;
+                            font-size:13px;
+                            color:#666;">
+
+                        Attached proof
+
+                    </p>
+
+                    <img th:src="${imageUrl}"
+                         alt="Request proof"
+                         style="
+                                max-width:100%;
+                                max-height:400px;
+                                border-radius:8px;
+                                object-fit:contain;">
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+            <td style="
+                    background:#f9f9f9;
+                    color:#777;
+                    padding:20px;
+                    text-align:center;
+                    font-size:12px;
+                    border-top:1px solid #eeeeee;">
+
+                <p style="margin:0 0 10px 0;">
+                    &copy; 2026 SynHub. All rights reserved.
+                </p>
+
+                <p style="margin:0;">
+                    This is an automated notification email.
+                </p>
+
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+</body>
+</html>

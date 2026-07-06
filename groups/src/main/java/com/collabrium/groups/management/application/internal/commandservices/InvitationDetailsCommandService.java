@@ -1,6 +1,7 @@
 package com.collabrium.groups.management.application.internal.commandservices;
 
 import com.collabrium.groups.management.application.internal.dto.InvitationDetailsDTO;
+import com.collabrium.groups.management.application.internal.outboundservices.messaging.GroupsEventPublisher;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
 import com.collabrium.groups.management.domain.exceptions.GroupNotFoundException;
 import com.collabrium.groups.management.domain.exceptions.InvitationAlreadyExistsException;
@@ -8,10 +9,12 @@ import com.collabrium.groups.management.domain.exceptions.MemberNotFoundExceptio
 import com.collabrium.groups.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.groups.management.domain.model.aggregates.Invitation;
 import com.collabrium.groups.management.domain.model.commands.CreateInvitationCommand;
+import com.collabrium.groups.management.domain.model.events.InvitationCreatedEvent;
 import com.collabrium.groups.management.domain.model.valueobjects.MemberId;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.GroupRepository;
 import com.collabrium.groups.management.infrastructure.persistence.jpa.repositories.InvitationRepository;
 import com.collabrium.groups.shared.infrastructure.clients.iam.resources.UserOnlyResource;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -22,18 +25,22 @@ public class InvitationDetailsCommandService {
   private final InvitationRepository invitationRepository;
   private final GroupRepository groupRepository;
   private final IamQueryPort iamQueryPort;
+  private final GroupsEventPublisher groupsEventPublisher;
 
   public InvitationDetailsCommandService(
       InvitationRepository invitationRepository,
       GroupRepository groupRepository,
-      IamQueryPort iamQueryPort
+      IamQueryPort iamQueryPort,
+      GroupsEventPublisher groupsEventPublisher
   ) {
 
     this.invitationRepository = invitationRepository;
     this.groupRepository = groupRepository;
     this.iamQueryPort = iamQueryPort;
+    this.groupsEventPublisher = groupsEventPublisher;
   }
 
+  @Transactional
   public Optional<InvitationDetailsDTO> handle(CreateInvitationCommand command) {
 
     var group = groupRepository
@@ -61,6 +68,19 @@ public class InvitationDetailsCommandService {
     );
 
     var savedInvitation = invitationRepository.save(invitation);
+
+    var leaderUserInfo = iamQueryPort.getUserByLeaderId(group.getLeader().getId());
+
+    var invitationCreatedEvent = new InvitationCreatedEvent(
+        leaderUserInfo.email(),
+        user.username(),
+        user.name(),
+        user.surname(),
+        user.imgUrl(),
+        user.email()
+    );
+
+    groupsEventPublisher.publishInvitationCreated(invitationCreatedEvent);
 
     return Optional.of(
         buildInvitationDetailsDTO(

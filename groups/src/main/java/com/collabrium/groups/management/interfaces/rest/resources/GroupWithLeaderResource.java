@@ -7,6 +7,7 @@ public record GroupWithLeaderResource(
     String description,
     String code,
     Integer memberCount,
-    Long leaderId
+    Long leaderId,
+    String publicId
 ) {
 }

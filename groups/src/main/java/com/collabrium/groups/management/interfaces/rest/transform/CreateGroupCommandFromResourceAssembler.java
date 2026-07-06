@@ -10,11 +10,12 @@ public class CreateGroupCommandFromResourceAssembler {
 
   public static CreateGroupCommand toCommandFromResource(
       CreateGroupResource resource,
-      Long userId) {
+      Long userId
+  ) {
 
     return new CreateGroupCommand(
         resource.name(),
-        resource.imgUrl(),
+        resource.file(),
         resource.description(),
         userId
     );

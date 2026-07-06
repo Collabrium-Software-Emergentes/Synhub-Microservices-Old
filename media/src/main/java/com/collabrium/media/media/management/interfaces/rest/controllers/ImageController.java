@@ -1,0 +1,141 @@
+package com.collabrium.media.media.management.interfaces.rest.controllers;
+
+import com.collabrium.media.media.management.domain.model.commands.UpdateGroupImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UploadGroupImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UploadRequestImageCommand;
+import com.collabrium.media.media.management.domain.services.ImageCommandService;
+import com.collabrium.media.media.management.interfaces.rest.resources.ImageUploadResource;
+import com.collabrium.media.media.management.interfaces.rest.transform.ImageUploadResourceFromResponseAssembler;
+import com.collabrium.media.media.management.domain.model.commands.UpdateTaskImageCommand;
+import com.collabrium.media.media.management.domain.model.commands.UploadTaskImageCommand;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping(
+    value = "/api/v1/images",
+    produces = MediaType.APPLICATION_JSON_VALUE
+)
+public class ImageController {
+
+  private final ImageCommandService imageCommandService;
+
+  public ImageController(
+      ImageCommandService imageCommandService
+  ) {
+
+    this.imageCommandService = imageCommandService;
+  }
+
+  @PutMapping(
+      value = "/groups/{groupId}",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> updateGroupImage(
+      @PathVariable Long groupId,
+      @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UpdateGroupImageCommand(groupId, file);
+
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @PostMapping(
+      value = "/groups",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> uploadGroupImage(
+      @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UploadGroupImageCommand(file);
+
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource =  ImageUploadResourceFromResponseAssembler
+        .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @PutMapping(
+          value = "/tasks/{taskId}",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> updateTaskImage(
+          @PathVariable Long taskId,
+          @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UpdateTaskImageCommand(taskId, file);
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+
+  @PostMapping(
+          value = "/tasks",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> uploadTaskImage(
+          @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UploadTaskImageCommand(file);
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+            .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+  
+  @PostMapping(
+      value = "/requests",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ResponseEntity<ImageUploadResource> uploadRequestImage(
+      @RequestParam("file") MultipartFile file
+  ) {
+
+    var command = new UploadRequestImageCommand(file);
+
+    var response = imageCommandService.handle(command);
+
+    if (response.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var resource = ImageUploadResourceFromResponseAssembler
+        .toResourceFromResponse(response.get());
+
+    return ResponseEntity.ok(resource);
+  }
+}

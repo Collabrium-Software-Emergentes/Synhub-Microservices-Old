@@ -14,6 +14,7 @@ import com.collabrium.groups.management.interfaces.rest.transform.UpdateGroupCom
 import com.collabrium.groups.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +36,12 @@ public class LeaderGroupController {
     this.groupQueryService = groupQueryService;
   }
 
-  @PostMapping
+  @PostMapping(
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
   @Operation(summary = "Create a new group", description = "Creates a new group")
   public ResponseEntity<GroupResource> createGroup(
-      @RequestBody CreateGroupResource createGroupResource,
+      @ModelAttribute CreateGroupResource createGroupResource,
       @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
@@ -57,13 +60,15 @@ public class LeaderGroupController {
     return ResponseEntity.ok(groupResource);
   }
 
-  @PutMapping
+  @PutMapping(
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
   @Operation(
       summary = "Update a group",
       description = "Updates the authenticated leader group"
   )
   public ResponseEntity<GroupResource> updateGroup(
-      @RequestBody UpdateGroupResource updateGroupResource,
+      @ModelAttribute UpdateGroupResource updateGroupResource,
       @AuthenticationPrincipal AuthenticatedUser user
   ) {
 

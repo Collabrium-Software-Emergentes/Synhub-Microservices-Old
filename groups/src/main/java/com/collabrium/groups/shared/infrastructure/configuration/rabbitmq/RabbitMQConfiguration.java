@@ -27,6 +27,8 @@ public class RabbitMQConfiguration {
   public static final String MEMBER_LEFT_GROUP_KEY = "member.left.group";
   public static final String MEMBER_REMOVED_FROM_GROUP_KEY = "member.removed.from.group";
   public static final String GROUP_DELETED_KEY = "group.deleted";
+  public static final String GROUP_CREATED_KEY = "group.created";
+  public static final String INVITATION_CREATED_KEY = "invitation.created";
 
   // =========================
   // QUEUES
@@ -42,11 +44,13 @@ public class RabbitMQConfiguration {
     return new TopicExchange(IAM_EXCHANGE);
   }
 
-  @Bean TopicExchange groupsExchange() {
+  @Bean
+  public TopicExchange groupsExchange() {
     return new TopicExchange(GROUPS_EXCHANGE);
   }
 
-  @Bean TopicExchange tasksExchange() {
+  @Bean
+  public TopicExchange tasksExchange() {
     return new TopicExchange(TASKS_EXCHANGE);
   }
 

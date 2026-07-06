@@ -19,7 +19,8 @@ public class GroupWithLeaderResourceFromEntityAssembler {
         entity.getDescription(),
         entity.getCode().value(),
         entity.getMemberCount(),
-        entity.getLeader().getId()
+        entity.getLeader().getId(),
+        entity.getPublicId()
     );
   }
 }

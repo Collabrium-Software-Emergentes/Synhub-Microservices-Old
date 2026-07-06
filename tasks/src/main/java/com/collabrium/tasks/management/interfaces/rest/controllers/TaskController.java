@@ -7,6 +7,7 @@ import com.collabrium.tasks.management.domain.model.queries.GetTasksByMemberIdQu
 import com.collabrium.tasks.management.domain.services.TaskCommandService;
 import com.collabrium.tasks.management.domain.services.TaskQueryService;
 import com.collabrium.tasks.management.interfaces.rest.resources.TaskDetailsResource;
+import com.collabrium.tasks.management.interfaces.rest.resources.TaskOnlyResource;
 import com.collabrium.tasks.management.interfaces.rest.transform.TaskDetailsResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,6 +51,26 @@ public class TaskController {
     var taskResource = TaskDetailsResourceFromEntityAssembler.toResourceFromEntity(task.get());
 
     return ResponseEntity.ok(taskResource);
+  }
+
+  @GetMapping("/{taskId}/only")
+  public ResponseEntity<TaskOnlyResource> getTaskOnlyById(
+          @PathVariable Long taskId
+  ) {
+
+    var query = new GetTaskByIdQuery(taskId);
+    var task = taskQueryService.handle(query);
+
+    if (task.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    var resource = new TaskOnlyResource(
+            task.get().getId(),
+            task.get().getPublicId()
+    );
+
+    return ResponseEntity.ok(resource);
   }
 
   @DeleteMapping("/{taskId}")

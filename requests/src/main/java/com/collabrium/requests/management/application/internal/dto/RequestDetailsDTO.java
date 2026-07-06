@@ -5,6 +5,7 @@ public record RequestDetailsDTO(
     String description,
     String requestType,
     String requestStatus,
+    String imageUrl,
     TaskDetailsDTO task
 ) {
 }
