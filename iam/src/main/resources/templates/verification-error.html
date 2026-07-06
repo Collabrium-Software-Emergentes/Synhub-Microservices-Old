@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error de verificación</title>
+  <link rel="stylesheet" th:href="@{/css/verification.css}">
+</head>
+<body>
+<main class="verification-page">
+  <section class="verification-card error">
+    <div class="verification-icon error">!</div>
+    <h1>No se pudo verificar</h1>
+    <p class="verification-text" th:text="${message}">
+      El enlace no es válido o ya expiró.
+    </p>
+    <p class="verification-subtext">
+      Vuelve a registrar tu cuenta o solicita un nuevo enlace.
+    </p>
+  </section>
+</main>
+</body>
+</html>

@@ -22,6 +22,13 @@ public interface UserCommandService {
    */
   Optional<User> handle(SignUpCommand command);
 
+  /**
+   * Handle verify user command
+   * @param command verification command
+   * @return verified user
+   */
+  Optional<User> handle(VerifyUserCommand command);
+
   void handle(UpdateUserLeaderIdCommand command);
 
   void handle(UpdateUserMemberIdCommand command);
