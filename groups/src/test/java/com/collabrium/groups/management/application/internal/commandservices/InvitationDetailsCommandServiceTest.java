@@ -3,6 +3,10 @@ package com.collabrium.groups.management.application.internal.commandservices;
 import com.collabrium.groups.management.application.internal.dto.InvitationDetailsDTO;
 import com.collabrium.groups.management.application.internal.outboundservices.messaging.GroupsEventPublisher;
 import com.collabrium.groups.management.application.internal.outboundservices.ports.IamQueryPort;
+import com.collabrium.groups.management.domain.exceptions.GroupNotFoundException;
+import com.collabrium.groups.management.domain.exceptions.InvitationAlreadyExistsException;
+import com.collabrium.groups.management.domain.exceptions.MemberNotFoundException;
+import com.collabrium.groups.management.domain.exceptions.UserNotFoundException;
 import com.collabrium.groups.management.domain.model.aggregates.Group;
 import com.collabrium.groups.management.domain.model.aggregates.Invitation;
 import com.collabrium.groups.management.domain.model.aggregates.Leader;
@@ -24,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -134,5 +139,98 @@ public class InvitationDetailsCommandServiceTest {
 
     assertThat(event.memberUsername())
         .isEqualTo("jdoe");
+  }
+
+  @Test
+  @DisplayName("handle(CreateInvitationCommand) - group not found: throws exception")
+  void handle_createInvitationCommand_groupNotFound_throwsException() {
+
+    // Arrange
+    var command = new CreateInvitationCommand(1L, 2L);
+
+    when(groupRepository.findById(2L))
+        .thenReturn(Optional.empty());
+
+    // Act + Assert
+    assertThatThrownBy(() -> service.handle(command))
+        .isInstanceOf(GroupNotFoundException.class);
+
+    verifyNoInteractions(iamQueryPort);
+  }
+
+  @Test
+  @DisplayName("handle(CreateInvitationCommand) - user not found: throws exception")
+  void handle_createInvitationCommand_userNotFound_throwsException() {
+
+    // Arrange
+    var command = new CreateInvitationCommand(1L, 2L);
+
+    when(groupRepository.findById(2L))
+        .thenReturn(Optional.of(mock(Group.class)));
+
+    when(iamQueryPort.getUserOnlyById(1L))
+        .thenReturn(null);
+
+    // Act + Assert
+    assertThatThrownBy(() -> service.handle(command))
+        .isInstanceOf(UserNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("handle(CreateInvitationCommand) - user without member: throws exception")
+  void handle_createInvitationCommand_userWithoutMember_throwsException() {
+
+    // Arrange
+    var command = new CreateInvitationCommand(1L, 2L);
+
+    when(groupRepository.findById(2L))
+        .thenReturn(Optional.of(mock(Group.class)));
+
+    when(iamQueryPort.getUserOnlyById(1L))
+        .thenReturn(new UserOnlyResource(
+            "user",
+            "John",
+            "Doe",
+            null,
+            "test@test.com",
+            null,
+            null
+        ));
+
+    // Act + Assert
+    assertThatThrownBy(() -> service.handle(command))
+        .isInstanceOf(MemberNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("handle(CreateInvitationCommand) - invitation already exists: throws exception")
+  void handle_createInvitationCommand_invitationAlreadyExists_throwsException() {
+
+    // Arrange
+    var command = new CreateInvitationCommand(1L, 2L);
+
+    when(groupRepository.findById(2L))
+        .thenReturn(Optional.of(mock(Group.class)));
+
+    when(iamQueryPort.getUserOnlyById(1L))
+        .thenReturn(new UserOnlyResource(
+            "user",
+            "John",
+            "Doe",
+            null,
+            "test@test.com",
+            null,
+            50L
+        ));
+
+    when(invitationRepository.existsByMemberId(MemberId.of(50L)))
+        .thenReturn(true);
+
+    // Act + Assert
+    assertThatThrownBy(() -> service.handle(command))
+        .isInstanceOf(InvitationAlreadyExistsException.class);
+
+    verify(invitationRepository, never())
+        .save(any());
   }
 }
