@@ -254,13 +254,14 @@ public class MetricsController {
   }
 
 
-  // [NUEVOS ENDPOINTS: PDF y Correo] (
+  // acá estan los nuevos endopoints: PDF y Correo
 
   @GetMapping("/report/download")
   @Operation(summary = "Download metrics report in PDF")
   public ResponseEntity<byte[]> downloadReport(@AuthenticationPrincipal AuthenticatedUser user) {
 
     // 1. Obtener la data real del usuario usando tu query existente
+    // Acá evitamos que el código trabaje con mockus(datos simulados)
     var query = new GetTasksOverviewOfMyGroupQuery(user.userId());
     var taskOverviewOpt = metricsQueryService.handle(query);
 
@@ -268,7 +269,7 @@ public class MetricsController {
       return ResponseEntity.badRequest().build();
     }
 
-    // 2. Generar el PDF con la data real
+    // 2. Generar el PDF con la data real (ojito nuevamente xd)
     byte[] pdfBytes = metricsReportService.getPdfReport(taskOverviewOpt.get());
 
     HttpHeaders headers = new HttpHeaders();

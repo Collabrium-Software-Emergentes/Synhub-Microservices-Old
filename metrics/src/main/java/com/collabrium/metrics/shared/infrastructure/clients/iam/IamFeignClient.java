@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+//Ojito y muy importante: Se tiene que cambiar o eliminar el url si vas
+// a correrlo en el docker o en un entorno distinto o en otro puerto de tu localhost
 @FeignClient(name = "iam-service", url="http://localhost:8081")
 public interface IamFeignClient {
 

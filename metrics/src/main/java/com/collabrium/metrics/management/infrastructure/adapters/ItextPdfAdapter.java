@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 
+//Ojito profesor acá, acá se define lo que viene hacer para el PDF
 @Component
 public class ItextPdfAdapter implements PdfGenerationPort {
 
+    // Nuevamente, Ojito profesor, acá se inyectan data real para la generación del reporte en pdf
     @Override
     public byte[] generateMetricsReport(TaskOverviewDTO taskOverview) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

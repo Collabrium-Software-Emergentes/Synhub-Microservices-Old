@@ -8,12 +8,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
+// Aca empezamos a implementar para poder enviar mail el reporte generado (Ojito)
 @Component
 public class BrevoEmailAdapter implements EmailNotificationPort {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}") // Asegúrate de que esto coincida con tu application.yml
+    @Value("${spring.mail.username}") //usamos variable de entorno como buenas prácticas de seguridad y para que sea mas dinamica
     private String fromEmail;
 
     public BrevoEmailAdapter(JavaMailSender mailSender) {
