@@ -1,43 +1,52 @@
 package com.collabrium.metrics.management.interfaces.rest.controllers;
 
 import com.collabrium.metrics.management.application.internal.queryservices.MetricsQueryService;
+import com.collabrium.metrics.management.application.internal.queryservices.MetricsReportService; // [NUEVO] Importar el servicio del reporte
 import com.collabrium.metrics.management.domain.model.queries.*;
 import com.collabrium.metrics.management.interfaces.rest.resources.*;
 import com.collabrium.metrics.management.interfaces.rest.transform.*;
 import com.collabrium.metrics.shared.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders; // NUEVO
+import org.springframework.http.HttpStatus; // NUEVO
+import org.springframework.http.MediaType; // NUEVO
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping; // NUEVO
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam; // NUEVO
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/metrics")
 @Tag(
-    name = "Metrics",
-    description = "Provides access to analytics and group metrics"
+        name = "Metrics",
+        description = "Provides access to analytics and group metrics"
 )
 public class MetricsController {
 
   private final MetricsQueryService metricsQueryService;
+  private final MetricsReportService metricsReportService; // [NUEVO] Inyectar dependencia
 
   public MetricsController(
-      MetricsQueryService metricsQueryService
+          MetricsQueryService metricsQueryService,
+          MetricsReportService metricsReportService // [NUEVO]
   ) {
 
     this.metricsQueryService = metricsQueryService;
+    this.metricsReportService = metricsReportService; // [NUEVO]
   }
 
   @GetMapping("/member/{memberId}/tasks/avg-completion-time")
   @Operation(
-      summary = "Get average completion time for member",
-      description = "Returns the average time (in days) it takes for the given member to complete tasks."
+          summary = "Get average completion time for member",
+          description = "Returns the average time (in days) it takes for the given member to complete tasks."
   )
   public ResponseEntity<AvgCompletionTimeResource> getAvgCompletionTimeForMember(
-      @PathVariable Long memberId
+          @PathVariable Long memberId
   ) {
 
     var getAvgCompletionTimeFromMemberQuery = new GetAvgCompletionTimeForMemberQuery(memberId);
@@ -49,18 +58,18 @@ public class MetricsController {
     }
 
     var resource = AvgCompletionTimeResourceFromDTOAssembler
-        .toResourceFromDTO(avgCompletionTime.get());
+            .toResourceFromDTO(avgCompletionTime.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/member/{memberId}/tasks/rescheduled")
   @Operation(
-      summary = "Get rescheduled tasks for member",
-      description = "Returns the count of rescheduled vs non-rescheduled tasks for the given member."
+          summary = "Get rescheduled tasks for member",
+          description = "Returns the count of rescheduled vs non-rescheduled tasks for the given member."
   )
   public ResponseEntity<RescheduledTasksResource> getRescheduledTasksForMember(
-      @PathVariable Long memberId
+          @PathVariable Long memberId
   ) {
 
     var getRescheduledTasksFromMemberQuery = new GetRescheduledTasksForMemberQuery(memberId);
@@ -72,19 +81,19 @@ public class MetricsController {
     }
 
     var resource = RescheduledTasksResourceFromDTOAssembler
-        .toResourceFromDTO(rescheduledTasks.get());
+            .toResourceFromDTO(rescheduledTasks.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/member/{memberId}/tasks/distribution")
   @Operation(
-      summary = "Get task distribution for member",
-      description = "Returns the number of tasks assigned to the given member.",
-      tags = {"Metrics"}
+          summary = "Get task distribution for member",
+          description = "Returns the number of tasks assigned to the given member.",
+          tags = {"Metrics"}
   )
   public ResponseEntity<TaskDistributionResource> getTaskDistributionForMember(
-      @PathVariable Long memberId
+          @PathVariable Long memberId
   ) {
 
     var getTaskDistributionForMemberQuery = new GetTaskDistributionForMemberQuery(memberId);
@@ -96,18 +105,18 @@ public class MetricsController {
     }
 
     var resource = TaskDistributionResourceFromDTOAssembler
-        .toResourceFromDTO(taskDistribution.get());
+            .toResourceFromDTO(taskDistribution.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/member/{memberId}/tasks/overview")
   @Operation(
-      summary = "Get task overview for member",
-      description = "Returns a summary of task statuses for the given member."
+          summary = "Get task overview for member",
+          description = "Returns a summary of task statuses for the given member."
   )
   public ResponseEntity<TaskOverviewResource> getTaskOverviewForMember(
-      @PathVariable Long memberId
+          @PathVariable Long memberId
   ) {
 
     var getTaskOverviewForMemberQuery = new GetTaskOverviewForMemberQuery(memberId);
@@ -119,18 +128,18 @@ public class MetricsController {
     }
 
     var resource = TaskOverviewResourceFromDTOAssembler
-        .toResourceFromDTO(taskOverview.get());
+            .toResourceFromDTO(taskOverview.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/task/member/{memberId}/time-passed")
   @Operation(
-    summary = "Get time passed for a member's completed task",
-    description = "Returns the time passed in milliseconds for a completed task assigned to the given member."
+          summary = "Get time passed for a member's completed task",
+          description = "Returns the time passed in milliseconds for a completed task assigned to the given member."
   )
   public ResponseEntity<TaskTimePassedResource> getAverageTaskTimePassed(
-    @PathVariable Long memberId
+          @PathVariable Long memberId
   ) {
 
     var getTaskTimePassedQuery = new GetTaskTimePassedQuery(memberId);
@@ -142,22 +151,22 @@ public class MetricsController {
     }
 
     var resource = TaskTimePassedResourceFromDTOAssembler
-      .toResourceFromDTO(taskTimePassed.get());
+            .toResourceFromDTO(taskTimePassed.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/tasks/overview")
   @Operation(
-    summary = "Get task overview for group",
-    description = "Returns a summary of task statuses for the authenticated leader's group."
+          summary = "Get task overview for group",
+          description = "Returns a summary of task statuses for the authenticated leader's group."
   )
   public ResponseEntity<TaskOverviewResource> getTaskOverview(
-    @AuthenticationPrincipal AuthenticatedUser user
+          @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
     var getTasksOverviewOfMyGroupQuery =
-      new GetTasksOverviewOfMyGroupQuery(user.userId());
+            new GetTasksOverviewOfMyGroupQuery(user.userId());
 
     var taskOverview = metricsQueryService.handle(getTasksOverviewOfMyGroupQuery);
 
@@ -166,22 +175,22 @@ public class MetricsController {
     }
 
     var resource = TaskOverviewResourceFromDTOAssembler
-      .toResourceFromDTO(taskOverview.get());
+            .toResourceFromDTO(taskOverview.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/tasks/distribution")
   @Operation(
-    summary = "Get task distribution for group",
-    description = "Returns the number of tasks assigned to each member in the authenticated leader's group."
+          summary = "Get task distribution for group",
+          description = "Returns the number of tasks assigned to each member in the authenticated leader's group."
   )
   public ResponseEntity<TaskDistributionResource> getTaskDistribution(
-    @AuthenticationPrincipal AuthenticatedUser user
+          @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
     var getTaskDistributionOfMyGroupQuery =
-      new GetTaskDistributionOfMyGroupQuery(user.userId());
+            new GetTaskDistributionOfMyGroupQuery(user.userId());
 
     var taskDistribution = metricsQueryService.handle(getTaskDistributionOfMyGroupQuery);
 
@@ -190,24 +199,24 @@ public class MetricsController {
     }
 
     var resource = TaskDistributionResourceFromDTOAssembler
-      .toResourceFromDTO(taskDistribution.get());
+            .toResourceFromDTO(taskDistribution.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/tasks/rescheduled")
   @Operation(
-      summary = "Get rescheduled tasks for group",
-      description = "Returns the count of rescheduled vs non-rescheduled tasks " +
-          "for the authenticated leader's group, and the memberIds " +
-          "of those with rescheduled tasks."
+          summary = "Get rescheduled tasks for group",
+          description = "Returns the count of rescheduled vs non-rescheduled tasks " +
+                  "for the authenticated leader's group, and the memberIds " +
+                  "of those with rescheduled tasks."
   )
   public ResponseEntity<RescheduledTasksResource> getRescheduledTasks(
-      @AuthenticationPrincipal AuthenticatedUser user
+          @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
     var getRescheduledTasksOfMyGroupQuery =
-        new GetRescheduledTasksOfMyGroupQuery(user.userId());
+            new GetRescheduledTasksOfMyGroupQuery(user.userId());
 
     var rescheduledTasks = metricsQueryService.handle(getRescheduledTasksOfMyGroupQuery);
 
@@ -216,19 +225,19 @@ public class MetricsController {
     }
 
     var resource = RescheduledTasksResourceFromDTOAssembler
-        .toResourceFromDTO(rescheduledTasks.get());
+            .toResourceFromDTO(rescheduledTasks.get());
 
     return ResponseEntity.ok(resource);
   }
 
   @GetMapping("/tasks/avg-completion-time")
   @Operation(
-      summary = "Get average completion time for group",
-      description = "Returns the average time (in days) it " +
-          "takes to complete tasks in the authenticated leader's group."
+          summary = "Get average completion time for group",
+          description = "Returns the average time (in days) it " +
+                  "takes to complete tasks in the authenticated leader's group."
   )
   public ResponseEntity<AvgCompletionTimeResource> getAvgCompletionTime(
-      @AuthenticationPrincipal AuthenticatedUser user
+          @AuthenticationPrincipal AuthenticatedUser user
   ) {
 
     var getAvgCompletionTimeOfMyGroupQuery = new GetAvgCompletionTimeOfMyGroupQuery(user.userId());
@@ -243,4 +252,45 @@ public class MetricsController {
 
     return ResponseEntity.ok(resource);
   }
-}
+
+
+  // [NUEVOS ENDPOINTS: PDF y Correo] (
+
+  @GetMapping("/report/download")
+  @Operation(summary = "Download metrics report in PDF")
+  public ResponseEntity<byte[]> downloadReport(@AuthenticationPrincipal AuthenticatedUser user) {
+
+    // 1. Obtener la data real del usuario usando tu query existente
+    var query = new GetTasksOverviewOfMyGroupQuery(user.userId());
+    var taskOverviewOpt = metricsQueryService.handle(query);
+
+    if (taskOverviewOpt.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    // 2. Generar el PDF con la data real
+    byte[] pdfBytes = metricsReportService.getPdfReport(taskOverviewOpt.get());
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.setContentDispositionFormData("attachment", "Reporte_Metricas_Grupo.pdf");
+
+    return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+  }
+
+  @PostMapping("/report/send")
+  @Operation(summary = "Send metrics report via email")
+  public ResponseEntity<String> sendReportToEmail(
+          @RequestParam String email,
+          @AuthenticationPrincipal AuthenticatedUser user
+  ) {
+    var query = new GetTasksOverviewOfMyGroupQuery(user.userId());
+    var taskOverviewOpt = metricsQueryService.handle(query);
+
+    if (taskOverviewOpt.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    metricsReportService.sendPdfReportByEmail(email, taskOverviewOpt.get());
+    return ResponseEntity.ok("Reporte con datos reales enviado a: " + email);
+  }}

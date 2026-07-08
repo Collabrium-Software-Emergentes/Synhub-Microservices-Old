@@ -9,6 +9,18 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
+  mail:
+    host: ${BREVO_HOST}
+    port: ${BREVO_PORT}
+    username: ${BREVO_USERNAME}
+    password: ${BREVO_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   datasource:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USER}
@@ -86,6 +98,6 @@ springdoc:
 
 authorization:
   jwt:
-    secret: ${JWT_SECRET}
-    issuer: ${JWT_ISSUER}
-    audience: ${JWT_AUDIENCE}
+    secret: ${JWT_SECRET:WriteHereYourSecretStringForTokenSigningCredentials}
+    issuer: ${JWT_ISSUER:collabrium}
+    audience: ${JWT_AUDIENCE:collabrium-platform}
